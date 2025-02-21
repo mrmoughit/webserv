@@ -4,12 +4,17 @@
 #include <iostream> 
 #include <cstdlib>
 #include <map>
+#include <vector>
 #include <string>
 #include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <fstream>
 #include <cstring>
+#include <sys/stat.h>
+#include <dirent.h>
+
 class request
 {
     private:
@@ -26,7 +31,7 @@ class request
         void set_path(std::string& name);
         void set_version(std::string& name);
 
-        bool fill_headers_map(std::istringstream &obj);
+        bool fill_headers_map(std::istringstream &obj , std::string &res);
 
         request();
         ~request();
@@ -34,6 +39,7 @@ class request
 
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);
-bool out_root_dir(std::string line);
+bool out_root_dir(std::string &pa , std::string &res);
 bool is_upper(std::string line);
 char	**ft_split(char const *s, char c);
+void get_error_res(std::string &res , int status);

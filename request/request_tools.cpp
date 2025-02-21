@@ -63,7 +63,7 @@ std::string removeslashes(const std::string& line) {
 }
 
 
-bool request::fill_headers_map(std::istringstream &ob){
+bool request::fill_headers_map(std::istringstream &ob , std::string &res){
     std::string line, key, value;
     while (std::getline(ob, line)) {
         if (line.empty()) continue;
@@ -76,12 +76,14 @@ bool request::fill_headers_map(std::istringstream &ob){
         else
             key = line.substr(pos + 1);
         if (key.empty()){
-            std::cout << "400 Bad requeste 1" << std::endl;
+            // std::cout << "400 Bad requeste 1" << std::endl;
+            get_error_res(res , 400);
             headers_map.clear();
             return false;
         }
         if ((key[0] >= 9 && key[0] < 13) || key[0] == 32){
-            std::cout << "400 Bad requeste 2 "<< "|" << (int)key[0] << "|"  << std::endl;
+            // std::cout << "400 Bad requeste 2 "<< "|" << (int)key[0] << "|"  << std::endl;
+            get_error_res(res , 400);
             headers_map.clear();
             return false;
         }
@@ -90,9 +92,41 @@ bool request::fill_headers_map(std::istringstream &ob){
     return true;
 }
 
-bool out_root_dir(std::string line){
-    (void)line;
-    return false;
+bool out_root_dir(std::string &pa , std::string &res){
+    char **str = ft_split(pa.c_str(), '/');
+    int entry = 0;
+    int sorty = 0;
+    for (int i = 0; str[i]; i++)
+    {
+        if (strcmp(str[i], "..") == 0)
+            sorty++;
+        else
+            entry++;
+        if (sorty > entry)
+        {
+            get_error_res(res, 400);
+            return false;
+        }
+    }
+    std::vector<std::string> vec;
+
+    for (int i = 0 ; str[i] ; i++){
+        vec.push_back(str[i]);
+        if (strcmp(str[i] , "..") == 0){
+            vec.pop_back();
+            vec.pop_back();
+        }
+    }
+    pa = "/";
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        oss << vec[i];
+        if (i != vec.size() - 1) {
+            oss << "/"; 
+        }
+    }
+    pa += oss.str();
+    return true;
 }
 
 bool is_upper(std::string line){
