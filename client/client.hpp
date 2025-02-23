@@ -1,19 +1,20 @@
 #pragma once 
+
 #include "../webserver.hpp"
 
-class client{
+class Client{
     private:
         int client_id;
-        // response response_object;
-        // request request_object;
+        Request request_object;
+        Response response_object;
     public:
         void set_client_id(int fd);
         int get_client_id();
-        // request  get_request();
-        // void  set_request(request & R);
-        // response & get_response();
-        // void  set_response(response & R);
+        Request  get_request();
+        void  set_request(Request & R);
+        Response & get_response();
+        void  set_response(Response & R);
 
-        client();
-        ~client(){};
+        Client();
+        ~Client(){};
 };

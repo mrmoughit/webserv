@@ -1,12 +1,12 @@
-#include "response.hpp"
+#include "../webserver.hpp"
 
-std::ifstream & response::get_fileStream(){
+std::ifstream & Response::get_fileStream(){
     return *fileStream;
 }
 
-void response::set_fileStream(std::ifstream & object){
+void Response::set_fileStream(std::ifstream & object){
     fileStream = &object;
 }
 
-response::~response(){};
-response::response(){};
+Response::~Response(){};
+Response::Response(){};

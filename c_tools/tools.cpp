@@ -1,5 +1,6 @@
-#include "../request/request.hpp"
-
+#include "../webserver.hpp"
+#include <iostream>
+#include <cstdlib>
 static int	word_size(const char *s, char c)
 {
 	int	i;

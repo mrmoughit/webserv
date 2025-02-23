@@ -1,38 +1,38 @@
 #include "../webserver.hpp"
 
-request::request(){};
-request::~request(){};
+Request::Request(){};
+Request::~Request(){};
 
-const std::string & request::get_method(){
+const std::string & Request::get_method(){
     return method;
 }
 
-const std::string & request::get_path(){
+const std::string & Request::get_path(){
     return path;
 }
 
-const std::string & request::get_version(){
+const std::string & Request::get_version(){
     return  version; 
 }
 
-void request::set_method(std::string & name){
+void Request::set_method(std::string & name){
     method = name;
 }
 
-void    request::set_s_request(char * req){
+void    Request::set_s_request(char * req){
     s_request = req;
 }
 
 
-void request::set_path(std::string & name){
+void Request::set_path(std::string & name){
     path = name;
 }
 
-char * request::get_s_request(){
+char * Request::get_s_request(){
     return s_request;
 }
 
-void request::set_version(std::string & name){
+void Request::set_version(std::string & name){
     version = name;
 }
 
@@ -72,7 +72,7 @@ std::string removeslashes(const std::string& line) {
 }
 
 
-bool request::fill_headers_map(std::istringstream &ob , std::string &res){
+bool Request::fill_headers_map(std::istringstream &ob , std::string &res){
     std::string line, key, value;
     while (std::getline(ob, line)) {
         if (line.empty()) continue;
@@ -145,4 +145,3 @@ bool is_upper(std::string line){
     }
     return true;
 }
-

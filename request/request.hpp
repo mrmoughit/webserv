@@ -1,24 +1,8 @@
 #pragma once
 
-
-#include <iostream> 
-#include <cstdlib>
-#include <map>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <cstring>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <fstream>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <errno.h>
 #include "../webserver.hpp"
-class request
+
+class Request
 {
     private:
         std::string method; 
@@ -38,6 +22,6 @@ class request
         char * get_s_request();
         bool fill_headers_map(std::istringstream &obj , std::string &res);
 
-        request();
-        ~request();
+        Request();
+        ~Request();
 };
