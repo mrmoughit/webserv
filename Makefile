@@ -1,6 +1,7 @@
 SRC = request/request.cpp \
 	  request/request_tools.cpp \
-	  c_tools/tools.cpp
+	  c_tools/tools.cpp \
+	  request/post.cpp
 
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv

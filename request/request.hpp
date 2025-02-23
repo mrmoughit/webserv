@@ -25,7 +25,8 @@ class request
         std::string version; 
         std::string path;
         std::map<std::string,std::string> headers_map;
-
+        char *s_request;
+        
     public:
         const std::string& get_method();
         const std::string& get_version();
@@ -33,7 +34,8 @@ class request
         void set_method(std::string & name);
         void set_path(std::string& name);
         void set_version(std::string& name);
-
+        void set_s_request(char * reques);
+        char * get_s_request();
         bool fill_headers_map(std::istringstream &obj , std::string &res);
 
         request();
@@ -47,3 +49,4 @@ bool is_upper(std::string line);
 char	**ft_split(char const *s, char c);
 void get_error_res(std::string &res , int status);
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath);
+void handle_post_requst(request & object , std::string res , std::istringstream &requestStream);

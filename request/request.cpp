@@ -1,336 +1,147 @@
 #include "request.hpp"
 
-#define PORT 4444
-void get_error_res(std::string &res, int status)
-{
-    if (status == 400)
-    {
-        res = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\n\
-        <html><head><title>400 Bad Request</title></head><body><center><h1>400 Bad Request</h1></center>\
-        <hr><center>42 webserv 0.1</center></body></html>";
-    }
-    else if (status == 405)
-    {
-        res = "HTTP/1.1 405 Not Allowed\r\nContent-Type: text/html\r\n\r\n\
-        <html><head><title>405 Not Allowed</title></head><body><center><h1>405 Not Allowed</h1></center>\
-        <hr><center>42 webserv 0.1</center></body></html>";
-    }
-    else if (status == 505)
-    {
-        res = "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/html\r\n\r\n\
-        <html><head><title>505 HTTP Version Not Supported</title></head><body><center><h1>505 HTTP Version Not Supported</h1></center>\
-        <hr><center>42 webserv 0.1</center></body></html>";
-    }
+request::request(){};
+request::~request(){};
+
+const std::string & request::get_method(){
+    return method;
 }
 
-void get_default_index(std::string &res, std::string path)
-{
-    std::ifstream f;
-    if (path == "/")
-        f.open("www/index.html");
-    else
-        f.open(path.c_str());
-    std::string line;
-    res = "HTTP/1.1 200 ok\r\nContent-Type: text/html\r\n\r\n";
-    while (std::getline(f, line))
-        res += line;
+const std::string & request::get_path(){
+    return path;
 }
 
-std::string  parse_request(const std::string &request_buffer, request &object, std::ifstream& fileStream)
-{
-    std::string res;
-    std::istringstream requestStream(request_buffer);
-    std::string line;
-    std::getline(requestStream, line);
-    std::istringstream requestLine(line);
-    if (!check_request_line(line))
-        return res;
+const std::string & request::get_version(){
+    return  version; 
+}
 
-    std::string method, path, version, error;
-    requestLine >> method >> path >> version >> error;
-    if (error.size() > 0 || !method.size() || !path.size() || !version.size())
-    {
-        // std::cout << "400 bad request" << std::endl;
-        get_error_res(res, 400);
-        return res;
-    }
-    object.set_method(method);
-    object.set_path(path);
-    object.set_version(version);
+void request::set_method(std::string & name){
+    method = name;
+}
 
-    if (object.get_method() != "GET" && object.get_method() != "POST" && object.get_method() != "DELETE")
-    {
-        if (!is_upper(object.get_method()))
-        {
-            get_error_res(res, 400);
-            return res;
-        }
-        else
-        {
-            get_error_res(res, 405);
-            return res;
-        }
-    }
-    if (object.get_method() == "POST"){
-        // handle_post_requst();
-        return res;
-    }
-    if (object.get_version() != "HTTP/1.1")
-    {
-        if (strncmp(object.get_version().c_str(), "HTTP/", 5) > 0)
-        {
-            // std::cout << "400 bad request" << std::endl;
-            get_error_res(res, 400);
-            return res;
-        }
-        else
-        {
-            // std::cout << "505 HTTP Version Not Supported" << std::endl;
-            get_error_res(res, 505);
-            return res;
-        }
-    }
-    std::string pa = object.get_path();
-    if (pa[0] != '/')
-    {
-        // std::cout << "400 bad request" << std::endl;
-        get_error_res(res, 400);
-        return res;
-    }
-    pa = removeslashes(pa);
-    if (!out_root_dir(pa, res))
-        return res;
-
-    object.set_path(pa);
-
-    if (object.fill_headers_map(requestStream, res) == 0)
-        return res;
-
-    if (object.get_path() == "/")
-    {
-        std::string p = "/index.html";
-        object.set_path(p);
-    }
-    std::string pat = "www/" + object.get_path().substr(1);
-    object.set_path(pat);
-    struct stat path_stat;
-    if (stat(object.get_path().c_str(), &path_stat) == -1)
-    {
-        std::cerr << "Error: stat field" << std::endl;
-        res = "HTTP/1.1 404 not found\r\nContent-Type: text/html\r\n\r\n\
-        <html><head><title>404 not found</title></head><body><center><h1>404 not found</h1></center>\
-        <hr><center>42 webserv 0.1</center></body></html>";
-    }
-
-    else if (S_ISDIR(path_stat.st_mode))
-    {
-        if (access(pat.c_str(), R_OK | W_OK | X_OK) == -1)
-        {
-            res = "HTTP/1.1 403 Forbidden\r\nContent-Type: text/html\r\n\r\n\
-                <html><head><title>403 Forbidden</title></head><body><center><h1>403 Forbidden</h1></center>\
-                <hr><center>42 webserv 0.1</center></body></html>";
-            return res;
-        }
-        DIR *dir = opendir(pat.c_str());
-
-        if (dir == NULL)
-        {
-            std::cerr << "Error opening directory: " << strerror(errno) << std::endl;
-            return res;
-        }
-
-        struct dirent *entry;
-        res = "HTTP/1.1 200 OK\r\n";
-        res += "Content-Type: text/html; charset=UTF-8\r\n";
-        res += "Connection: close\r\n";
-        res += "\r\n";
-
-        res += "<html>\n<head>\n<title>Found Files</title>\n</head>\n<body>\n";
-        res += "<h1>Found Files in Directory</h1>\n<ul>\n";
-        while ((entry = readdir(dir)) != NULL)
-        {
-            std::string fileName = entry->d_name;
-            res += "<li><a href=\"/" + pat.substr(4) +"/" + fileName + "\">" + fileName + "</a></li>\n";
-            // 4 must be change by root dir size 
-        }
-        res += "</ul>\n</body>\n</html>\n";
-        closedir(dir);
-    }
-
-    else if (S_ISREG(path_stat.st_mode)){
-        res = fill_response(fileStream , pat);
-    }
-    else
-        res = "HTTP/1.1 404 not found\r\nContent-Type: text/html\r\n\r\n\
-            <html><head><title>404 not found</title></head><body><center><h1>404 not found</h1></center>\
-            <hr><center>42 webserv 0.1</center></body></html>";
-    return res;
+void    request::set_s_request(char * req){
+    s_request = req;
 }
 
 
-bool setupSocket(int& server_fd, struct sockaddr_in& server_addr) {
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1) {
-        std::cerr << "Socket creation failed: " << strerror(errno) << std::endl;
+void request::set_path(std::string & name){
+    path = name;
+}
+
+char * request::get_s_request(){
+    return s_request;
+}
+
+void request::set_version(std::string & name){
+    version = name;
+}
+
+
+bool is_allowed_char(char c){
+    if (c != '/' && c != '?' && c != '=' && c != '&' && c != '#' && c != '-' && c != '_' && c != ':' && c != '.' && c != ' ' && (int)c != 13\
+        && c != '(' && c != ')' && c != '[' && c != ']')
         return false;
-    }
-
-    // Set socket options
-    int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-        std::cerr << "Setsockopt failed: " << strerror(errno) << std::endl;
-        return false;
-    }
-
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
-
-    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-        std::cerr << "Bind failed: " << strerror(errno) << std::endl;
-        return false;
-    }
-
-    if (listen(server_fd, 10) == -1) {
-        std::cerr << "Listen failed: " << strerror(errno) << std::endl;
-        return false;
-    }
-
     return true;
 }
 
-std::string getContentType(std::string filePath) {
-    std::map<std::string, std::string> mimeTypes;
-    mimeTypes.insert(std::make_pair(".html", "text/html"));
-    mimeTypes.insert(std::make_pair(".css", "text/css"));
-    mimeTypes.insert(std::make_pair(".js", "application/javascript"));
-    mimeTypes.insert(std::make_pair(".json", "application/json"));
-    mimeTypes.insert(std::make_pair(".jpg", "image/jpeg"));
-    mimeTypes.insert(std::make_pair(".jpeg", "image/jpeg"));
-    mimeTypes.insert(std::make_pair(".png", "image/png"));
-    mimeTypes.insert(std::make_pair(".gif", "image/gif"));
-    mimeTypes.insert(std::make_pair(".mp4", "video/mp4"));
-    mimeTypes.insert(std::make_pair(".pdf", "application/pdf"));
-    mimeTypes.insert(std::make_pair(".txt", "text/plain"));
-    mimeTypes.insert(std::make_pair(".zip", "application/zip"));
-    mimeTypes.insert(std::make_pair(".mp3", "audio/mpeg"));
-    
-    size_t dotPos = filePath.find_last_of(".");
-    if (dotPos != std::string::npos) {
-        std::string ext = filePath.substr(dotPos);
-        for (size_t i = 0; i < ext.length(); i++) {
-            ext[i] = tolower(ext[i]);
-        }
 
-        if (mimeTypes.count(ext)) {
-            return mimeTypes[ext];
+bool check_request_line(std::string & line){
+    int i = 0;
+    while(line[i]){
+        if (!isalnum(line[i]) && !is_allowed_char(line[i])){
+            std::cout << "400 bad request ||" << line[i] << " (ASCII: " << (int)line[i] << ")" << std::endl;
+            return false;
         }
+        i++;
     }
-    return "";
+    return true;
 }
 
-std::string fill_response(std::ifstream& fileStream,  std::string& filePath) {
-    fileStream.open(filePath.c_str(), std::ios::binary | std::ios::ate);
-    
-    if (!fileStream) {
-        std::cerr << "Failed to open file: " << filePath << std::endl;
-        return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
-    }
 
-    std::streampos fileSize = fileStream.tellg();
-    fileStream.seekg(0, std::ios::beg);
-
-    std::ostringstream response;
-    response << "HTTP/1.1 200 OK\r\n";
-    response << "Content-Type:" + getContentType(filePath)  + "\r\n";
-    response << "Content-Length: " << fileSize << "\r\n";
-    response << "Accept-Ranges: bytes\r\n";
-    response << "Connection: close\r\n";
-    response << "X-Content-Type-Options: nosniff\r\n";
-    response << "Access-Control-Allow-Origin: *\r\n";
-    response << "\r\n";
-
-    std::cout << "File size: " << fileSize << " bytes\n";
-    std::cout << "Headers:\n" << response.str();
-    
-    return response.str();
-}
-
-void handleClient(int client_fd , request &object) {
-    char recv_buffer[1024] = {0};
-    ssize_t bytes_received = recv(client_fd, recv_buffer, sizeof(recv_buffer), 0);
-    
-    if (bytes_received > 0) {
-        std::string request(recv_buffer, bytes_received);
-
-        std::ifstream fileStream;
-        // std::cout << request << "\n\n\n\n\n\n\n\n"<< std::endl;
-        // return ;
-        std::string response = parse_request(request ,object ,  fileStream);
-        
-        if (send(client_fd, response.c_str(), response.length(), 0) == -1) {
-            std::cerr << "Failed to send headers: " << strerror(errno) << std::endl;
-            return;
-        }
-
-        char send_buffer[8192];
-        size_t total_sent = 0;
-        
-        while (fileStream.good() && !fileStream.eof()) {
-            fileStream.read(send_buffer, sizeof(send_buffer));
-            size_t bytes_read = fileStream.gcount();  
-            if (bytes_read == 0) 
-                break;    
-           size_t bytes_sent = 0;
-            while (bytes_sent < bytes_read) {
-                ssize_t result = send(client_fd, send_buffer + bytes_sent,bytes_read - bytes_sent,0);
-                
-                if (result <= 0) {
-                    std::cerr << "Send failed: " << strerror(errno) << std::endl;
-                    fileStream.close();
-                    return;
-                }
-                
-                bytes_sent += result;
-                total_sent += result;
+std::string removeslashes(const std::string& line) {
+    std::string result;
+    for (size_t i = 0; i < line.size(); ++i) {
+        result += line[i];
+        if (line[i] == '/') {
+            while (i + 1 < line.size() && line[i + 1] == '/') {
+                ++i;
             }
-            
-            std::cout << "Progress: " << total_sent << " bytes sent\r" << std::flush;
         }
-        fileStream.close();
-        std::cout << "\nTotal sent: " << total_sent << " bytes\n";
     }
+    return result;
 }
 
-int main() {
-    int server_fd = -1;
-    struct sockaddr_in server_addr;
-    request object;
-    
-    if (!setupSocket(server_fd, server_addr)) {
-        return 1;
-    }
 
-    std::cout << "Server listening on port " << PORT << "...\n";
+bool request::fill_headers_map(std::istringstream &ob , std::string &res){
+    std::string line, key, value;
+    while (std::getline(ob, line)) {
+        if (line.empty()) continue;
+        std::size_t pos = line.find(':');
 
-    while (true) {
-        struct sockaddr_in client_addr;
-        socklen_t client_addr_len = sizeof(client_addr);
-        
-        int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
-        if (client_fd == -1) {
-            std::cerr << "Accept failed: " << strerror(errno) << std::endl;
-            continue;
+        if (pos != std::string::npos){
+            key = line.substr(0, pos);
+            value = line.substr(pos + 1);
         }
-
-        int flag = 1;
-        setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-
-        std::cout << "Client connected\n";
-        handleClient(client_fd , object);
-        close(client_fd);
-        std::cout << "Connection closed\n\n";
+        else
+            key = line.substr(pos + 1);
+        if (key.empty()){
+            // std::cout << "400 Bad requeste 1" << std::endl;
+            get_error_res(res , 400);
+            headers_map.clear();
+            return false;
+        }
+        if ((key[0] >= 9 && key[0] < 13) || key[0] == 32){
+            // std::cout << "400 Bad requeste 2 "<< "|" << (int)key[0] << "|"  << std::endl;
+            get_error_res(res , 400);
+            headers_map.clear();
+            return false;
+        }
+        headers_map[key] = value;
     }
-    close(server_fd);
-    return 0;
+    return true;
+}
+
+bool out_root_dir(std::string &pa , std::string &res){
+    char **str = ft_split(pa.c_str(), '/');
+    int entry = 0;
+    int sorty = 0;
+    for (int i = 0; str[i]; i++)
+    {
+        if (strcmp(str[i], "..") == 0)
+            sorty++;
+        else
+            entry++;
+        if (sorty > entry)
+        {
+            get_error_res(res, 400);
+            return false;
+        }
+    }
+    std::vector<std::string> vec;
+
+    for (int i = 0 ; str[i] ; i++){
+        vec.push_back(str[i]);
+        if (strcmp(str[i] , "..") == 0){
+            vec.pop_back();
+            vec.pop_back();
+        }
+    }
+    pa = "/";
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        oss << vec[i];
+        if (i != vec.size() - 1) {
+            oss << "/"; 
+        }
+    }
+    pa += oss.str();
+    return true;
+}
+
+bool is_upper(std::string line){
+    for (std::size_t i = 0; i < line.size() ; i++){
+        if (!(line[i] >= 'A' && line[i] <= 'Z' ))
+            return false;
+    }
+    return true;
 }

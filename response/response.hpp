@@ -9,12 +9,16 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <cstring>
+#include <fstream>
+
 
 class response
 {
     private:
-        std::string re;
+        std::ifstream fileStream;
     public:
+        std::ifstream & get_fileStream();
+        void set_fileStream(std::ifstream & object);
         
 };
 
