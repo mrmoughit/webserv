@@ -11,7 +11,7 @@ void  Client::set_client_id(int fd){
     client_id = fd;
 }
 
-Request  Client::get_request(){
+Request & Client::get_request(){
     return request_object;
 }
 

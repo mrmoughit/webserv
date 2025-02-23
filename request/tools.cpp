@@ -64,6 +64,13 @@ std::string getContentType(std::string filePath) {
     }
     return "";
 }
+void _response(std::ifstream& fileStream , int status){
+    (void)fileStream;
+    (void)status;
+    // fileStream.open()
+    if (status == 400){
+    }
+}
 
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath) {
     fileStream.open(filePath.c_str(), std::ios::binary | std::ios::ate);

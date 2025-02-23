@@ -1,6 +1,6 @@
 #include "webserver.hpp"
 
-#define PORT 4445
+#define PORT 4444
 
 bool setupSocket(int& server_fd, struct sockaddr_in& server_addr) {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -34,17 +34,27 @@ bool setupSocket(int& server_fd, struct sockaddr_in& server_addr) {
 }
 
 
-void handleClient(int client_fd , Request &object) {
-    char recv_buffer[1024] = {0};
-    ssize_t bytes_received = recv(client_fd, recv_buffer, sizeof(recv_buffer), 0);
+void handleClient(int client_fd , Client &client) {
+    char  *request = (char *)malloc(2000);
+    request[1999] = 0;
+    ssize_t bytes_received = recv(client_fd, request, 2000, 0);
     
     if (bytes_received > 0) {
-        std::string request(recv_buffer, bytes_received);
-
+ 
         std::ifstream fileStream;
-        std::string response = parse_request(request ,object ,  fileStream);
+        Request req;
+        Response res;
+        std::string response;
+        req.set_s_request(request);
+        res.set_fileStream(fileStream);
+        res.set_response(response);
+        client.set_request(req);
+        client.set_response(res);
+
+        parse_request(client);
+
         
-        if (send(client_fd, response.c_str(), response.length(), 0) == -1) {
+        if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1) {
             std::cerr << "Failed to send headers: " << strerror(errno) << std::endl;
             return;
         }
@@ -81,7 +91,7 @@ void handleClient(int client_fd , Request &object) {
 int main() {
     int server_fd = -1;
     struct sockaddr_in server_addr;
-    Request object;
+    Client client;
     
     if (!setupSocket(server_fd, server_addr)) {
         return 1;
@@ -103,7 +113,7 @@ int main() {
         setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
 
         std::cout << "Client connected\n";
-        handleClient(client_fd , object);
+        handleClient(client_fd , client);
         close(client_fd);
         std::cout << "Connection closed\n\n";
     }

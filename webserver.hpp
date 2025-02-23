@@ -16,7 +16,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <errno.h>
-
+#include <cstdlib>
 #include "response/response.hpp"
 #include "request/request.hpp"
 #include "client/client.hpp"
@@ -28,4 +28,5 @@ bool is_upper(std::string line);
 char	**ft_split(char const *s, char c);
 void get_error_res(std::string &res , int status);
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath);
-std::string  parse_request(const std::string &request_buffer, Request &object, std::ifstream& fileStream);
+void parse_request(Client &object);
+void _response(std::ifstream& fileStream , int status);

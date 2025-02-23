@@ -11,9 +11,9 @@ class Client{
     public:
         void set_client_id(int fd);
         int get_client_id();
-        Request  get_request();
+        Request  & get_request();
         void  set_request(Request & R);
-        Response & get_response();
+        Response& get_response();
         void  set_response(Response & R);
 
         Client();

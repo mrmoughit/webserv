@@ -1,6 +1,8 @@
 #include "../webserver.hpp"
 
-Request::Request(){};
+Request::Request(){
+    s_request =NULL;
+};
 Request::~Request(){};
 
 const std::string & Request::get_method(){
@@ -20,17 +22,20 @@ void Request::set_method(std::string & name){
 }
 
 void    Request::set_s_request(char * req){
-    s_request = req;
+    if (s_request) {
+        free(s_request);
+    }
+    s_request = strdup(req);
 }
 
+char *Request::get_s_request(){
+    return s_request;
+}
 
 void Request::set_path(std::string & name){
     path = name;
 }
 
-char * Request::get_s_request(){
-    return s_request;
-}
 
 void Request::set_version(std::string & name){
     version = name;

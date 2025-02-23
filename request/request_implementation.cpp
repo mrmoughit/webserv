@@ -1,91 +1,97 @@
 #include "../webserver.hpp"
 
-std::string  parse_request(const std::string &request_buffer, Request &object, std::ifstream& fileStream)
+void parse_request(Client &client)
 {
-    std::string res;
+    char * request_buffer = client.get_request().get_s_request();
+    std::string res = "";
+
     std::istringstream requestStream(request_buffer);
     std::string line;
     std::getline(requestStream, line);
     std::istringstream requestLine(line);
-    std::cout << request_buffer << std::endl ;
-    if (!check_request_line(line))
-        return res;
+    if (!check_request_line(line)){
+        get_error_res(res, 400);
+        client.get_response().set_response(res);
+        return ;
+    }
     
     std::string method, path, version, error;
     requestLine >> method >> path >> version >> error;
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
     {
-        // std::cout << "400 bad request" << std::endl;
         get_error_res(res, 400);
-        return res;
+        client.get_response().set_response(res);
+        return ;
     }
-    object.set_method(method);
-    object.set_path(path);
-    object.set_version(version);
 
-    if (object.get_method() != "GET" && object.get_method() != "POST" && object.get_method() != "DELETE")
+    client.get_request().set_method(method);
+    client.get_request().set_path(path);
+    client.get_request().set_version(version);
+
+    if (client.get_request().get_method() != "GET" && client.get_request().get_method() != "POST" && client.get_request().get_method() != "DELETE")
     {
-        if (!is_upper(object.get_method()))
+        if (!is_upper(client.get_request().get_method()))
         {
             get_error_res(res, 400);
-            return res;
+            return ;
         }
         else
         {
             get_error_res(res, 405);
-            return res;
+            return ;
         }
     }
-    if (object.get_method() == "POST"){
+    if (client.get_request().get_method() == "POST"){
         std::cout << "here" << std::endl;
         // handle_post_requst(object , res , requestStream);
-        return res;
+        return ;
     }
-    if (object.get_version() != "HTTP/1.1")
+    if (client.get_request().get_version() != "HTTP/1.1")
     {
-        if (strncmp(object.get_version().c_str(), "HTTP/", 5) > 0)
+        if (strncmp(client.get_request().get_version().c_str(), "HTTP/", 5) > 0)
         {
-            // std::cout << "400 bad request" << std::endl;
             get_error_res(res, 400);
-            return res;
+            client.get_response().set_response(res);
+            return ;
         }
         else
         {
-            // std::cout << "505 HTTP Version Not Supported" << std::endl;
             get_error_res(res, 505);
-            return res;
+            return ;
         }
     }
-    std::string pa = object.get_path();
+    std::string pa = client.get_request().get_path();
     if (pa[0] != '/')
     {
-        // std::cout << "400 bad request" << std::endl;
         get_error_res(res, 400);
-        return res;
+        client.get_response().set_response(res);
+        return ;
     }
     pa = removeslashes(pa);
     if (!out_root_dir(pa, res))
-        return res;
+        return ;
+    client.get_request().set_path(pa);
 
-    object.set_path(pa);
+    if (client.get_request().fill_headers_map(requestStream, res) == 0)
+        return ;
 
-    if (object.fill_headers_map(requestStream, res) == 0)
-        return res;
-
-    if (object.get_path() == "/")
+    if (client.get_request().get_path() == "/")
     {
         std::string p = "/index.html";
-        object.set_path(p);
+        client.get_request().set_path(p);
     }
-    std::string pat = "www/" + object.get_path().substr(1);
-    object.set_path(pat);
+    std::string pat = "www/" + client.get_request().get_path().substr(1);
+    client.get_request().set_path(pat);
+
     struct stat path_stat;
-    if (stat(object.get_path().c_str(), &path_stat) == -1)
+    if (stat(client.get_request().get_path().c_str(), &path_stat) == -1)
     {
         std::cerr << "Error: stat field" << std::endl;
         res = "HTTP/1.1 404 not found\r\nContent-Type: text/html\r\n\r\n\
         <html><head><title>404 not found</title></head><body><center><h1>404 not found</h1></center>\
         <hr><center>42 webserv 0.1</center></body></html>";
+        client.get_response().set_response(res);
+        return ;
     }
 
     else if (S_ISDIR(path_stat.st_mode))
@@ -95,14 +101,19 @@ std::string  parse_request(const std::string &request_buffer, Request &object, s
             res = "HTTP/1.1 403 Forbidden\r\nContent-Type: text/html\r\n\r\n\
                 <html><head><title>403 Forbidden</title></head><body><center><h1>403 Forbidden</h1></center>\
                 <hr><center>42 webserv 0.1</center></body></html>";
-            return res;
+                client.get_response().set_response(res);
+            return ;
         }
         DIR *dir = opendir(pat.c_str());
 
         if (dir == NULL)
         {
             std::cerr << "Error opening directory: " << strerror(errno) << std::endl;
-            return res;
+            res = "HTTP/1.1 404 not found\r\nContent-Type: text/html\r\n\r\n\
+                <html><head><title>404 not found</title></head><body><center><h1>404 not found</h1></center>\
+                <hr><center>42 webserv 0.1</center></body></html>";
+                client.get_response().set_response(res);
+            return ;
         }
 
         struct dirent *entry;
@@ -120,16 +131,19 @@ std::string  parse_request(const std::string &request_buffer, Request &object, s
             // 4 must be change by root dir size 
         }
         res += "</ul>\n</body>\n</html>\n";
+        client.get_response().set_response(res);
         closedir(dir);
     }
 
     else if (S_ISREG(path_stat.st_mode)){
-        res = fill_response(fileStream , pat);
+        res = fill_response(client.get_response().get_fileStream() , pat);
+        client.get_response().set_response(res);
     }
     else
         res = "HTTP/1.1 404 not found\r\nContent-Type: text/html\r\n\r\n\
             <html><head><title>404 not found</title></head><body><center><h1>404 not found</h1></center>\
             <hr><center>42 webserv 0.1</center></body></html>";
-    return res;
+            client.get_response().set_response(res);
+    return ;
 }
 
