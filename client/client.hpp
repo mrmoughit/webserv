@@ -5,6 +5,7 @@
 class Client{
     private:
         int client_id;
+        // struct sockaddr_in Address;
         Request request_object;
         Response response_object;
     public:
