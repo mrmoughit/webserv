@@ -1,4 +1,4 @@
-#include "request.hpp"
+#include "../webserver.hpp"
 
 request::request(){};
 request::~request(){};
@@ -145,3 +145,4 @@ bool is_upper(std::string line){
     }
     return true;
 }
+
