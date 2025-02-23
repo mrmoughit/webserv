@@ -10,10 +10,13 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <fstream>
 #include <cstring>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <fstream>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <errno.h>
 
 class request
 {
@@ -43,3 +46,4 @@ bool out_root_dir(std::string &pa , std::string &res);
 bool is_upper(std::string line);
 char	**ft_split(char const *s, char c);
 void get_error_res(std::string &res , int status);
+std::string fill_response(std::ifstream& fileStream,  std::string& filePath);
