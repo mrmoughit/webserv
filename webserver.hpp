@@ -30,3 +30,4 @@ void get_error_res(std::string &res , int status);
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath);
 void parse_request(Client &object);
 void _response(std::ifstream& fileStream , int status);
+void check_request( Client & client);

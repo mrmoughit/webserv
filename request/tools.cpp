@@ -93,8 +93,8 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath) {
     response << "Access-Control-Allow-Origin: *\r\n";
     response << "\r\n";
 
-    std::cout << "File size: " << fileSize << " bytes\n";
-    std::cout << "Headers:\n" << response.str();
+    // std::cout << "File size: " << fileSize << " bytes\n";
+    // std::cout << "Headers:\n" << response.str();
     
     return response.str();
 }

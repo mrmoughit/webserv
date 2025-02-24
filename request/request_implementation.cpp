@@ -1,9 +1,11 @@
 #include "../webserver.hpp"
 
+
+
 void parse_request(Client &client)
 {
     char * request_buffer = client.get_request().get_s_request();
-    std::string res = "";
+    std::string res;
 
     std::istringstream requestStream(request_buffer);
     std::string line;
@@ -14,7 +16,6 @@ void parse_request(Client &client)
         client.get_response().set_response(res);
         return ;
     }
-    
     std::string method, path, version, error;
     requestLine >> method >> path >> version >> error;
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
@@ -42,10 +43,19 @@ void parse_request(Client &client)
         }
     }
     if (client.get_request().get_method() == "POST"){
-        std::cout << "here" << std::endl;
+        // std::cout << "here" << std::endl;
+        std::cout <<"\033[38;5;214m"<<"POST request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
         // handle_post_requst(object , res , requestStream);
         return ;
     }
+
+    if (client.get_request().get_method() == "POST"){
+
+        std::cout <<"\033[1;31m"<<"DELETE request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
+        return ;
+    }
+
+    std::cout << "\033[34m" << "GET request ====> "<< method<<  " "<< path << " "<< version << " " << "\033[0m" << std::endl;
     if (client.get_request().get_version() != "HTTP/1.1")
     {
         if (strncmp(client.get_request().get_version().c_str(), "HTTP/", 5) > 0)
@@ -147,3 +157,17 @@ void parse_request(Client &client)
     return ;
 }
 
+
+void check_request(Client & client){
+    std::cout << client.get_request().get_s_request();
+    // std::string method = client.get_request().get_method();
+    // std::cout << client.get_request().get_method() <<std::endl;
+    // if (client.get_request().get_method().empty()){
+    //     parse_request(client);
+    //     std::cout << client.get_request().get_method() <<std::endl;
+    // }
+    // else{
+    //     std::cout << "here" << std::endl;
+    // }
+
+}

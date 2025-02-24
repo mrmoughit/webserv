@@ -51,7 +51,7 @@ void handleClient(int client_fd , Client &client) {
         client.set_request(req);
         client.set_response(res);
 
-        parse_request(client);
+        check_request(client);
 
         
         if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1) {
@@ -72,7 +72,6 @@ void handleClient(int client_fd , Client &client) {
                 ssize_t result = send(client_fd, send_buffer + bytes_sent,bytes_read - bytes_sent,0);
                 
                 if (result <= 0) {
-                    std::cerr << "Send failed: " << strerror(errno) << std::endl;
                     fileStream.close();
                     return;
                 }
@@ -81,10 +80,10 @@ void handleClient(int client_fd , Client &client) {
                 total_sent += result;
             }
             
-            std::cout << "Progress: " << total_sent << " bytes sent\r" << std::flush;
+            // std::cout << "Progress: " << total_sent << " bytes sent\r" << std::flush;
         }
         fileStream.close();
-        std::cout << "\nTotal sent: " << total_sent << " bytes\n";
+        // std::cout << "\nTotal sent: " << total_sent << " bytes\n";
     }
 }
 
@@ -112,10 +111,10 @@ int main() {
         int flag = 1;
         setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
 
-        std::cout << "Client connected\n";
+        // std::cout << "Client connected\n";
         handleClient(client_fd , client);
         close(client_fd);
-        std::cout << "Connection closed\n\n";
+        // std::cout << "Connection closed\n\n";
     }
     close(server_fd);
     return 0;
