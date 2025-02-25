@@ -159,15 +159,13 @@ void parse_request(Client &client)
 
 
 void check_request(Client & client){
-    std::cout << client.get_request().get_s_request();
-    // std::string method = client.get_request().get_method();
-    // std::cout << client.get_request().get_method() <<std::endl;
-    // if (client.get_request().get_method().empty()){
-    //     parse_request(client);
-    //     std::cout << client.get_request().get_method() <<std::endl;
-    // }
-    // else{
-    //     std::cout << "here" << std::endl;
-    // }
+    // std::cout << client.get_request().get_s_request();
+    std::string method = client.get_request().get_method();
+    if (client.get_request().get_method().empty()){
+        parse_request(client);
+    }
+    else{
+        std::cout << "here" << std::endl;
+    }
 
 }
