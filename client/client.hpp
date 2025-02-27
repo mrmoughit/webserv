@@ -6,8 +6,8 @@ class Client{
     private:
         int client_id;
         // struct sockaddr_in Address;
-        Request request_object;
-        Response response_object;
+        Request *request_object;
+        Response *response_object;
     public:
         void set_client_id(int fd);
         int get_client_id();

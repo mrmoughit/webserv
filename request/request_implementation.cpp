@@ -1,15 +1,21 @@
 #include "../webserver.hpp"
 
 
-
 void parse_request(Client &client)
 {
-    char * request_buffer = client.get_request().get_s_request();
+    std::string request_buffer = client.get_request().get_s_request();
+
     std::string res;
+    std::string requestData = client.get_request().get_s_request();
+
+    size_t bodyStart = requestData.find("\r\n\r\n");
+    requestData = requestData.substr(bodyStart + 4);
 
     std::istringstream requestStream(request_buffer);
     std::string line;
     std::getline(requestStream, line);
+    // std::cout << line;
+    // exit (0);
     std::istringstream requestLine(line);
     if (!check_request_line(line)){
         get_error_res(res, 400);
@@ -42,14 +48,17 @@ void parse_request(Client &client)
             return ;
         }
     }
+
     if (client.get_request().get_method() == "POST"){
-        // std::cout << "here" << std::endl;
+        if (client.get_request().fill_headers_map(requestStream, res) == 0){
+            return ;
+        }
+        hanlde_post_request(client , 1 , requestData);
         std::cout <<"\033[38;5;214m"<<"POST request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
-        // handle_post_requst(object , res , requestStream);
         return ;
     }
 
-    if (client.get_request().get_method() == "POST"){
+    if (client.get_request().get_method() == "DELETE"){
 
         std::cout <<"\033[1;31m"<<"DELETE request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
         return ;
@@ -159,13 +168,13 @@ void parse_request(Client &client)
 
 
 void check_request(Client & client){
-    // std::cout << client.get_request().get_s_request();
     std::string method = client.get_request().get_method();
     if (client.get_request().get_method().empty()){
         parse_request(client);
     }
     else{
-        std::cout << "here" << std::endl;
+        hanlde_post_request(client , 0 , "ssss");
     }
-
 }
+
+

@@ -2,6 +2,7 @@
 
 #include "../webserver.hpp"
 
+
 class Request
 {
     private:
@@ -9,7 +10,9 @@ class Request
         std::string version; 
         std::string path;
         std::map<std::string,std::string> headers_map;
-        char *s_request;
+        std::string s_request;
+        size_t length;
+        int BodyStart;
         
     public:
         const std::string& get_method();
@@ -18,10 +21,14 @@ class Request
         void set_method(std::string & name);
         void set_path(std::string& name);
         void set_version(std::string& name);
-        void set_s_request(char * req);
-        char * get_s_request();
+        void set_s_request(std::string req);
+        std::string get_s_request();
+        size_t get_length();
+        void set_length(size_t len);
+        int get_bodyStart();
+        void set_bodyStart(int pos);
+        std::string get_map_values(std::string key);
         bool fill_headers_map(std::istringstream &obj , std::string &res);
-
         Request();
         ~Request();
 };
