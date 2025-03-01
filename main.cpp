@@ -38,6 +38,67 @@ bool setupSocket(int &server_fd, struct sockaddr_in &server_addr)
     return true;
 }
 
+// int hex_to_int(std::string line){
+//     int result = 0;
+//     std::stringstream ss;
+//     ss << std::hex << line;
+//     ss >> result;
+//     return result;
+// }
+
+// void save_chunked_data_to_file(std::string& chunked_data) {
+//     static int i ;
+//     if (!i){
+//         int pos = chunked_data.find("\r\n\r\n");
+//         chunked_data = chunked_data.substr(pos + 4);
+//     }
+//     i = 10;
+//     std::cout << chunked_data  <<std::endl;
+//     std::cout <<" ------------------------------------ " << std::endl;
+//     return ;
+//     std::stringstream data_stream(chunked_data);  
+//     std::ofstream output_file("output_data.txt");
+
+//     if (!output_file.is_open()) {
+//         std::cerr << "Error opening file for writing." << std::endl;
+//         return;
+//     }
+
+//     std::string line;
+//     while (true) {
+
+//         if (!getline(data_stream, line)) {
+//             std::cerr << "Error reading chunk size." << std::endl;
+//             break;
+//         }
+
+//         size_t pos = line.find("\r\n");
+//         if (pos != std::string::npos) {
+//             line.erase(pos);
+//         }
+
+//         int chunk_size = hex_to_int(line);
+//         if (chunk_size == 0) {
+//             break;
+//         }
+//         // std::string test ;
+//         // data_stream >> test;
+//         char* buffer = new char[chunk_size];
+//         data_stream.read(buffer, chunk_size);
+//         std::cout << buffer  << "  ___> "  << std::endl;
+
+
+
+//         delete [] buffer;
+
+//         if (!getline(data_stream, line)) {
+//             std::cerr << "Error reading CRLF after chunk." << std::endl;
+//             break;
+//         }
+//     }
+//     output_file.close(); 
+// }
+
 void handleClient(int client_fd, Client &client)
 {
     char request[2000];
@@ -52,20 +113,17 @@ void handleClient(int client_fd, Client &client)
     res.set_fileStream(fileStream);
     res.set_response(response);
     client.set_request(req);
-
-    std::ofstream file;
-    file.open("file.txt");
-    if (!file)
-        std::cout << "error" << std::endl;
     while ((bytes_received = recv(client_fd, request, 2000 , 0)) > 0)
     {
         std::string tmp(request, bytes_received);
         req.set_s_request(tmp);
         check_request(client);
+        // save_chunked_data_to_file(tmp);
         // std::cout << req.get_s_request();
         memset(request, 0, 2000);
+        // break;
     }
-
+    std::cout << "here" << std::endl;
     if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1)
     {
         std::cerr << "Failed to send headers: " << strerror(errno) << std::endl;

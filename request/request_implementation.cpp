@@ -14,8 +14,7 @@ void parse_request(Client &client)
     std::istringstream requestStream(request_buffer);
     std::string line;
     std::getline(requestStream, line);
-    // std::cout << line;
-    // exit (0);
+
     std::istringstream requestLine(line);
     if (!check_request_line(line)){
         get_error_res(res, 400);
@@ -63,7 +62,6 @@ void parse_request(Client &client)
         std::cout <<"\033[1;31m"<<"DELETE request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
         return ;
     }
-
     std::cout << "\033[34m" << "GET request ====> "<< method<<  " "<< path << " "<< version << " " << "\033[0m" << std::endl;
     if (client.get_request().get_version() != "HTTP/1.1")
     {

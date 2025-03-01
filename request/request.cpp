@@ -250,18 +250,13 @@ void hanlde_post_request(Client &client, int first , std::string req)
             std::cerr << "Error: Could not open file " << file_name << std::endl;
             return;
         }
-        // std::cout << file_name << std::endl;
-        // exit (0);
-        // if (client.get_request().get_bodyStart() < (int)client.get_request().get_length())
-        // {
         file  << req << std::flush;
-            // if (file.fail())
-            // {
-            //     std::cerr << "Error: Failed to write to file " << file_name << std::endl;
-            //     file.close();
-            //     return;
-            // }
-        // }
+            if (file.fail())
+            {
+                std::cerr << "Error: Failed to write to file " << file_name << std::endl;
+                file.close();
+                return;
+            }
     }
     else
     {
@@ -278,11 +273,5 @@ void hanlde_post_request(Client &client, int first , std::string req)
             file.close();
             return;
         }
-        // if (client.get_request().get_length() < 5000)
-        // {
-        //     std::cout << request_data;
-        //     std::cout << "File closed" << std::endl;
-        //     exit (0);
-        // }
     }
 }
