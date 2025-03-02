@@ -161,12 +161,12 @@ void handleClient(int client_fd, Client &client)
     {
         std::string tmp(request, bytes_received);
         req.set_s_request(tmp);
-        check_request(client);
+        // check_request(client);
         // chunked(tmp);
         // std::cout << req.get_s_request();
-        // std::cout << tmp;
+        std::cout << tmp;
         memset(request, 0, 5000);
-        break;
+        // break;
     }
     // std::cout << "here" << std::endl;
     if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1)
