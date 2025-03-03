@@ -145,8 +145,8 @@ void chunked(std::string request)
 
 void handleClient(int client_fd, Client &client)
 {
-    char request[5000];
-    memset(request, 0, 5000);
+    char request[1000];
+    memset(request, 0, 1000);
     ssize_t bytes_received = 0;
     std::ifstream fileStream;
     Request req;
@@ -157,15 +157,18 @@ void handleClient(int client_fd, Client &client)
     res.set_fileStream(fileStream);
     res.set_response(response);
     client.set_request(req);
-    while ((bytes_received = recv(client_fd, request, 5000, 0)) > 0)
+    while ((bytes_received = recv(client_fd, request, 1000, 0)) > 0)
     {
         std::string tmp(request, bytes_received);
         req.set_s_request(tmp);
         // check_request(client);
         // chunked(tmp);
-        // std::cout << req.get_s_request();
+
+
+
         std::cout << tmp;
-        memset(request, 0, 5000);
+        memset(request, 0, 1000);
+
         // break;
     }
     // std::cout << "here" << std::endl;
