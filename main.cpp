@@ -134,14 +134,133 @@ void chunked(std::string request)
             }
             else
             {
-                std::cerr << "the chunk data must be end by \r\n" << std::endl;
-                exit (0);
+                std::cerr << "the chunk data must be end by \r\n"
+                          << std::endl;
+                exit(0);
             }
         }
     }
 }
 
-/// /////////////////////////// chanked
+void boundary(const std::string &request)
+{
+    static std::string buffer = "";
+    static bool processing = false;
+    static std::map<std::string, std::string> form_data;
+    static std::ofstream file;
+    static std::string current_key;
+    static std::string current_filename;
+    static bool in_file_content = false;
+    static bool in_header = false;
+    static std::string boundary;
+
+
+    buffer += request;
+
+
+    if (!processing) {
+        int pos = buffer.find("\r\n\r\n");
+        if (pos == (int)std::string::npos)
+            return;
+
+
+        std::string headers = buffer.substr(0, pos);
+        size_t boundary_pos = headers.find("boundary=");
+        if (boundary_pos == std::string::npos)
+            return; 
+            
+        boundary_pos += 9; 
+        size_t boundary_end = headers.find("\r\n", boundary_pos);
+        if (boundary_end == std::string::npos)
+            boundary_end = headers.length();
+            
+        boundary = "--" + headers.substr(boundary_pos, boundary_end - boundary_pos);
+        
+
+        buffer = buffer.substr(pos + 4);
+        processing = true;
+        in_header = true;
+    }
+
+
+    size_t line_end;
+    while ((line_end = buffer.find("\r\n")) != std::string::npos) {
+        std::string line = buffer.substr(0, line_end);
+        buffer = buffer.substr(line_end + 2); 
+
+        if (line.find(boundary) != std::string::npos) {
+            if (in_file_content) {
+                file.close();
+                in_file_content = false;
+            }
+            
+            if (line.find(boundary + "--") != std::string::npos) {
+
+                processing = false;
+                buffer.clear();
+                form_data.clear();
+                return;
+            }
+            
+            in_header = true;
+            current_key = "";
+            continue;
+        }
+
+        if (in_header) {
+            if (line.find("Content-Disposition:") != std::string::npos) {
+                size_t name_pos = line.find("name=\"");
+                if (name_pos != std::string::npos) {
+                    size_t name_start = name_pos + 6;
+                    size_t name_end = line.find("\"", name_start);
+                    if (name_end != std::string::npos) {
+                        current_key = line.substr(name_start, name_end - name_start);
+                    }
+                }
+                
+                size_t filename_pos = line.find("filename=\"");
+                if (filename_pos != std::string::npos) {
+                    size_t filename_start = filename_pos + 10;
+                    size_t filename_end = line.find("\"", filename_start);
+                    if (filename_end != std::string::npos) {
+                        current_filename = line.substr(filename_start, filename_end - filename_start);
+                    }
+                }
+            }
+            else if (line.find("Content-Type:") != std::string::npos) {
+                size_t type_pos = line.find("/");
+                if (type_pos != std::string::npos) {
+                    std::string extension = line.substr(type_pos + 1);
+
+                    size_t param_pos = extension.find(";");
+                    if (param_pos != std::string::npos) {
+                        extension = extension.substr(0, param_pos);
+                    }
+                    
+                    if (current_filename.empty()) {
+                        current_filename = "file." + extension;
+                    }
+                }
+            }
+            else if (line.empty()) {
+                in_header = false;
+                if (!current_filename.empty()) {
+                    file.open(current_filename.c_str(), std::ios::binary);
+                    in_file_content = true;
+                }
+            }
+        }
+        else if (in_file_content) {
+            file << line << "\r\n";
+        }
+        else if (!current_key.empty()) {
+            form_data[current_key] = line;
+            std::cout << current_key << " : " << line << std::endl;
+            current_key = "";
+            in_header = true;
+        }
+    }
+}
 
 void handleClient(int client_fd, Client &client)
 {
@@ -161,14 +280,12 @@ void handleClient(int client_fd, Client &client)
     {
         std::string tmp(request, bytes_received);
         req.set_s_request(tmp);
-        // check_request(client);
+        check_request(client);
+        // boundary(tmp);
         // chunked(tmp);
 
-
-
-        std::cout << tmp;
+        // std::cout << tmp;
         memset(request, 0, 1000);
-
         // break;
     }
     // std::cout << "here" << std::endl;

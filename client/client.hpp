@@ -8,6 +8,8 @@ class Client{
         // struct sockaddr_in Address;
         Request *request_object;
         Response *response_object;
+        std::map<std::string , std::string > map;
+        
     public:
         void set_client_id(int fd);
         int get_client_id();

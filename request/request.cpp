@@ -49,6 +49,14 @@ void Request::set_version(std::string &name)
     version = name;
 }
 
+bool Request::get_parse_index(){
+    return index;
+}
+
+void Request::set_parse_index(bool index){
+    this->index = index;
+}
+
 bool is_allowed_char(char c)
 {
     if (c != '/' && c != '?' && c != '=' && c != '&' && c != '#' && c != '-' && c != '_' && c != ':' && c != '.' && c != ' ' && (int)c != 13 && c != '(' && c != ')' && c != '[' && c != ']')
@@ -221,8 +229,10 @@ std::string get_file_ex(std::string name){
     return str;
 }
 
-std::ofstream file; 
 
+
+
+std::ofstream file; 
 void hanlde_post_request(Client &client, int first , std::string req)
 {
 

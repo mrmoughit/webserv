@@ -166,6 +166,11 @@ void parse_request(Client &client)
 
 
 void check_request(Client & client){
+
+    // if (!client.get_request().get_parse_index()){
+    //     parse_request(client);
+    // }
+
     std::string method = client.get_request().get_method();
     if (client.get_request().get_method().empty()){
         parse_request(client);

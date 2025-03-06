@@ -13,6 +13,7 @@ class Request
         std::string s_request;
         size_t length;
         int BodyStart;
+        bool index;
         
     public:
         const std::string& get_method();
@@ -29,6 +30,12 @@ class Request
         void set_bodyStart(int pos);
         std::string get_map_values(std::string key);
         bool fill_headers_map(std::istringstream &obj , std::string &res);
+
+
+
+        bool get_parse_index();
+        void set_parse_index(bool index);
+
         Request();
         ~Request();
 };
