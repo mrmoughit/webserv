@@ -31,4 +31,14 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath);
 void parse_request(Client &object);
 void _response(std::ifstream& fileStream , int status);
 void check_request( Client & client );
-void hanlde_post_request(Client &client , int first , std::string req);
+void hanlde_post_request(Client &client);
+void response_to_get(Client &client);
+
+
+
+
+
+
+// void boundary(Client &clinet);
+void chunked(Client &client);
+void trim_non_printable(std::string &str);

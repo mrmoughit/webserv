@@ -27,3 +27,16 @@ Response&  Client::get_response(){
 void Client::set_response(Response & R) {
         response_object = &R;
 }
+
+void Client::fill_map(std::string key , std::string value){
+    form_data[key] = value;
+}
+
+
+void Client::print_map(){
+    std::map<std::string , std::string >::iterator it = form_data.begin();
+    while(it != form_data.end()){
+        std::cout << it->first << " ---------> " << it->second << std::endl;
+        ++it ;
+    }
+}

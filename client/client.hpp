@@ -8,7 +8,7 @@ class Client{
         // struct sockaddr_in Address;
         Request *request_object;
         Response *response_object;
-        std::map<std::string , std::string > map;
+        std::map<std::string , std::string > form_data;
         
     public:
         void set_client_id(int fd);
@@ -18,6 +18,9 @@ class Client{
         Response& get_response();
         void  set_response(Response & R);
 
+
+        void fill_map(std::string key , std::string value);
+        void print_map();
         Client();
         ~Client(){};
 };

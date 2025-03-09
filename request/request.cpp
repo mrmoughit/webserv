@@ -3,6 +3,8 @@
 
 Request::Request()
 {
+    index = false;
+    request_end = false;
     // s_request = NULL;
 };
 Request::~Request() {};
@@ -52,6 +54,15 @@ void Request::set_version(std::string &name)
 bool Request::get_parse_index(){
     return index;
 }
+
+bool Request::get_request_end(){
+    return request_end;
+}
+
+void Request::set_request_end(bool index){
+    request_end = index;
+}
+
 
 void Request::set_parse_index(bool index){
     this->index = index;
@@ -114,14 +125,13 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res)
             key = line.substr(pos + 1);
         if (key.empty())
         {
-            // std::cout << "400 Bad requeste 1" << std::endl;
             get_error_res(res, 400);
             headers_map.clear();
             return false;
         }
         if (key[0] == 32)
         {
-            std::cout << "400 Bad requeste 2 "<< "|" << (int)key[0] << "|"  << std::endl;
+            // std::cout << "400 Bad requeste 2 "<< "|" << (int)key[0] << "|"  << std::endl;
             get_error_res(res, 400);
             headers_map.clear();
             return false;
@@ -233,11 +243,12 @@ std::string get_file_ex(std::string name){
 
 
 std::ofstream file; 
-void hanlde_post_request(Client &client, int first , std::string req)
+void hanlde_post_request(Client &client)
 {
-
-    if (first)
+    static int first ;
+    if (!first)
     {
+        first = 10;
         std::string content_type = client.get_request().get_map_values("Content-Type");
         std::string file_extension;
         if (content_type.size() > 7)
@@ -252,7 +263,7 @@ void hanlde_post_request(Client &client, int first , std::string req)
                 }
             }
         }
-        std::cout << file_extension << std::endl;
+        // std::cout << file_extension << std::endl;
         std::string file_name = get_file_ex(file_extension);
         file.open(file_name.c_str());
         if (!file.is_open())
@@ -260,7 +271,7 @@ void hanlde_post_request(Client &client, int first , std::string req)
             std::cerr << "Error: Could not open file " << file_name << std::endl;
             return;
         }
-        file  << req << std::flush;
+        file  << client.get_request().get_s_request() << std::flush;
             if (file.fail())
             {
                 std::cerr << "Error: Failed to write to file " << file_name << std::endl;
