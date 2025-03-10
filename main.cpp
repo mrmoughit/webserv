@@ -159,11 +159,11 @@ int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client
     return static_cast<int>(pos);
 }
 
-void fill_data_boudary(const std::string &tmp, std::ofstream &file , Client &clinet)
+void fill_data_boudary(const std::string &tmp, Client &clinet)
 {
-    (void)file;
     std::istringstream ss(tmp);
     std::string line;
+    std::ofstream file;
 
     std::getline(ss, line);
 
@@ -198,29 +198,32 @@ void fill_data_boudary(const std::string &tmp, std::ofstream &file , Client &cli
                 }
                 std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
                 file.open(filename.c_str());
-                while(1){
-                    char c ;
+                std::getline(ss, line);
+                std::getline(ss, line);
+                while (1)
+                {
+                    char c;
                     line = "";
-                    while(ss.get(c)){
+                    while (ss.get(c))
                         line += c;
-                    }
                     if (line.empty())
                         break;
                     file << line << std::flush;
                 }
-                exit (0) ;
+                // exit(0);
             }
-            std::getline(ss , line);
-            while(1)
+            std::getline(ss, line);
+            while (1)
             {
                 char c;
                 line = "";
-                while(ss.get(c)){
+                while (ss.get(c))
+                {
                     line += c;
                 }
                 if (line.empty())
                     break;
-                clinet.fill_map(key , line);
+                clinet.fill_map(key, line);
             }
         }
         else
@@ -231,165 +234,165 @@ void fill_data_boudary(const std::string &tmp, std::ofstream &file , Client &cli
     }
 }
 
-    void boundary(Client & client)
+void boundary(Client &client)
+{
+    static std::string buffer;
+    static int i = 0;
+    static std::string boundary;
+    std::string tmp;
+
+    buffer += client.get_request().get_s_request();
+    if (i == 0)
     {
-        static std::ofstream file;
-        static std::string buffer;
-        static int i = 0;
-        static std::string boundary;
-        std::string tmp;
-
-        buffer += client.get_request().get_s_request();
-        if (i == 0)
+        size_t pos = buffer.find("\r\n\r\n");
+        if (pos == std::string::npos)
         {
-            size_t pos = buffer.find("\r\n\r\n");
-            if (pos == std::string::npos)
-            {
-                std::cerr << "Error: No headers found!" << std::endl;
-                exit (55);;
-            }
-
-            std::string headers = buffer.substr(0, pos);
-            buffer = buffer.substr(pos + 4);
-
-            size_t boundary_pos = headers.find("boundary=");
-            if (boundary_pos == std::string::npos)
-            {
-                std::cerr << "Error: Boundary not found in headers!" << std::endl;
-                return;
-            }
-
-            boundary_pos += 9;
-            size_t boundary_end = headers.find("\r\n", boundary_pos);
-            if (boundary_end == std::string::npos)
-            {
-                std::cerr << "Error: Invalid header format!" << std::endl;
-                return;
-            }
-
-            boundary = headers.substr(boundary_pos, boundary_end - boundary_pos);
-
-            size_t first_boundary_pos = buffer.find(boundary);
-            if (first_boundary_pos != std::string::npos)
-            {
-                buffer = buffer.substr(first_boundary_pos + boundary.size() + 2);
-            }
-
-            i = 1;
+            std::cerr << "Error: No headers found!" << std::endl;
+            exit(55);
+            ;
         }
 
-        while (true)
-        {
-            int index = check_if_have_new_boundary(buffer, boundary, client);
-            if (index == -1)
-            {
-                // client.print_map();
-                // std::cout << "Request done or no boundary found." << std::endl;
-                return;
-            }
-            else if (index == 0)
-                buffer = buffer.substr(boundary.size() + 4);
-            else
-            {
-                tmp = buffer.substr(0, index - 2);
-                buffer = buffer.substr(index);
-                fill_data_boudary(tmp, file , client);
-            }
-        }
-    }
+        std::string headers = buffer.substr(0, pos);
+        buffer = buffer.substr(pos + 4);
 
-    void handleClient(int client_fd, Client &client)
-    {
-        char request[1000];
-        memset(request, 0, 1000);
-        ssize_t bytes_received = 0;
-        std::ifstream fileStream;
-        Request req;
-        Response res;
-        std::string response;
-
-        client.set_response(res);
-        res.set_fileStream(fileStream);
-        res.set_response(response);
-        client.set_request(req);
-        while ((bytes_received = recv(client_fd, request, 1000, 0)) > 0)
+        size_t boundary_pos = headers.find("boundary=");
+        if (boundary_pos == std::string::npos)
         {
-            std::string tmp(request, bytes_received);
-            req.set_s_request(tmp);
-            // check_request(client);
-            boundary(client);
-            memset(request, 0, 1000);
-            // if (client.get_request().get_request_end()){
-            //     std::cout << "here";
-            //     break ;
-            // }
-        }
-        if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1)
-        {
-            std::cerr << "Failed to send headers: " << strerror(errno) << std::endl;
+            std::cerr << "Error: Boundary not found in headers!" << std::endl;
             return;
         }
 
-        char send_buffer[8192];
-        size_t total_sent = 0;
-
-        while (fileStream.good() && !fileStream.eof())
+        boundary_pos += 9;
+        size_t boundary_end = headers.find("\r\n", boundary_pos);
+        if (boundary_end == std::string::npos)
         {
-            fileStream.read(send_buffer, sizeof(send_buffer));
-            size_t bytes_read = fileStream.gcount();
-            if (bytes_read == 0)
-                break;
-
-            size_t bytes_sent = 0;
-            while (bytes_sent < bytes_read)
-            {
-                ssize_t result = send(client_fd, send_buffer + bytes_sent, bytes_read - bytes_sent, 0);
-
-                if (result <= 0)
-                {
-                    fileStream.close();
-                    return;
-                }
-
-                bytes_sent += result;
-                total_sent += result;
-            }
+            std::cerr << "Error: Invalid header format!" << std::endl;
+            return;
         }
 
-        fileStream.close();
+        boundary = headers.substr(boundary_pos, boundary_end - boundary_pos);
+
+        size_t first_boundary_pos = buffer.find(boundary);
+        if (first_boundary_pos != std::string::npos)
+        {
+            buffer = buffer.substr(first_boundary_pos + boundary.size() + 2);
+        }
+
+        i = 1;
     }
 
-    int main()
+    while (true)
     {
-        int server_fd = -1;
-        struct sockaddr_in server_addr;
-        Client client;
-
-        if (!setupSocket(server_fd, server_addr))
+        int index = check_if_have_new_boundary(buffer, boundary, client);
+        if (index == -1)
         {
-            return 1;
+            // client.print_map();
+            // std::cout << "Request done or no boundary found." << std::endl;
+            return;
         }
-
-        std::cout << "Server listening on port " << PORT << "...\n";
-
-        while (true)
+        else if (index == 0)
+            buffer = buffer.substr(boundary.size() + 4);
+        else
         {
-            struct sockaddr_in client_addr;
-            socklen_t client_addr_len = sizeof(client_addr);
+            tmp = buffer.substr(0, index - 2);
+            buffer = buffer.substr(index);
+            fill_data_boudary(tmp, client);
+        }
+    }
+}
 
-            int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
-            if (client_fd == -1)
+void handleClient(int client_fd, Client &client)
+{
+    char request[1000];
+    memset(request, 0, 1000);
+    ssize_t bytes_received = 0;
+    std::ifstream fileStream;
+    Request req;
+    Response res;
+    std::string response;
+
+    client.set_response(res);
+    res.set_fileStream(fileStream);
+    res.set_response(response);
+    client.set_request(req);
+    while ((bytes_received = recv(client_fd, request, 1000, 0)) > 0)
+    {
+        std::string tmp(request, bytes_received);
+        req.set_s_request(tmp);
+        // check_request(client);
+        boundary(client);
+        memset(request, 0, 1000);
+        // if (client.get_request().get_request_end()){
+        //     std::cout << "here";
+        //     break ;
+        // }
+    }
+    if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1)
+    {
+        std::cerr << "Failed to send headers: " << strerror(errno) << std::endl;
+        return;
+    }
+
+    char send_buffer[8192];
+    size_t total_sent = 0;
+
+    while (fileStream.good() && !fileStream.eof())
+    {
+        fileStream.read(send_buffer, sizeof(send_buffer));
+        size_t bytes_read = fileStream.gcount();
+        if (bytes_read == 0)
+            break;
+
+        size_t bytes_sent = 0;
+        while (bytes_sent < bytes_read)
+        {
+            ssize_t result = send(client_fd, send_buffer + bytes_sent, bytes_read - bytes_sent, 0);
+
+            if (result <= 0)
             {
-                std::cerr << "Accept failed: " << strerror(errno) << std::endl;
-                continue;
+                fileStream.close();
+                return;
             }
 
-            int flag = 1;
-            setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-
-            handleClient(client_fd, client);
-            close(client_fd);
+            bytes_sent += result;
+            total_sent += result;
         }
-        close(server_fd);
-        return 0;
     }
+
+    fileStream.close();
+}
+
+int main()
+{
+    int server_fd = -1;
+    struct sockaddr_in server_addr;
+    Client client;
+
+    if (!setupSocket(server_fd, server_addr))
+    {
+        return 1;
+    }
+
+    std::cout << "Server listening on port " << PORT << "...\n";
+
+    while (true)
+    {
+        struct sockaddr_in client_addr;
+        socklen_t client_addr_len = sizeof(client_addr);
+
+        int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+        if (client_fd == -1)
+        {
+            std::cerr << "Accept failed: " << strerror(errno) << std::endl;
+            continue;
+        }
+
+        int flag = 1;
+        setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
+
+        handleClient(client_fd, client);
+        close(client_fd);
+    }
+    close(server_fd);
+    return 0;
+}
