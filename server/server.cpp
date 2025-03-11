@@ -198,50 +198,24 @@ void Server::handleClientWrite(size_t index)
 {
     Client& client = this->Clients[index - 1];
     int client_fd = this->pollfds[index].fd;
-    
+
     std::string response = client.get_response().get_response();
-    // std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
     std::ifstream &fileStream = client.get_response().get_fileStream();
-    // std::string file ;
-    
-    // Send headers
-    ssize_t sent = send(client_fd, response.c_str(), response.length(), 0);
-    if (sent < 0)
+    send(client_fd, response.c_str(), response.length(), 0);
+    while (1)
     {
-        std::cerr << "Send error: " << strerror(errno) << std::endl;
-        closeClientConnection(index);
-        return;
-    }
-
-    // If file exists, send file contents
-    if (fileStream.is_open())
-    {
-        // std::cout << "here" << std::endl;
-        char file_buffer[1024];
-        while (fileStream.read(file_buffer, sizeof(file_buffer) -1))
+        if (fileStream.is_open())
         {
-            ssize_t bytes_sent = send(client_fd, file_buffer, fileStream.gcount(), 0);
-            if (bytes_sent < 0)
+            char buffer[1024] = {0};
+            fileStream.read(buffer, sizeof(buffer));
+            if (fileStream.eof())
             {
-                std::cerr << "File send error: " << strerror(errno) << std::endl;
-                closeClientConnection(index);
-                return;
+                fileStream.close();
+                break;
             }
+            send(client_fd, buffer, fileStream.gcount(), 0);
         }
-        // Send any remaining bytes
-        if (fileStream.gcount() > 0)
-        {
-            ssize_t bytes_sent = send(client_fd, file_buffer, fileStream.gcount(), 0);
-            if (bytes_sent < 0)
-            {
-                std::cerr << "Final file send error: " << strerror(errno) << std::endl;
-                closeClientConnection(index);
-                return;
-            }
-        }
-        fileStream.close();
     }
-
     // Close connection if not keep-alive
     if (!client.get_Alive())
     {
