@@ -4,12 +4,13 @@ SRC = request/request.cpp \
 	  request/tools.cpp \
 	  c_tools/tools.cpp \
 	  client/client.cpp \
+	  server/server.cpp \
 	  main.cpp
 
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv
 HEDER = request/request.hpp
-CFLAGS =  -Wall -Wextra -Werror -std=c++98
+CFLAGS =  -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 
 all : $(NAME)
 

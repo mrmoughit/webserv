@@ -26,6 +26,8 @@ void Response::set_response_index(bool index){
 
 Response::~Response(){};
 Response::Response(){
+    fileStream = new std::ifstream();
+    response = "";
     Ready_to_send = false;
 };
 

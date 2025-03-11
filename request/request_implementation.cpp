@@ -135,23 +135,23 @@ void check_request(Client & client){
     if (client.get_request().get_method() == "GET")
         response_to_get(client);
     
-    else if (client.get_request().get_method() == "POST"){
-        std::string check = client.get_request().get_map_values("Content-Type");
-        size_t pos = check.find("boundary=");
-        if (pos != std::string::npos){
-            // boundary(client);
-            return ;
-        }
-        check = client.get_request().get_map_values("Transfer-Encoding");
-        trim_non_printable(check);
-        if (check == " chunked"){
-            chunked(client);
-            return ;
-        }
+    // else if (client.get_request().get_method() == "POST"){
+    //     std::string check = client.get_request().get_map_values("Content-Type");
+    //     size_t pos = check.find("boundary=");
+    //     if (pos != std::string::npos){
+    //         // boundary(client);
+    //         return ;
+    //     }
+    //     check = client.get_request().get_map_values("Transfer-Encoding");
+    //     trim_non_printable(check);
+    //     if (check == " chunked"){
+    //         chunked(client);
+    //         return ;
+    //     }
 
-        hanlde_post_request(client);
-        return ;
-    }
+    //     hanlde_post_request(client);
+    //     return ;
+    // }
 
 }
 

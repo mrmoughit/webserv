@@ -20,6 +20,7 @@
 #include "response/response.hpp"
 #include "request/request.hpp"
 #include "client/client.hpp"
+#include "server/server.hpp"
 
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);
