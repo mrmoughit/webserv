@@ -2,17 +2,17 @@
 
 // #define PORT 4444
 
-// void trim_non_printable(std::string &str)
-// {
-//     size_t start = 0;
-//     while (start < str.length() && !std::isprint(str[start]))
-//         ++start;
+void trim_non_printable(std::string &str)
+{
+    size_t start = 0;
+    while (start < str.length() && !std::isprint(str[start]))
+        ++start;
 
-//     size_t end = str.length();
-//     while (end > start && !std::isprint(str[end - 1]))
-//         --end;
-//     str = str.substr(start, end - start);
-// }
+    size_t end = str.length();
+    while (end > start && !std::isprint(str[end - 1]))
+        --end;
+    str = str.substr(start, end - start);
+}
 
 // bool setupSocket(int &server_fd, struct sockaddr_in &server_addr)
 // {
@@ -51,255 +51,276 @@
 // }
 
 // /// /////////////////////////// chanked
-// static int size = 0;
-// static int writed = 0;
-// std::ofstream file1;
+static int size = 0;
+static int writed = 0;
+std::ofstream file1;
 
-// int hex_to_int(const std::string &hexStr)
-// {
-//     int result = 0;
-//     for (size_t i = 0; i < hexStr.length(); ++i)
-//     {
-//         char c = hexStr[i];
-//         if (c >= '0' && c <= '9')
-//             result = result * 16 + (c - '0');
-//         else if (c >= 'a' && c <= 'f')
-//             result = result * 16 + (c - 'a' + 10);
-//         else if (c >= 'A' && c <= 'F')
-//             result = result * 16 + (c - 'A' + 10);
-//     }
-//     return result;
-// }
+int hex_to_int(const std::string &hexStr)
+{
+    int result = 0;
+    for (size_t i = 0; i < hexStr.length(); ++i)
+    {
+        char c = hexStr[i];
+        if (c >= '0' && c <= '9')
+            result = result * 16 + (c - '0');
+        else if (c >= 'a' && c <= 'f')
+            result = result * 16 + (c - 'a' + 10);
+        else if (c >= 'A' && c <= 'F')
+            result = result * 16 + (c - 'A' + 10);
+    }
+    return result;
+}
 
-// void chunked(Client &client)
-// {
-//     static int d;
-//     if (!d)
-//     {
-//         file1.open("file.pm4");
-//         d = 9;
-//     }
-//     std::cout << "ok" << std::endl;
-//     std::string request = client.get_request().get_s_request();
-//     size_t i = 0;
-//     std::string chunk_size;
+void chunked(Client &client)
+{
+    static int d;
+    if (!d)
+    {
+        file1.open("file.pm4");
+        d = 9;
+    }
+    std::cout << "ok" << std::endl;
+    std::string request = client.get_request().get_s_request();
+    size_t i = 0;
+    std::string chunk_size;
 
-//     const int get_chunk_size = 0;
-//     const int read_from_chunk = 1;
-//     const int chunk_end = 2;
-//     int state;
-//     if (size == 0)
-//         state = get_chunk_size;
-//     else
-//         state = read_from_chunk;
+    const int get_chunk_size = 0;
+    const int read_from_chunk = 1;
+    const int chunk_end = 2;
+    int state;
+    if (size == 0)
+        state = get_chunk_size;
+    else
+        state = read_from_chunk;
 
-//     while (i < request.length())
-//     {
-//         if (state == get_chunk_size)
-//         {
-//             if (request[i] == '\r' && i + 1 < request.length() && request[i + 1] == '\n')
-//             {
-//                 size = hex_to_int(chunk_size);
-//                 chunk_size = "";
-//                 i += 2;
+    while (i < request.length())
+    {
+        if (state == get_chunk_size)
+        {
+            if (request[i] == '\r' && i + 1 < request.length() && request[i + 1] == '\n')
+            {
+                size = hex_to_int(chunk_size);
+                chunk_size = "";
+                i += 2;
 
-//                 if (size == 0)
-//                     break;
-//                 state = read_from_chunk;
-//                 writed = 0;
-//             }
-//             else
-//             {
-//                 chunk_size += request[i];
-//                 i++;
-//             }
-//         }
-//         else if (state == read_from_chunk)
-//         {
-//             file1 << request[i] << std::flush;
-//             i++;
-//             writed++;
+                if (size == 0)
+                    break;
+                state = read_from_chunk;
+                writed = 0;
+            }
+            else
+            {
+                chunk_size += request[i];
+                i++;
+            }
+        }
+        else if (state == read_from_chunk)
+        {
+            file1 << request[i] << std::flush;
+            i++;
+            writed++;
 
-//             if (writed >= size)
-//                 state = chunk_end;
-//         }
-//         else if (state == chunk_end)
-//         {
-//             if (request[i] == '\r' && i + 1 < request.length() && request[i + 1] == '\n')
-//             {
-//                 i += 2;
-//                 state = get_chunk_size;
-//             }
-//             else
-//             {
-//                 std::cerr << "the chunk data must be end by \r\n"
-//                           << std::endl;
-//                 exit(0);
-//             }
-//         }
-//     }
-// }
+            if (writed >= size)
+                state = chunk_end;
+        }
+        else if (state == chunk_end)
+        {
+            if (request[i] == '\r' && i + 1 < request.length() && request[i + 1] == '\n')
+            {
+                i += 2;
+                state = get_chunk_size;
+            }
+            else
+            {
+                std::cerr << "the chunk data must be end by \r\n"
+                          << std::endl;
+                exit(0);
+            }
+        }
+    }
+}
 
-// int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client &client)
-// {
-//     boundary = "--" + boundary;
-//     size_t pos = buffer.find(boundary);
+int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client &client)
+{
+    boundary = "--" + boundary;
+    size_t pos = buffer.find(boundary);
 
-//     if (pos == std::string::npos)
-//         return -1;
+    if (pos == std::string::npos)
+        return -1;
 
-//     size_t last_Boundary = pos + boundary.size();
+    size_t last_Boundary = pos + boundary.size();
 
-//     if (last_Boundary + 2 < buffer.size() &&
-//         buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
-//     {
-//         client.get_request().set_request_end(true);
-//     }
+    if (last_Boundary + 2 < buffer.size() &&
+        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
+    {
+        client.get_request().set_request_end(true);
+    }
 
-//     return static_cast<int>(pos);
-// }
+    return static_cast<int>(pos);
+}
 
-// void fill_data_boudary(const std::string &tmp, Client &clinet)
-// {
-//     std::istringstream ss(tmp);
-//     std::string line;
-//     std::ofstream file;
+void fill_data_boudary(const std::string &tmp, Client &clinet)
+{
+    std::istringstream ss(tmp);
+    std::string line;
+    std::ofstream file;
 
-//     std::getline(ss, line);
+    std::getline(ss, line);
 
-//     std::string key;
-//     // std::cout << line << std::endl;
-//     if (line.find("Content-Disposition:") != std::string::npos)
-//     {
-//         size_t name_pos = line.find("name=\"");
-//         if (name_pos != std::string::npos)
-//         {
-//             size_t name_start = name_pos + 6;
-//             size_t name_end = line.find("\"", name_start);
-//             if (name_end != std::string::npos)
-//             {
-//                 key = line.substr(name_start, name_end - name_start);
-//                 // std::cout << "Extracted key: " << key << std::endl;
-//             }
-//             else
-//             {
-//                 std::cerr << "Invalid boundary format 1" << std::endl;
-//                 return;
-//             }
-//             size_t filename_pos = line.find("filename=\"");
-//             if (filename_pos != std::string::npos)
-//             {
-//                 filename_pos += 10;
-//                 size_t file_name_end = line.find("\"", filename_pos);
-//                 if (file_name_end == std::string::npos)
-//                 {
-//                     std::cout << "error" << std::endl;
-//                     exit(55);
-//                 }
-//                 std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
-//                 file.open(filename.c_str());
-//                 std::getline(ss, line);
-//                 std::getline(ss, line);
-//                 while (1)
-//                 {
-//                     char c;
-//                     line = "";
-//                     while (ss.get(c))
-//                         line += c;
-//                     if (line.empty())
-//                         break;
-//                     file << line << std::flush;
-//                 }
-//                 // exit(0);
-//             }
-//             std::getline(ss, line);
-//             while (1)
-//             {
-//                 char c;
-//                 line = "";
-//                 while (ss.get(c))
-//                 {
-//                     line += c;
-//                 }
-//                 if (line.empty())
-//                     break;
-//                 clinet.fill_map(key, line);
-//             }
-//         }
-//         else
-//         {
-//             std::cerr << "Invalid boundary format 3" << std::endl;
-//             return;
-//         }
-//     }
-// }
+    std::string key;
+    // std::cout << line << std::endl;
+    if (line.find("Content-Disposition:") != std::string::npos)
+    {
+        size_t name_pos = line.find("name=\"");
+        if (name_pos != std::string::npos)
+        {
+            size_t name_start = name_pos + 6;
+            size_t name_end = line.find("\"", name_start);
+            if (name_end != std::string::npos)
+            {
+                key = line.substr(name_start, name_end - name_start);
+                // std::cout << "Extracted key: " << key << std::endl;
+            }
+            else
+            {
+                std::cerr << "Invalid boundary format 1" << std::endl;
+                return;
+            }
+            size_t filename_pos = line.find("filename=\"");
+            if (filename_pos != std::string::npos)
+            {
+                filename_pos += 10;
+                size_t file_name_end = line.find("\"", filename_pos);
+                if (file_name_end == std::string::npos)
+                {
+                    std::cout << "error" << std::endl;
+                    exit(55);
+                }
+                std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
+                file.open(filename.c_str());
+                std::getline(ss, line);
+                std::getline(ss, line);
+                while (1)
+                {
+                    char c;
+                    line = "";
+                    while (ss.get(c))
+                        line += c;
+                    if (line.empty())
+                        break;
+                    file << line << std::flush;
+                }
+                // exit(0);
+            }
+            std::getline(ss, line);
+            while (1)
+            {
+                char c;
+                line = "";
+                while (ss.get(c))
+                {
+                    line += c;
+                }
+                if (line.empty())
+                    break;
+                clinet.fill_map(key, line);
+            }
+        }
+        else
+        {
+            std::cerr << "Invalid boundary format 3" << std::endl;
+            return;
+        }
+    }
+}
 
-// void boundary(Client &client)
-// {
-//     static std::string buffer;
-//     static int i = 0;
-//     static std::string boundary;
-//     std::string tmp;
+void boundary(Client &client)
+{
+    static std::string buffer;
+    static int i = 0;
+    static std::string boundary;
+    std::string tmp;
 
-//     buffer += client.get_request().get_s_request();
-//     if (i == 0)
-//     {
-//         size_t pos = buffer.find("\r\n\r\n");
-//         if (pos == std::string::npos)
-//         {
-//             std::cerr << "Error: No headers found!" << std::endl;
-//             exit(55);
-//             ;
-//         }
+    buffer += client.get_request().get_s_request();
 
-//         std::string headers = buffer.substr(0, pos);
-//         buffer = buffer.substr(pos + 4);
+    if (i == 0)
+    {
+        // size_t pos = buffer.find("\r\n\r\n");
+        // if (pos == std::string::npos)
+        // {
+        //     std::cerr << "Error: No headers found!" << std::endl;
+        //     exit(55);
+        // }
 
-//         size_t boundary_pos = headers.find("boundary=");
-//         if (boundary_pos == std::string::npos)
-//         {
-//             std::cerr << "Error: Boundary not found in headers!" << std::endl;
-//             return;
-//         }
 
-//         boundary_pos += 9;
-//         size_t boundary_end = headers.find("\r\n", boundary_pos);
-//         if (boundary_end == std::string::npos)
-//         {
-//             std::cerr << "Error: Invalid header format!" << std::endl;
-//             return;
-//         }
 
-//         boundary = headers.substr(boundary_pos, boundary_end - boundary_pos);
+        // std::string headers = buffer.substr(0, pos);
+        // buffer = buffer.substr(pos + 4);
 
-//         size_t first_boundary_pos = buffer.find(boundary);
-//         if (first_boundary_pos != std::string::npos)
-//         {
-//             buffer = buffer.substr(first_boundary_pos + boundary.size() + 2);
-//         }
+        // size_t boundary_pos = headers.find("boundary=");
+        // if (boundary_pos == std::string::npos)
+        // {
+        //     std::cerr << "Error: Boundary not found in headers!" << std::endl;
+        //     return;
+        // }
 
-//         i = 1;
-//     }
+        // boundary_pos += 9;
+        // size_t boundary_end = headers.find("\r\n", boundary_pos);
+        // if (boundary_end == std::string::npos)
+        // {
+        //     std::cerr << "Error: Invalid header format!" << std::endl;
+        //     return;
+        // }
 
-//     while (true)
-//     {
-//         int index = check_if_have_new_boundary(buffer, boundary, client);
-//         if (index == -1)
-//         {
-//             // client.print_map();
-//             // std::cout << "Request done or no boundary found." << std::endl;
-//             return;
-//         }
-//         else if (index == 0)
-//             buffer = buffer.substr(boundary.size() + 4);
-//         else
-//         {
-//             tmp = buffer.substr(0, index - 2);
-//             buffer = buffer.substr(index);
-//             fill_data_boudary(tmp, client);
-//         }
-//     }
-// }
+        // boundary = headers.substr(boundary_pos, boundary_end - boundary_pos);
+
+        // size_t first_boundary_pos = buffer.find(boundary);
+        // if (first_boundary_pos != std::string::npos)
+        // {
+        //     buffer = buffer.substr(first_boundary_pos + boundary.size() + 2);
+        // }
+
+        std::istringstream ss(buffer);
+        std::getline(ss , boundary);
+        // std::cout << boundary;
+        size_t pos = boundary.find_first_not_of("-");
+        if (pos == std::string::npos)
+        {
+            std::cout << "error ";
+            exit (55);
+        }
+        boundary = boundary.substr(pos);
+        
+        pos = buffer.find("\r\n");
+        if (pos == std::string::npos)
+        {
+            std::cout << "error ";
+            exit (55);
+        }
+        buffer = buffer.substr(pos);
+        i = 1;
+    }
+    
+    while (true)
+    {
+        std::cout << "here" << std::endl;
+        int index = check_if_have_new_boundary(buffer, boundary, client);
+        if (index == -1)
+        {
+            // client.print_map();
+            // std::cout << "Request done or no boundary found." << std::endl;
+            return;
+        }
+        else if (index == 0)
+            buffer = buffer.substr(boundary.size() + 4);
+        else
+        {
+            tmp = buffer.substr(0, index - 2);
+            buffer = buffer.substr(index);
+            fill_data_boudary(tmp, client);
+        }
+    }
+}
 
 // void handleClient(int client_fd, Client &client)
 // {

@@ -130,28 +130,35 @@ void parse_request(Client &client)
 void check_request(Client & client){
     if (!client.get_request().get_parse_index())
         parse_request(client);
+    
     if (client.get_response().get_response_index())
         return ;
     if (client.get_request().get_method() == "GET")
         response_to_get(client);
     
-    // else if (client.get_request().get_method() == "POST"){
-    //     std::string check = client.get_request().get_map_values("Content-Type");
-    //     size_t pos = check.find("boundary=");
-    //     if (pos != std::string::npos){
-    //         // boundary(client);
-    //         return ;
-    //     }
-    //     check = client.get_request().get_map_values("Transfer-Encoding");
-    //     trim_non_printable(check);
-    //     if (check == " chunked"){
-    //         chunked(client);
-    //         return ;
-    //     }
+    else if (client.get_request().get_method() == "POST"){
+        std::string res = "HTTP/1.1 200 Ok\r\nContent-Type: text/html\r\n\r\n\
+        <html><head><title>200 Ok</title></head><body><center><h1>200 Ok</h1></center>\
+        <hr><center>42 webserv 0.1</center></body></html>";
 
-    //     hanlde_post_request(client);
-    //     return ;
-    // }
+
+        client.get_response().set_response(res);
+        std::string check = client.get_request().get_map_values("Content-Type");
+        size_t pos = check.find("boundary=");
+        if (pos != std::string::npos){
+            boundary(client);
+            return ;
+        }
+        check = client.get_request().get_map_values("Transfer-Encoding");
+        trim_non_printable(check);
+        if (check == " chunked"){
+            chunked(client);
+            return ;
+        }
+
+        hanlde_post_request(client);
+        return ;
+    }
 
 }
 

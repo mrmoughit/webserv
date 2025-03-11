@@ -40,6 +40,6 @@ void response_to_get(Client &client);
 
 
 
-// void boundary(Client &clinet);
+void boundary(Client &clinet);
 void chunked(Client &client);
 void trim_non_printable(std::string &str);

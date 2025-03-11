@@ -11,8 +11,8 @@ Client::Client(int fd, struct sockaddr_in Add)
     Client_Addr = Add;
     keep_alive = false;
     all_recv = false;
-    std::cout << "Client created with fd: " << client_id << std::endl;
-    std::cout << "Client created with req: " << request_object << std::endl;
+    // std::cout << "Client created with fd: " << client_id << std::endl;
+    // std::cout << "Client created with req: " << request_object << std::endl;
 }
 
 int  Client::get_client_id(){
