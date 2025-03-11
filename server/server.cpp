@@ -182,7 +182,7 @@ void Server::handleClientRead(size_t index)
 
     // Set request data
     this->Clients[index - 1].get_request().set_s_request(req);
-    std::cout << "Request2: " << this->Clients[index - 1].get_request().get_s_request() << std::endl;
+    // std::cout << "Request2: " << this->Clients[index - 1].get_request().get_s_request() << std::endl;
     check_request(this->Clients[index - 1]);
 
 
@@ -198,60 +198,50 @@ void Server::handleClientWrite(size_t index)
 {
     Client& client = this->Clients[index - 1];
     int client_fd = this->pollfds[index].fd;
-    
-    std::string response = client.get_response().get_response();
-    // std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello World!";
-    std::ifstream &fileStream = client.get_response().get_fileStream();
-    // std::string file ;
-    
-    // Send headers
-    ssize_t sent = send(client_fd, response.c_str(), response.length(), 0);
-    if (sent < 0)
+    // std::string response = client.get_response().get_response();
+    // std::cout << "respose :\n" << response << std::endl;
+    ssize_t bytes_sent = send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0);
+    if (bytes_sent < 0)
     {
         std::cerr << "Send error: " << strerror(errno) << std::endl;
         closeClientConnection(index);
         return;
     }
+    char buffer[8192];
+    size_t total_sent = 0;
 
-    // If file exists, send file contents
-    if (fileStream.is_open())
+    while (client.get_response().get_fileStream().good() && !client.get_response().get_fileStream().eof())
     {
-        // std::cout << "here" << std::endl;
-        char file_buffer[1024];
-        while (fileStream.read(file_buffer, sizeof(file_buffer) -1))
+        std::cout << "heeeere" << std::endl;
+        client.get_response().get_fileStream().read(buffer, sizeof(buffer));
+        size_t bytes_read = client.get_response().get_fileStream().gcount();
+        if (bytes_read == 0)
+            break;
+        size_t bytes_sent = 0;
+        while (bytes_sent < bytes_read)
         {
-            ssize_t bytes_sent = send(client_fd, file_buffer, fileStream.gcount(), 0);
-            if (bytes_sent < 0)
-            {
-                std::cerr << "File send error: " << strerror(errno) << std::endl;
-                closeClientConnection(index);
-                return;
-            }
-        }
-        // Send any remaining bytes
-        if (fileStream.gcount() > 0)
-        {
-            ssize_t bytes_sent = send(client_fd, file_buffer, fileStream.gcount(), 0);
-            if (bytes_sent < 0)
-            {
-                std::cerr << "Final file send error: " << strerror(errno) << std::endl;
-                closeClientConnection(index);
-                return;
-            }
-        }
-        fileStream.close();
-    }
+            ssize_t result = send(client_fd, buffer + bytes_sent, bytes_read - bytes_sent, 0);
 
+            if (result <= 0)
+            {
+                client.get_response().get_fileStream().close();
+                return;
+            }
+
+            bytes_sent += result;
+            total_sent += result;
+        }
+    }
     // Close connection if not keep-alive
-    if (!client.get_Alive())
-    {
-        closeClientConnection(index);
-    }
-    else
-    {
-        // Reset for next request
-        this->pollfds[index].events = POLLIN;
-    }
+    // if (!client.get_Alive())
+    // {
+    //     closeClientConnection(index);
+    // }
+    // else
+    // {
+    //     // Reset for next request
+    //     this->pollfds[index].events = POLLIN;
+    // }
 }
 
 void Server::closeClientConnection(size_t index)
