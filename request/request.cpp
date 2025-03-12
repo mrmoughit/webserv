@@ -4,8 +4,6 @@
 Request::Request()
 {
     index = false;
-    request_end = false;
-    // s_request = NULL;
 };
 Request::~Request() {};
 
@@ -54,15 +52,6 @@ void Request::set_version(std::string &name)
 bool Request::get_parse_index(){
     return index;
 }
-
-bool Request::get_request_end(){
-    return request_end;
-}
-
-void Request::set_request_end(bool index){
-    request_end = index;
-}
-
 
 void Request::set_parse_index(bool index){
     this->index = index;
@@ -153,24 +142,24 @@ std::string Request::get_map_values(std::string key)
     return "NULL";
 }
 
-size_t Request::get_length()
-{
-    return length;
-}
-void Request::set_length(size_t len)
-{
-    length = len;
-}
+// size_t Request::get_length()
+// {
+//     return length;
+// }
+// void Request::set_length(size_t len)
+// {
+//     length = len;
+// }
 
-int Request::get_bodyStart()
-{
-    return BodyStart;
-}
+// int Request::get_bodyStart()
+// {
+//     return BodyStart;
+// }
 
-void Request::set_bodyStart(int pos)
-{
-    BodyStart = pos;
-}
+// void Request::set_bodyStart(int pos)
+// {
+//     BodyStart = pos;
+// }
 
 bool out_root_dir(std::string &pa, std::string &res)
 {
@@ -224,22 +213,6 @@ bool is_upper(std::string line)
     return true;
 }
 
-std::string get_file_ex(std::string name){
-    std::string str = "bat";
-    if (name == "ation/pdf")
-        str = "file.pdf";
-    else if (name == "mp4")
-        str = "file.mp4";
-    else if (name == "png")
-        str = "file.png";
-    else if (name == "jpg")
-        str = "file.jpg";
-    else if (name == "jpeg")
-        str = "file.jpeg";
-    return str;
-}
-
-
 
 
 std::ofstream file; 
@@ -250,21 +223,11 @@ void hanlde_post_request(Client &client)
     {
         first = 10;
         std::string content_type = client.get_request().get_map_values("Content-Type");
-        std::string file_extension;
-        if (content_type.size() > 7)
-        {
-            file_extension = content_type.substr(7);
-            for (size_t i = 0; i < file_extension.size(); i++)
-            {
-                if (file_extension[i] < 32 || file_extension[i] > 126)
-                {
-                    file_extension.resize(i);
-                    break;
-                }
-            }
-        }
-        // std::cout << file_extension << std::endl;
-        std::string file_name = get_file_ex(file_extension);
+        size_t pos = content_type.find("/");
+        std::string extension = content_type.substr(pos + 1);
+        trim_non_printable(extension);
+
+        std::string file_name = "./upload/" + generate_file_names(extension);
         file.open(file_name.c_str());
         if (!file.is_open())
         {

@@ -1,6 +1,5 @@
 #include "../webserver.hpp"
 
-
 void parse_request(Client &client)
 {
     client.get_request().set_parse_index(true);
@@ -11,7 +10,8 @@ void parse_request(Client &client)
     std::string line;
 
     size_t bodyStart = requestData.find("\r\n\r\n");
-    if (bodyStart == std::string::npos){
+    if (bodyStart == std::string::npos)
+    {
         get_error_res(res, 400);
         client.get_response().set_response_index(true);
         std::cout << "ha wahd l error";
@@ -19,33 +19,29 @@ void parse_request(Client &client)
     }
     std::string new_request = requestData.substr(bodyStart + 4);
     client.get_request().set_s_request(new_request);
-    requestData = requestData.substr(0 , bodyStart + 4);
-
-
-
+    requestData = requestData.substr(0, bodyStart + 4);
 
     std::istringstream requestLine(requestData);
     std::getline(requestLine, line);
     std::istringstream Line(line);
 
-
-    if (!check_request_line(line)){
+    if (!check_request_line(line))
+    {
         get_error_res(res, 400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
-        return ;
+        return;
     }
 
     std::string method, path, version, error;
     Line >> method >> path >> version >> error;
-
 
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
     {
         get_error_res(res, 400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
-        return ;
+        return;
     }
 
     client.get_request().set_method(method);
@@ -58,17 +54,15 @@ void parse_request(Client &client)
         {
             get_error_res(res, 400);
             client.get_response().set_response_index(true);
-            return ;
+            return;
         }
         else
         {
             get_error_res(res, 405);
             client.get_response().set_response_index(true);
-            return ;
+            return;
         }
     }
-
-
 
     // if (client.get_request().get_method() == "POST"){
     //     if (client.get_request().fill_headers_map(requestStream, res) == 0){
@@ -85,8 +79,6 @@ void parse_request(Client &client)
     //     return ;
     // }
 
-
-    
     if (client.get_request().get_version() != "HTTP/1.1")
     {
         if (strncmp(client.get_request().get_version().c_str(), "HTTP/", 5) > 0)
@@ -94,16 +86,15 @@ void parse_request(Client &client)
             get_error_res(res, 400);
             client.get_response().set_response(res);
             client.get_response().set_response_index(true);
-            return ;
+            return;
         }
         else
         {
             get_error_res(res, 505);
             client.get_response().set_response_index(true);
-            return ;
+            return;
         }
     }
-
 
     std::string pa = client.get_request().get_path();
     if (pa[0] != '/')
@@ -111,55 +102,55 @@ void parse_request(Client &client)
         get_error_res(res, 400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
-        return ;
+        return;
     }
     pa = removeslashes(pa);
-    if (!out_root_dir(pa, res)){
+    if (!out_root_dir(pa, res))
+    {
         client.get_response().set_response_index(true);
-        return ;
+        return;
     }
     client.get_request().set_path(pa);
-    if (client.get_request().fill_headers_map(requestLine, res) == 0){
+    if (client.get_request().fill_headers_map(requestLine, res) == 0)
+    {
         client.get_response().set_response_index(true);
-        return ;
+        return;
     }
-    
 }
 
-
-void check_request(Client & client){
+void check_request(Client &client)
+{
     if (!client.get_request().get_parse_index())
         parse_request(client);
-    
+
     if (client.get_response().get_response_index())
-        return ;
+        return;
     if (client.get_request().get_method() == "GET")
         response_to_get(client);
-    
-    else if (client.get_request().get_method() == "POST"){
-        std::string res = "HTTP/1.1 200 Ok\r\nContent-Type: text/html\r\n\r\n\
-        <html><head><title>200 Ok</title></head><body><center><h1>200 Ok</h1></center>\
-        <hr><center>42 webserv 0.1</center></body></html>";
 
-
+    else if (client.get_request().get_method() == "POST")
+    {
+        std::string res = "HTTP/1.1 200 File uploaded succesfuly \r\nContent-Type: text/html\r\n\r\n\
+            <html><head><title>200 File uploaded succesfuly </title></head><body><center><h1>200 File uploaded succesfuly </h1></center>\
+            <hr><center>42 webserv 0.1</center></body></html>";
         client.get_response().set_response(res);
+
         std::string check = client.get_request().get_map_values("Content-Type");
         size_t pos = check.find("boundary=");
-        if (pos != std::string::npos){
+        if (pos != std::string::npos)
+        {
             boundary(client);
-            return ;
+            return;
         }
         check = client.get_request().get_map_values("Transfer-Encoding");
         trim_non_printable(check);
-        if (check == " chunked"){
+        if (check == " chunked")
+        {
             chunked(client);
-            return ;
+            return;
         }
 
         hanlde_post_request(client);
-        return ;
+        return;
     }
-
 }
-
-
