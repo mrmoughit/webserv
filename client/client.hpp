@@ -12,7 +12,8 @@ class Client{
         bool keep_alive;
         bool all_recv;
         
-    public:
+        public:
+
         void set_client_id(int fd);
         int get_client_id();
         Request  & get_request();
@@ -31,5 +32,5 @@ class Client{
         void fill_map(std::string key , std::string value);
         void print_map();
         Client();
-        ~Client(){};
+        ~Client();
 };

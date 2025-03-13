@@ -6,8 +6,11 @@ Request::Request()
     index = false;
     request_end = false;
     // s_request = NULL;
+    is_string_req_send = false;
 };
-Request::~Request() {};
+Request::~Request() {
+
+};
 
 const std::string &Request::get_method()
 {

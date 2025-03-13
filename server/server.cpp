@@ -196,52 +196,49 @@ void Server::handleClientRead(size_t index)
 
 void Server::handleClientWrite(size_t index)
 {
+    
     Client& client = this->Clients[index - 1];
     int client_fd = this->pollfds[index].fd;
-    // std::string response = client.get_response().get_response();
-    // std::cout << "respose :\n" << response << std::endl;
-    ssize_t bytes_sent = send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0);
-    if (bytes_sent < 0)
+
+    if (client.get_request().is_string_req_send == false)
     {
-        std::cerr << "Send error: " << strerror(errno) << std::endl;
-        closeClientConnection(index);
-        return;
+        ssize_t bytes_sent = send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0);
+        if (bytes_sent < 0)
+        {
+            std::cerr << "Send error: " << strerror(errno) << std::endl;
+            closeClientConnection(index);
+            return;
+        }
+        client.get_request().is_string_req_send == true;
     }
     char buffer[8192];
     size_t total_sent = 0;
 
-    while (client.get_response().get_fileStream().good() && !client.get_response().get_fileStream().eof())
+    // send one time and keep offset for the second time
+    if (client.get_response().get_fileStream().good() && !client.get_response().get_fileStream().eof())
     {
-        std::cout << "heeeere" << std::endl;
         client.get_response().get_fileStream().read(buffer, sizeof(buffer));
         size_t bytes_read = client.get_response().get_fileStream().gcount();
         if (bytes_read == 0)
-            break;
-        size_t bytes_sent = 0;
-        while (bytes_sent < bytes_read)
         {
-            ssize_t result = send(client_fd, buffer + bytes_sent, bytes_read - bytes_sent, 0);
-
-            if (result <= 0)
-            {
-                client.get_response().get_fileStream().close();
-                return;
-            }
-
-            bytes_sent += result;
-            total_sent += result;
+            client.get_request().is_string_req_send == false;
+            return;
+        }
+        if (bytes_read < 0)
+        {
+            std::cerr << "Read error: " << strerror(errno) << std::endl;
+            closeClientConnection(index);
+            return;
+        }
+        ssize_t bytes_sent = send(client_fd, buffer, bytes_read, 0);
+        if (bytes_sent < 0)
+        {
+            std::cerr << "Send error: " << strerror(errno) << std::endl;
+            closeClientConnection(index);
+            return;
         }
     }
-    // Close connection if not keep-alive
-    // if (!client.get_Alive())
-    // {
-    //     closeClientConnection(index);
-    // }
-    // else
-    // {
-    //     // Reset for next request
-    //     this->pollfds[index].events = POLLIN;
-    // }
+
 }
 
 void Server::closeClientConnection(size_t index)

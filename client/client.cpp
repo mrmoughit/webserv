@@ -15,6 +15,14 @@ Client::Client(int fd, struct sockaddr_in Add)
     std::cout << "Client created with req: " << request_object << std::endl;
 }
 
+Client::~Client()
+{
+    client_id = -1;
+    Client_Addr = {};
+    delete request_object;
+    delete response_object;
+
+}
 int  Client::get_client_id(){
     return client_id;
 }
