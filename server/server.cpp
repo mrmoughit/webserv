@@ -1,79 +1,20 @@
-#include "../webserver.hpp"
-#include <fcntl.h>
-#include <sys/ioctl.h>
+# include "../webserver.hpp"
+# include <fcntl.h>
+# include <sys/ioctl.h>
 
-Server::Server()
-{
+Server::Server() {
     this->fd_server = createServer();
-    
     struct pollfd server_poll;
     server_poll.fd = this->fd_server;
     server_poll.events = POLLIN;
     server_poll.revents = 0;
-    
     this->pollfds.push_back(server_poll);
     this->bindServer();
     this->listenServer();
 }
 
-Server::~Server()
-{
+Server::~Server() {
     this->closeServer();
-}
-
-void Server::startServer()
-{
-    while (true)
-    {
-        int poll_count = poll(this->pollfds.data(), this->pollfds.size(), -1);
-        if (poll_count < 0)
-        {
-            std::cerr << "Poll failed: " << strerror(errno) << std::endl;
-            continue;
-        }
-        
-        // Iterate through pollfds to handle events
-        for (size_t i = 0; i < this->pollfds.size(); ++i)
-        {
-            if (this->pollfds[i].revents & POLLERR)
-            {
-                // Handle error condition
-                std::cerr << "Error on socket: " << this->pollfds[i].fd << std::endl;
-                closeClientConnection(i);
-                continue;
-            }
-
-            if (this->pollfds[i].revents & POLLIN)
-            {
-                if (this->pollfds[i].fd == this->fd_server)
-                {
-                    // New connection
-                    if (acceptClient() != 0)
-                    {
-                        std::cerr << "Failed to accept client connection" << std::endl;
-                    }
-                    
-                }
-                else 
-                {
-                    // Existing client data
-                    handleClientRead(i);
-                    this->Clients[i - 1].set_all_recv(true);
-                }
-            }
-            if ( i != 0 && this->Clients[i - 1].get_all_recv())
-            {
-                std::cout << "Ready to send response" << std::endl;
-                // Ready to send response
-                handleClientWrite(i);
-                if (this->pollfds[i].revents & POLLOUT)
-                {
-                    // Handle outgoing data
-                }
-                // check this if it is non stopping sending of data
-            }
-        }
-    }
 }
 
 int Server::createServer()
@@ -151,12 +92,49 @@ int Server::acceptClient()
     this->pollfds.push_back(new_pollfd);
     this->Clients.push_back(Client(new_socket, addr_client));
     
-    std::cout << "New client connected. Socket FD: " << new_socket << std::endl;
+    std::cout << "\033[38;5;214m" << "New client connected. Socket FD: " << new_socket << "\033[0m" << std::endl;
     return 0;
+}
+//************************************************************************************ */
+
+void Server::startServer() {
+    while (true) {
+        int poll_count = poll(this->pollfds.data(), this->pollfds.size(), -1);
+        if (poll_count < 0) {
+            std::cerr << "Poll failed: " << strerror(errno) << std::endl;
+            continue;
+        }
+
+        for (size_t i = 0; i < this->pollfds.size(); ++i) {
+            if (this->pollfds[i].revents & POLLERR) {
+                std::cerr << "Error on socket: " << this->pollfds[i].fd << std::endl;
+                closeClientConnection(i);
+                continue;
+            }
+
+            if (this->pollfds[i].revents & POLLIN) {
+                if (this->pollfds[i].fd == this->fd_server) {
+                    if (acceptClient() != 0) {
+                        std::cerr << "Failed to accept client connection" << std::endl;
+                    }
+                } else {
+                    handleClientRead(i);
+                    // Prepare to send response by switching to POLLOUT
+                    this->Clients[i - 1].set_all_recv(false);
+                    this->pollfds[i].revents = POLLOUT;
+                }
+            }
+
+            if (this->pollfds[i].revents & POLLOUT) {
+                handleClientWrite(i);
+            }
+        }
+    }
 }
 
 void Server::handleClientRead(size_t index)
 {
+    std::cout << index << std::endl;
     char buffer[1024] = {0};
     int client_fd = this->pollfds[index].fd;
     
@@ -168,7 +146,7 @@ void Server::handleClientRead(size_t index)
         // Connection closed or error
         if (bytes_read == 0)
         {
-            std::cout << "Client disconnected. Socket FD: " << client_fd << std::endl;
+            std::cout << "\033[1;31m" << "Client disconnected. Socket FD: " << client_fd << "\036[0m" << std::endl;
         }
         else 
         {
@@ -179,78 +157,73 @@ void Server::handleClientRead(size_t index)
     }
 
     std::string req(buffer, bytes_read);
-
-    // Set request data
     this->Clients[index - 1].get_request().set_s_request(req);
-    // std::cout << "Request2: " << this->Clients[index - 1].get_request().get_s_request() << std::endl;
     check_request(this->Clients[index - 1]);
-
-
-
-    // Prepare to send response
-    // if (this->Clients[index - 1].get_all_recv())
-    // {
-    //     this->pollfds[index].events = POLLOUT;
-    // }
+    this->pollfds[index].events = POLLOUT;
 }
 
-void Server::handleClientWrite(size_t index)
-{
-    
+void Server::handleClientWrite(size_t index) {
     Client& client = this->Clients[index - 1];
     int client_fd = this->pollfds[index].fd;
 
-    if (client.get_request().is_string_req_send == false)
-    {
-        ssize_t bytes_sent = send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0);
-        if (bytes_sent < 0)
-        {
+    // Send the string response if not yet sent
+    if (!client.get_request().is_string_req_send) {
+        const std::string& response = client.get_response().get_response();
+        ssize_t bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
+        if (bytes_sent < 0) {
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                return; // Retry in next POLLOUT
+            }
             std::cerr << "Send error: " << strerror(errno) << std::endl;
             closeClientConnection(index);
             return;
         }
-        client.get_request().is_string_req_send == true;
-    }
-    char buffer[8192];
-    size_t total_sent = 0;
-
-    // send one time and keep offset for the second time
-    if (client.get_response().get_fileStream().good() && !client.get_response().get_fileStream().eof())
-    {
-        client.get_response().get_fileStream().read(buffer, sizeof(buffer));
-        size_t bytes_read = client.get_response().get_fileStream().gcount();
-        if (bytes_read == 0)
-        {
-            client.get_request().is_string_req_send == false;
-            return;
-        }
-        if (bytes_read < 0)
-        {
-            std::cerr << "Read error: " << strerror(errno) << std::endl;
-            closeClientConnection(index);
-            return;
-        }
-        ssize_t bytes_sent = send(client_fd, buffer, bytes_read, 0);
-        if (bytes_sent < 0)
-        {
-            std::cerr << "Send error: " << strerror(errno) << std::endl;
-            closeClientConnection(index);
-            return;
-        }
+        client.get_request().is_string_req_send = true;
     }
 
+    // Send file content if available
+    std::ifstream& fileStream = client.get_response().get_fileStream();
+    if (fileStream.is_open() && !fileStream.eof()) {
+        char buffer[8192];
+        fileStream.read(buffer, sizeof(buffer));
+        int bytes_read = fileStream.gcount();
+
+        if (bytes_read > 0) {
+            ssize_t bytes_sent = send(client_fd, buffer, bytes_read, 0);
+            if (bytes_sent < 0) {
+                if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                    return; // Retry later
+                }
+                std::cerr << "Send error: " << strerror(errno) << std::endl;
+                closeClientConnection(index);
+                return;
+            }
+        }
+
+        if (fileStream.eof()) {
+            if (client.get_Alive())
+            {
+                // Keep connection alive; reset after file response
+                client.reset();
+                client.set_all_recv(false);
+                this->pollfds[index].events = POLLIN;
+            } else {
+                // Close connection after file response
+                closeClientConnection(index);
+                fileStream.close();
+            }
+        }
+    } else {
+        // No file to send; reset after string response
+        client.reset();
+        client.set_all_recv(false);
+        this->pollfds[index].events = POLLIN;
+    }
 }
 
 void Server::closeClientConnection(size_t index)
 {
-    Client& client = this->Clients[index - 1];
-
-    if (client.get_Alive())
-    {
-        // client.set_Alive(false);
-        // this->pollfds[index].events = POLLIN;
-        return;
-    }
+    // Client& client = this->Clients[index - 1];
     close(this->pollfds[index].fd);
     this->pollfds.erase(this->pollfds.begin() + index);
     this->Clients.erase(this->Clients.begin() + index - 1);

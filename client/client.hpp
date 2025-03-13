@@ -33,4 +33,5 @@ class Client{
         void print_map();
         Client();
         ~Client();
+        void reset();
 };

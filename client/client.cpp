@@ -9,7 +9,7 @@ Client::Client(int fd, struct sockaddr_in Add)
     response_object = new Response();
     client_id = fd;
     Client_Addr = Add;
-    keep_alive = false;
+    keep_alive = true;
     all_recv = false;
     std::cout << "Client created with fd: " << client_id << std::endl;
     std::cout << "Client created with req: " << request_object << std::endl;
@@ -17,11 +17,22 @@ Client::Client(int fd, struct sockaddr_in Add)
 
 Client::~Client()
 {
-    client_id = -1;
-    Client_Addr = {};
+    // client_id = -1;
+    // // Client_Addr = {};
+    // delete request_object;
+    // delete response_object;
+
+}
+void Client::reset() {
+    // Reset the client state
+    // client_id = -1;
+    // Client_Addr = {};
     delete request_object;
     delete response_object;
-
+    request_object = new Request();
+    response_object = new Response();
+    // keep_alive = false;
+    all_recv = false;
 }
 int  Client::get_client_id(){
     return client_id;
