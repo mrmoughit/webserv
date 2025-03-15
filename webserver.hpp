@@ -43,3 +43,4 @@ std::string generate_file_names(const std::string& extension) ;
 void boundary(Client &clinet);
 void chunked(Client &client);
 void trim_non_printable(std::string &str);
+void handle_boundary_chanked(Client & client);

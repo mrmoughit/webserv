@@ -64,15 +64,6 @@ void parse_request(Client &client)
         }
     }
 
-    // if (client.get_request().get_method() == "POST"){
-    //     if (client.get_request().fill_headers_map(requestStream, res) == 0){
-    //         return ;
-    //     }
-    //     hanlde_post_request(client , 1 , requestData);
-    //     std::cout <<"\033[38;5;214m"<<"POST request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
-    //     return ;
-    // }
-
     // if (client.get_request().get_method() == "DELETE"){
 
     //     std::cout <<"\033[1;31m"<<"DELETE request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
@@ -118,6 +109,32 @@ void parse_request(Client &client)
     }
 }
 
+
+void handle_x_www_form_urlencoded(Client &client){
+    std::string tmp =  client.get_request().get_s_request();
+    std::istringstream ss(tmp);
+    std::string line;
+    std::string key;
+    std::string value;
+
+    while(std::getline(ss , line , '&')){
+        size_t pos = line.find("=");
+        if (pos == std::string::npos){
+            std::cout << "error" << std::endl;
+            exit (0);
+        }
+        key = line.substr(0 , pos);
+        value = line.substr(pos + 1);
+        std::cout << key << " -----------> "  << value << std::endl;
+
+    }
+}
+
+
+
+
+
+
 void check_request(Client &client)
 {
     if (!client.get_request().get_parse_index())
@@ -130,18 +147,29 @@ void check_request(Client &client)
 
     else if (client.get_request().get_method() == "POST")
     {
+        std::cout <<"\033[38;5;214m"<<"POST request ====> "<< client.get_request().get_method() << " "<<client.get_request().get_path()<<" "<< client.get_request().get_version()<<" "<<"\033[0m" << std::endl;
         std::string res = "HTTP/1.1 200 File uploaded succesfuly \r\nContent-Type: text/html\r\n\r\n\
             <html><head><title>200 File uploaded succesfuly </title></head><body><center><h1>200 File uploaded succesfuly </h1></center>\
             <hr><center>42 webserv 0.1</center></body></html>";
         client.get_response().set_response(res);
-
         std::string check = client.get_request().get_map_values("Content-Type");
         size_t pos = check.find("boundary=");
+
+        std::string tmp = client.get_request().get_map_values("Transfer-Encoding");
+        trim_non_printable(tmp);
+        if (pos != std::string::npos && tmp == " chunked"){
+            handle_boundary_chanked(client);
+            return ;
+        }
+
+        check = client.get_request().get_map_values("Content-Type");
+        pos = check.find("boundary=");
         if (pos != std::string::npos)
         {
             boundary(client);
             return;
         }
+
         check = client.get_request().get_map_values("Transfer-Encoding");
         trim_non_printable(check);
         if (check == " chunked")
@@ -149,8 +177,12 @@ void check_request(Client &client)
             chunked(client);
             return;
         }
-
+        check = client.get_request().get_map_values("Content-Type");
+        trim_non_printable(check);
+        if (check == " application/x-www-form-urlencoded"){
+            handle_x_www_form_urlencoded(client);
+            return ;
+        }
         hanlde_post_request(client);
-        return;
     }
 }

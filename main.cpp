@@ -50,8 +50,6 @@ bool setupSocket(int &server_fd, struct sockaddr_in &server_addr)
     return true;
 }
 
-
-
 int hex_to_int(const std::string &hexStr)
 {
     int result = 0;
@@ -68,41 +66,43 @@ int hex_to_int(const std::string &hexStr)
     return result;
 }
 
-
-std::string generate_file_names(const std::string& extension) {
+std::string generate_file_names(const std::string &extension)
+{
     static int index;
     std::string name;
-    while(1){
+    while (1)
+    {
         std::ostringstream ss;
 
-        ss << "file" << index << "." <<  extension;
+        ss << "file" << index << "." << extension;
         name = ss.str();
         if (access(("./upload/" + name).c_str(), F_OK) != 0)
-           return name;
+            return name;
         index++;
     }
     return NULL;
 }
 
-
 void chunked(Client &client)
 {
-    static int size ;
+    static int size;
     static int writed;
     static std::ofstream file;
     static int d;
     if (!d)
     {
         std::string extension = client.get_request().get_map_values("Content-Type");
-        if (extension == "NULL"){
+        if (extension == "NULL")
+        {
             std::cout << "error" << std::endl;
-            exit (0);
+            exit(0);
         }
         trim_non_printable(extension);
         size_t pos = extension.find("/");
-        if (pos == std::string::npos){
+        if (pos == std::string::npos)
+        {
             std::cout << "error" << std::endl;
-            exit (0);
+            exit(0);
         }
         extension = extension.substr(pos + 1);
         extension = "./upload/" + generate_file_names(extension);
@@ -174,16 +174,16 @@ int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client
     boundary = "--" + boundary;
 
     size_t pos = buffer.find(boundary);
-    
+
     if (pos == std::string::npos)
-    return -1;
-    
+        return -1;
+
     size_t last_Boundary = pos + boundary.size();
-    
+
     if (last_Boundary + 2 <= buffer.size() &&
-    buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
-    client.set_all_recv(true);
-    
+        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
+        client.set_all_recv(true);
+
     return static_cast<int>(pos);
 }
 
@@ -256,7 +256,6 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
     }
 }
 
-
 void boundary(Client &client)
 {
     static std::string buffer;
@@ -269,24 +268,25 @@ void boundary(Client &client)
     if (i == 0)
     {
         std::istringstream ss(buffer);
-        std::getline(ss , tmp);
+        std::getline(ss, tmp);
         size_t pos = tmp.find_first_not_of("-");
         size_t end = tmp.find("\r");
-        boundary = tmp.substr(pos , end  - pos);
+        boundary = tmp.substr(pos, end - pos);
         pos = buffer.find("\n");
         buffer = buffer.substr(pos + 1);
         i++;
     }
-    
+
     while (true)
     {
         int index = check_if_have_new_boundary(buffer, boundary, client);
         if (index == -1)
         {
-            // client.print_map();
+            client.print_map();
             return;
         }
-        else if (index == 0){
+        else if (index == 0)
+        {
             buffer = buffer.substr(boundary.size() + 4);
             // std::cout << buffer << std::endl;
         }
@@ -297,6 +297,43 @@ void boundary(Client &client)
             fill_data_boudary(tmp, client);
         }
     }
+}
+
+
+
+
+
+void handle_boundary_chanked(Client &client)
+{
+    static std::string request;
+    request += client.get_request().get_s_request();
+    static std::string result;
+    std::string line;
+    while (true) {
+        size_t pos = request.find("\r\n");
+        
+        if (pos == std::string::npos) {
+            return  ;
+        }
+
+        line = request.substr(0 , pos + 2);
+        size_t size = hex_to_int(line);
+        if (size == 0){
+            // std::cout << result << std::endl;
+            client.get_request().set_s_request(result);
+            boundary(client);
+            return ;
+        }
+        std::string tmp = request.substr(pos + 2);
+        if (tmp.size() < size){
+            return ;
+        }
+        request = request.substr(pos + 2);
+        result += request.substr(0 , size);
+        
+        request = request.substr(size + 2);
+    }
+    // std::cout << "Result: " << result << std::endl;
 }
 
 void handleClient(int client_fd, Client &client)
@@ -391,7 +428,6 @@ int main()
     return 0;
 }
 
-
 // int main(int ac, char **av)
 // {
 //     (void)ac;
@@ -405,5 +441,5 @@ int main()
 //     {
 //         std::cerr << e.what() << '\n';
 //     }
-    
+
 // }

@@ -142,24 +142,6 @@ std::string Request::get_map_values(std::string key)
     return "NULL";
 }
 
-// size_t Request::get_length()
-// {
-//     return length;
-// }
-// void Request::set_length(size_t len)
-// {
-//     length = len;
-// }
-
-// int Request::get_bodyStart()
-// {
-//     return BodyStart;
-// }
-
-// void Request::set_bodyStart(int pos)
-// {
-//     BodyStart = pos;
-// }
 
 bool out_root_dir(std::string &pa, std::string &res)
 {
