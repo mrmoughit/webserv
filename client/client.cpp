@@ -32,7 +32,7 @@ void Client::reset() {
     delete response_object;
     request_object = new Request();
     response_object = new Response();
-    keep_alive = true;
+    keep_alive = false;
     all_recv = false;
 }
 int  Client::get_client_id(){
