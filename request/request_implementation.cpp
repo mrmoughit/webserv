@@ -133,7 +133,10 @@ void check_request(Client & client){
     if (client.get_response().get_response_index())
         return;
     if (client.get_request().get_method() == "GET")
+    {
         response_to_get(client);
+        client.set_all_recv(true);
+    }
     // else if (client.get_request().get_method() == "POST"){
     //     std::string check = client.get_request().get_map_values("Content-Type");
     //     size_t pos = check.find("boundary=");

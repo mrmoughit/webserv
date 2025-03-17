@@ -95,6 +95,25 @@ int Server::acceptClient()
     std::cout << "\033[38;5;214m" << "New client connected. Socket FD: " << new_socket << "\033[0m" << std::endl;
     return 0;
 }
+
+
+void Server::closeClientConnection(size_t index)
+{
+    // Client& client = this->Clients[index - 1];
+    close(this->pollfds[index].fd);
+    this->pollfds.erase(this->pollfds.begin() + index);
+    this->Clients.erase(this->Clients.begin() + index - 1);
+}
+
+void Server::closeServer()
+{
+    for ( size_t i = 0; i < this->pollfds.size(); i++)
+    {
+        close(this->pollfds[i].fd);
+    }
+    this->pollfds.clear();
+    this->Clients.clear();
+}
 //************************************************************************************ */
 
 void Server::startServer() {
@@ -120,13 +139,28 @@ void Server::startServer() {
                 } else {
                     handleClientRead(i);
                     // Prepare to send response by switching to POLLOUT
-                    this->Clients[i - 1].set_all_recv(false);
-                    this->pollfds[i].revents = POLLOUT;
+                    if (this->Clients[i - 1].get_all_recv() == true) {
+                        this->pollfds[i].events = POLLOUT;
+                    }
                 }
             }
 
             if (this->pollfds[i].revents & POLLOUT) {
+                this->Clients[i - 1].set_all_recv(false);
                 handleClientWrite(i);
+                // check if responce end pollin
+                if (this->Clients[i - 1].get_response().get_fileStream().eof()) {
+                    this->pollfds[i].events = POLLIN;
+                    if (this->Clients[i - 1].get_Alive() == false) {
+                        closeClientConnection(i);
+                    } else {
+                        this->Clients[i - 1].reset();
+                    }
+                }
+                // Reset the event to POLLIN after sending response
+                // if (this->Clients[i - 1].get_all_recv() == false) {
+                //     this->pollfds[i].events = POLLIN;
+                // }
             }
         }
     }
@@ -151,6 +185,7 @@ void Server::handleClientRead(size_t index)
         else 
         {
             std::cerr << "Recv error: " << strerror(errno) << std::endl;
+            return;
         }
         closeClientConnection(index);
         return;
@@ -159,7 +194,6 @@ void Server::handleClientRead(size_t index)
     std::string req(buffer, bytes_read);
     this->Clients[index - 1].get_request().set_s_request(req);
     check_request(this->Clients[index - 1]);
-    this->pollfds[index].events = POLLOUT;
 }
 
 void Server::handleClientWrite(size_t index) {
@@ -200,41 +234,24 @@ void Server::handleClientWrite(size_t index) {
             }
         }
 
-        if (fileStream.eof()) {
-            if (client.get_Alive())
-            {
-                // Keep connection alive; reset after file response
-                client.reset();
-                client.set_all_recv(false);
-                this->pollfds[index].events = POLLIN;
-            } else {
-                // Close connection after file response
-                closeClientConnection(index);
-                fileStream.close();
-            }
-        }
-    } else {
-        // No file to send; reset after string response
-        client.reset();
-        client.set_all_recv(false);
-        this->pollfds[index].events = POLLIN;
+    //     if (fileStream.eof()) {
+    //         if (client.get_Alive())
+    //         {
+    //             // Keep connection alive; reset after file response
+    //             client.reset();
+    //             client.set_all_recv(false);
+    //             this->pollfds[index].events = POLLIN;
+    //         } else {
+    //             // Close connection after file response
+    //             closeClientConnection(index);
+    //             fileStream.close();
+    //         }
+    //     }
+    // } else {
+    //     // No file to send; reset after string response
+    //     client.reset();
+    //     client.set_all_recv(false);
+    //     this->pollfds[index].events = POLLIN;
     }
 }
 
-void Server::closeClientConnection(size_t index)
-{
-    // Client& client = this->Clients[index - 1];
-    close(this->pollfds[index].fd);
-    this->pollfds.erase(this->pollfds.begin() + index);
-    this->Clients.erase(this->Clients.begin() + index - 1);
-}
-
-void Server::closeServer()
-{
-    for ( size_t i = 0; i < this->pollfds.size(); i++)
-    {
-        close(this->pollfds[i].fd);
-    }
-    this->pollfds.clear();
-    this->Clients.clear();
-}

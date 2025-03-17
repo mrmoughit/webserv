@@ -26,12 +26,13 @@ Client::~Client()
 void Client::reset() {
     // Reset the client state
     // client_id = -1;
+    //free address
     // Client_Addr = {};
     delete request_object;
     delete response_object;
     request_object = new Request();
     response_object = new Response();
-    // keep_alive = false;
+    keep_alive = true;
     all_recv = false;
 }
 int  Client::get_client_id(){
