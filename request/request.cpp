@@ -1,6 +1,5 @@
 #include "../webserver.hpp"
 
-
 Request::Request()
 {
     index = false;
@@ -201,6 +200,9 @@ std::ofstream file;
 void hanlde_post_request(Client &client)
 {
     static int first ;
+    size_t check = client.get_request().get_s_request().find("\r\n\r\n");
+    if (check != std::string::npos)
+        client.set_all_recv(true);
     if (!first)
     {
         first = 10;

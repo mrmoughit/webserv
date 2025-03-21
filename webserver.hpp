@@ -22,6 +22,10 @@
 #include "client/client.hpp"
 #include "server/server.hpp"
 
+
+
+extern std::string root;
+
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);
 bool out_root_dir(std::string &pa , std::string &res);

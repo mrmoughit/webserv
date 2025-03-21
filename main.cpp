@@ -1,6 +1,5 @@
 #include "webserver.hpp"
 
-// #define PORT 4444
 
 void trim_non_printable(std::string &str)
 {
@@ -132,8 +131,10 @@ void chunked(Client &client)
                 chunk_size = "";
                 i += 2;
 
-                if (size == 0)
+                if (size == 0){
+                    client.set_all_recv(true);
                     break;
+                }
                 state = read_from_chunk;
                 writed = 0;
             }
@@ -319,7 +320,7 @@ void handle_boundary_chanked(Client &client)
         line = request.substr(0 , pos + 2);
         size_t size = hex_to_int(line);
         if (size == 0){
-            // std::cout << result << std::endl;
+            client.set_all_recv(true);
             client.get_request().set_s_request(result);
             boundary(client);
             return ;
@@ -333,7 +334,6 @@ void handle_boundary_chanked(Client &client)
         
         request = request.substr(size + 2);
     }
-    // std::cout << "Result: " << result << std::endl;
 }
 
 void handleClient(int client_fd, Client &client)
@@ -356,7 +356,7 @@ void handleClient(int client_fd, Client &client)
         req.set_s_request(tmp);
         check_request(client);
         // std::cout << tmp << std::endl;
-        // break ;
+        break ;
     }
     if (send(client_fd, client.get_response().get_response().c_str(), client.get_response().get_response().length(), 0) == -1)
     {

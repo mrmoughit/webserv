@@ -1,4 +1,5 @@
 #include "../webserver.hpp"
+std::string root = "www";
 
 void get_error_res(std::string &res, int status)
 {
@@ -25,8 +26,10 @@ void get_error_res(std::string &res, int status)
 void get_default_index(std::string &res, std::string path)
 {
     std::ifstream f;
-    if (path == "/")
-        f.open("www/index.html");
+    if (path == "/"){
+        std::string tmp = root + "/index.html";
+        f.open(tmp.c_str());
+    }
     else
         f.open(path.c_str());
     std::string line;
@@ -64,6 +67,7 @@ std::string getContentType(std::string filePath) {
     }
     return "";
 }
+
 void _response(std::ifstream& fileStream , int status){
     (void)fileStream;
     (void)status;

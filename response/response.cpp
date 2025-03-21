@@ -42,7 +42,7 @@ void response_to_get(Client &client){
         client.get_request().set_path(p);
     }
 
-    std::string pat = "www/" + client.get_request().get_path().substr(1);
+    std::string pat = root + "/" + client.get_request().get_path().substr(1);
     client.get_request().set_path(pat);
 
     struct stat path_stat;

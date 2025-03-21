@@ -256,17 +256,11 @@ void Server::handleClientWrite(size_t index)
 
 void Server::closeClientConnection(size_t index)
 {
-    Client& client = this->Clients[index - 1];
-
-    if (client.get_Alive())
-    {
-        // client.set_Alive(false);
-        // this->pollfds[index].events = POLLIN;
-        return;
-    }
-    close(this->pollfds[index].fd);
-    this->pollfds.erase(this->pollfds.begin() + index);
-    this->Clients.erase(this->Clients.begin() + index - 1);
+    int client_fd =this->pollfds[index + 1].fd;
+    close(client_fd);
+    this->pollfds.erase(this->pollfds.begin() + index + 1);
+    this->Clients.erase(this->Clients.begin() + index);
+    std::cout << "\033[1;31m" << "Client disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
 }
 
 void Server::closeServer()

@@ -64,12 +64,6 @@ void parse_request(Client &client)
         }
     }
 
-    // if (client.get_request().get_method() == "DELETE"){
-
-    //     std::cout <<"\033[1;31m"<<"DELETE request ====> "<< method<< " "<<path<<" "<< version<<" "<<"\033[0m" << std::endl;
-    //     return ;
-    // }
-
     if (client.get_request().get_version() != "HTTP/1.1")
     {
         if (strncmp(client.get_request().get_version().c_str(), "HTTP/", 5) > 0)
@@ -98,6 +92,7 @@ void parse_request(Client &client)
     pa = removeslashes(pa);
     if (!out_root_dir(pa, res))
     {
+        client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         return;
     }
@@ -117,6 +112,7 @@ void handle_x_www_form_urlencoded(Client &client){
     std::string key;
     std::string value;
 
+    client.set_all_recv(true);
     while(std::getline(ss , line , '&')){
         size_t pos = line.find("=");
         if (pos == std::string::npos){
@@ -126,13 +122,41 @@ void handle_x_www_form_urlencoded(Client &client){
         key = line.substr(0 , pos);
         value = line.substr(pos + 1);
         std::cout << key << " -----------> "  << value << std::endl;
-
     }
 }
 
 
+void  handle_delete_request(std::string path)
+{
+    struct stat buf ;
+    if (stat(path.c_str() , &buf) != 0)
+        throw std::runtime_error("Invalid path");
 
-
+    if (S_ISDIR(buf.st_mode)){
+        DIR* dir = opendir(path.c_str());
+        if (dir == NULL) {
+            throw std::runtime_error("cannot open dir ");
+        }
+    
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != NULL) {
+            if (std::strcmp(entry->d_name, ".") == 0 || std::strcmp(entry->d_name, "..") == 0) {
+                continue;
+            }
+            std::string fullPath = std::string(path) + "/" + entry->d_name;
+            handle_delete_request(fullPath);
+        }
+        if (remove(path.c_str())){
+            throw std::runtime_error("remove field , can't remove dir ");
+        }
+        closedir(dir);
+    }
+    else{
+        if (remove(path.c_str())){
+            throw std::runtime_error("remove field , can't remove file ");
+        }
+    }
+}
 
 
 void check_request(Client &client)
@@ -142,47 +166,60 @@ void check_request(Client &client)
 
     if (client.get_response().get_response_index())
         return;
-    if (client.get_request().get_method() == "GET")
-        response_to_get(client);
 
-    else if (client.get_request().get_method() == "POST")
-    {
-        std::cout <<"\033[38;5;214m"<<"POST request ====> "<< client.get_request().get_method() << " "<<client.get_request().get_path()<<" "<< client.get_request().get_version()<<" "<<"\033[0m" << std::endl;
-        std::string res = "HTTP/1.1 200 File uploaded succesfuly \r\nContent-Type: text/html\r\n\r\n\
-            <html><head><title>200 File uploaded succesfuly </title></head><body><center><h1>200 File uploaded succesfuly </h1></center>\
+    const std::string method = client.get_request().get_method();
+    const std::string content_type = client.get_request().get_map_values("Content-Type");
+    const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
+    
+    if (method == "GET") {
+        client.set_all_recv(true);
+        response_to_get(client);
+        return;
+    }
+
+
+    else if (method == "POST") {
+        std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
+                  << client.get_request().get_path() << " " 
+                  << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+
+        std::string res = "HTTP/1.1 200 File uploaded successfully \r\nContent-Type: text/html\r\n\r\n\
+            <html><head><title>200 File uploaded successfully </title></head><body><center><h1>200 File uploaded successfully </h1></center>\
             <hr><center>42 webserv 0.1</center></body></html>";
         client.get_response().set_response(res);
-        std::string check = client.get_request().get_map_values("Content-Type");
-        size_t pos = check.find("boundary=");
+        
 
-        std::string tmp = client.get_request().get_map_values("Transfer-Encoding");
-        trim_non_printable(tmp);
-        if (pos != std::string::npos && tmp == " chunked"){
+        std::string check = transfer_encoding;
+        trim_non_printable(check);
+
+        if (content_type.find("boundary=") != std::string::npos && check == " chunked") {
             handle_boundary_chanked(client);
-            return ;
+            return;
         }
 
-        check = client.get_request().get_map_values("Content-Type");
-        pos = check.find("boundary=");
-        if (pos != std::string::npos)
-        {
+        if (content_type.find("boundary=") != std::string::npos) {
             boundary(client);
             return;
         }
 
-        check = client.get_request().get_map_values("Transfer-Encoding");
-        trim_non_printable(check);
-        if (check == " chunked")
-        {
+        if (check == " chunked") {
             chunked(client);
             return;
         }
-        check = client.get_request().get_map_values("Content-Type");
-        trim_non_printable(check);
-        if (check == " application/x-www-form-urlencoded"){
+
+        if (check == "application/x-www-form-urlencoded") {
             handle_x_www_form_urlencoded(client);
-            return ;
+            return;
         }
+
         hanlde_post_request(client);
     }
+    else if (method == "DELETE"){
+        client.set_all_recv(true); // check ila chi mecrob 3amr l headers b ktar mn buffer size
+        std::cout <<"\033[1;31m"<<"DELETE request ====> "<< method<< " "<<client.get_request().get_path()<<" "<< client.get_request().get_version()<<" "<<"\033[0m" << std::endl;
+        std::string path = "www" + client.get_request().get_path();
+        handle_delete_request(path);
+        std::cout << "done" << std::endl;
+    }
 }
+
