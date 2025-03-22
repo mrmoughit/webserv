@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../webserver.hpp"
-
+class Client;
 
 class Request
 {
@@ -12,7 +12,7 @@ class Request
         std::map<std::string,std::string> headers_map;
         std::string s_request;
         bool index;
-
+        size_t content_length;
         
     public:
         const std::string& get_method();
@@ -23,9 +23,11 @@ class Request
         void set_version(std::string& name);
         void set_s_request(std::string req);
         std::string get_s_request();
-        size_t get_length();
+        size_t get_content_length();
+        void set_content_length(size_t length);
+        
         std::string get_map_values(std::string key);
-        bool fill_headers_map(std::istringstream &obj , std::string &res);
+        bool fill_headers_map(std::istringstream &obj , std::string &res , Client &client);
 
 
         void print_headers(){

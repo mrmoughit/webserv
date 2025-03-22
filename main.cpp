@@ -75,7 +75,7 @@ std::string generate_file_names(const std::string &extension)
 
         ss << "file" << index << "." << extension;
         name = ss.str();
-        if (access(("./upload/" + name).c_str(), F_OK) != 0)
+        if (access((root + "/" + name).c_str(), F_OK) != 0)
             return name;
         index++;
     }
@@ -104,7 +104,9 @@ void chunked(Client &client)
             exit(0);
         }
         extension = extension.substr(pos + 1);
-        extension = "./upload/" + generate_file_names(extension);
+        extension = root + "/" + generate_file_names(extension);
+        // std::cout << extension << std::endl;
+        // exit(0);
         file.open(extension.c_str());
         d = 9;
     }
@@ -221,6 +223,8 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
                     exit(55);
                 }
                 std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
+                // std::cout << filename << std::endl;
+                filename  = root + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);
                 std::getline(ss, line);
