@@ -100,9 +100,14 @@ int Server::acceptClient()
 void Server::closeClientConnection(size_t index)
 {
     // Client& client = this->Clients[index - 1];
+    std::cout << "size befor" << this->pollfds.size() << std::endl;
+    std::cout << "size befor" << this->Clients.size() << std::endl;
+    std::cout << this->pollfds[index].fd << std::endl;
     close(this->pollfds[index].fd);
     this->pollfds.erase(this->pollfds.begin() + index);
     this->Clients.erase(this->Clients.begin() + index - 1);
+    std::cout << "size after" << this->pollfds.size() << std::endl;
+    std::cout << "size after" << this->Clients.size() << std::endl;
 }
 
 void Server::closeServer()
@@ -136,19 +141,27 @@ void Server::startServer() {
                     if (acceptClient() != 0) {
                         std::cerr << "Failed to accept client connection" << std::endl;
                     }
+
+                    if (this->pollfds[i].fd != 3) {
+                        std::cout << "client fd 1: " << this->pollfds[i].fd << std::endl;
+                        std::cout << "client fd 2: " << this->Clients[i - 1].get_client_id() << std::endl;
+                    }
+                    
                 } else {
                     handleClientRead(i);
                     // Prepare to send response by switching to POLLOUT
                     if (this->Clients[i - 1].get_all_recv() == true) {
+                        std::cout << "heerrre" << std::endl;
                         this->pollfds[i].events = POLLOUT;
-                        this->Clients[i - 1].set_all_recv(false);
+                        // this->Clients[i - 1].set_all_recv(false);
                     }
                 }
             }
 
             if (this->pollfds[i].revents & POLLOUT) {
-                this->Clients[i - 1].set_all_recv(true);
+                // this->Clients[i - 1].set_all_recv(true);
                 handleClientWrite(i);
+                this->Clients[i - 1].reset();
                 // check if responce end pollin
                 // if (this->Clients[i - 1].get_response().get_fileStream().eof()) {
                 //     this->pollfds[i].events = POLLIN;
@@ -177,26 +190,29 @@ void Server::handleClientRead(size_t index)
     
     // Read data from client
     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+    std::cout << "bytes read : " << buffer << std::endl;
     
     if (bytes_read <= 0)
     {
-        // Connection closed or error
-        if (bytes_read == 0)
+        // Connection closed or error"
+        if (bytes_read == 0 && client.get_Alive() == true)
         {
-            std::cout << "\033[1;31m" << "Client disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
+            std::cout << "\033[1;31m" << " client still alive and read all re " << client_fd << "\033[0m" << std::endl;
         }
         else 
         {
             std::cerr << "Recv error: " << strerror(errno) << std::endl;
+            if (client.get_Alive() == false)
+                closeClientConnection(index);
             return;
         }
-        closeClientConnection(index);
         return;
     }
-
     std::string req(buffer, bytes_read);
+    std::cout << "\033[1;32m" << req << "\033[0m" << std::endl;
     this->Clients[index - 1].get_request().set_s_request(req);
     check_request(this->Clients[index - 1]);
+
 }
 
 void Server::handleClientWrite(size_t index) {
@@ -268,4 +284,3 @@ void Server::handleClientWrite(size_t index) {
         }
     }
 }
-
