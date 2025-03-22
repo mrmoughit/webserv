@@ -104,6 +104,8 @@ void parse_request(Client &client)
     }
     std::string tmp = client.get_request().get_map_values("Content-Length");
 
+
+    if (method == "POST"){
     std::istringstream ss(tmp);
     size_t size;
     ss >> size;
@@ -111,8 +113,8 @@ void parse_request(Client &client)
     if (ss.fail()){
         client.get_response().set_response_index(true);
         get_error_res(res, 400 , client);
-
     }
+}
 
 }
 
@@ -176,11 +178,11 @@ void  handle_delete_request(std::string path)
 void check_request(Client &client)
 {
     if (!client.get_request().get_parse_index())
-        parse_request(client);
-
+    parse_request(client);
+    
     if (client.get_response().get_response_index())
-        return;
-
+    return;
+    
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
