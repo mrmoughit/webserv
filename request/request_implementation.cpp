@@ -13,6 +13,7 @@ void parse_request(Client &client)
     if (bodyStart == std::string::npos)
     {
         get_error_res(res, 400 , client);
+        client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         std::cout << "ha wahd l error";
         return;
@@ -76,6 +77,7 @@ void parse_request(Client &client)
         else
         {
             get_error_res(res, 505 , client);
+            client.get_response().set_response(res);
             client.get_response().set_response_index(true);
             return;
         }

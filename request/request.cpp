@@ -209,15 +209,7 @@ void hanlde_post_request(Client &client)
 {
     static int first;
     static size_t writed;
-    // std::string  test = client.get_request().get_map_values("Content-Length");
-    // std::cout << test << std::endl;
-    // exit (0);
-    // size_t check = client.get_request().get_s_request().find("\r\n\r\n");
-    // if (check != std::string::npos){
-    //     client.set_all_recv(true);
-    //     std::cout << "here" << std::endl;
-    //     exit (0);
-    // }
+
     if (!first)
     {
         first = 10;
