@@ -256,7 +256,7 @@ void Server::handleClientWrite(size_t index)
 
 void Server::closeClientConnection(size_t index)
 {
-    int client_fd =this->pollfds[index + 1].fd;
+    int client_fd = this->pollfds[index + 1].fd;
     close(client_fd);
     this->pollfds.erase(this->pollfds.begin() + index + 1);
     this->Clients.erase(this->Clients.begin() + index);
