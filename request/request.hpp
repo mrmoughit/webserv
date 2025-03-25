@@ -15,6 +15,7 @@ class Request
         size_t content_length;
         
     public:
+        bool is_string_req_send;
         const std::string& get_method();
         const std::string& get_version();
         const std::string& get_path();

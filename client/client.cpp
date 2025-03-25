@@ -70,3 +70,16 @@ bool Client::get_all_recv(){
 void Client::set_all_recv(bool check){
     all_recv = check;
 }
+
+void Client::reset() {
+    // Reset the client state
+    // client_id = -1;
+    //free address
+    // Client_Addr = {};
+    delete request_object;
+    delete response_object;
+    request_object = new Request();
+    response_object = new Response();
+    keep_alive = true;
+    all_recv = false;
+}

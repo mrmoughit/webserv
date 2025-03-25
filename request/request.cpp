@@ -3,7 +3,9 @@
 Request::Request()
 {
     index = false;
-};
+    is_string_req_send = false;
+
+}
 Request::~Request() {};
 
 const std::string &Request::get_method()
