@@ -86,8 +86,8 @@ void chunked(Client &client)
 {
     static int size;
     static int writed;
-    static std::ofstream file;
     static int d;
+
     if (!d)
     {
         std::string extension = client.get_request().get_map_values("Content-Type");
@@ -105,9 +105,8 @@ void chunked(Client &client)
         }
         extension = extension.substr(pos + 1);
         extension = root + "/" + generate_file_names(extension);
-        // std::cout << extension << std::endl;
-        // exit(0);
-        file.open(extension.c_str());
+
+        client.get_request().file.open(extension.c_str());
         d = 9;
     }
     std::string request = client.get_request().get_s_request();
@@ -134,6 +133,7 @@ void chunked(Client &client)
                 i += 2;
 
                 if (size == 0){
+                    size = writed = d = 0;
                     client.set_all_recv(true);
                     break;
                 }
@@ -148,7 +148,7 @@ void chunked(Client &client)
         }
         else if (state == read_from_chunk)
         {
-            file << request[i] << std::flush;
+            client.get_request().file << request[i] << std::flush;
             i++;
             writed++;
 

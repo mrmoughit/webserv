@@ -218,7 +218,7 @@ bool is_upper(std::string line)
     return true;
 }
 
-std::ofstream file;
+
 void hanlde_post_request(Client &client)
 {
     static int first;
@@ -234,41 +234,45 @@ void hanlde_post_request(Client &client)
 
         std::string file_name = root + "/" + generate_file_names(extension);
 
-        file.open(file_name.c_str());
-        if (!file.is_open())
+        client.get_request().file.open(file_name.c_str());
+        if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: Could not open file " << file_name << std::endl;
             return;
         }
-        file << client.get_request().get_s_request() << std::flush;
-        if (file.fail())
+        client.get_request().file << client.get_request().get_s_request() << std::flush;
+        if (client.get_request().file.fail())
         {
             std::cerr << "Error: Failed to write to file " << file_name << std::endl;
-            file.close();
+            client.get_request().file.close();
             return;
         }
         writed += client.get_request().get_s_request().size();
-        if (writed >= client.get_request().get_content_length())
+        if (writed >= client.get_request().get_content_length()){
             client.set_all_recv(true);
+            first = writed = 0;
+        }
 
     }
     else
     {
-        if (!file.is_open())
+        if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: File is not open" << std::endl;
             exit(0);
             return;
         }
-        file << client.get_request().get_s_request() << std::flush;
+        client.get_request().file << client.get_request().get_s_request() << std::flush;
         writed += client.get_request().get_s_request().size();
-        if (file.fail())
+        if (client.get_request().file.fail())
         {
             std::cerr << "Error: Failed to write to file" << std::endl;
-            file.close();
+            client.get_request().file.close();
             return;
         }
-        if (writed >= client.get_request().get_content_length())
+        if (writed >= client.get_request().get_content_length()){
             client.set_all_recv(true);
+            first = writed = 0;
+        }
     }
 }
