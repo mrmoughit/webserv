@@ -92,7 +92,7 @@ int Server::acceptClient()
     this->pollfds.push_back(new_pollfd);
     this->Clients.push_back(Client(new_socket, addr_client));
     
-    std::cout << "\033[38;5;214m" << "****New client connected. Socket FD: " << new_socket << "\033[0m" << std::endl;
+    // std::cout << "\033[38;5;214m" << "****New client connected. Socket FD: " << new_socket << "\033[0m" << std::endl;
     return 0;
 }
 
@@ -151,7 +151,7 @@ void Server::startServer() {
                     handleClientRead(i);
                     // Prepare to send response by switching to POLLOUT
                     if (this->Clients[i - 1].get_all_recv() == true) {
-                        std::cout << "heerrre" << std::endl;
+                        // std::cout << "heerrre" << std::endl;
                         this->pollfds[i].events = POLLOUT;
                         // this->Clients[i - 1].set_all_recv(false);
                     }
@@ -161,7 +161,7 @@ void Server::startServer() {
             if (this->pollfds[i].revents & POLLOUT) {
                 // this->Clients[i - 1].set_all_recv(true);
                 handleClientWrite(i);
-                this->Clients[i - 1].reset();
+                // this->Clients[i - 1].reset();
                 // check if responce end pollin
                 // if (this->Clients[i - 1].get_response().get_fileStream().eof()) {
                 //     this->pollfds[i].events = POLLIN;
@@ -190,14 +190,14 @@ void Server::handleClientRead(size_t index)
     
     // Read data from client
     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-    std::cout << "bytes read : " << buffer << std::endl;
+    // std::cout << "bytes read : " << buffer << std::endl;
     
     if (bytes_read <= 0)
     {
         // Connection closed or error"
         if (bytes_read == 0 && client.get_Alive() == true)
         {
-            std::cout << "\033[1;31m" << " client still alive and read all re " << client_fd << "\033[0m" << std::endl;
+            // std::cout << "\033[1;31m" << " client still alive and read all re " << client_fd << "\033[0m" << std::endl;
         }
         else 
         {
@@ -209,7 +209,7 @@ void Server::handleClientRead(size_t index)
         return;
     }
     std::string req(buffer, bytes_read);
-    std::cout << "\033[1;32m" << req << "\033[0m" << std::endl;
+    // std::cout << "\033[1;32m" << req << "\033[0m" << std::endl;
     this->Clients[index - 1].get_request().set_s_request(req);
     check_request(this->Clients[index - 1]);
 
@@ -276,7 +276,7 @@ void Server::handleClientWrite(size_t index) {
     }
         if (client.get_response().get_fileStream().eof()) {
             this->pollfds[index].events = POLLIN;
-            std::cout << " keep alive is set to : " << client.get_Alive() << std::endl;
+            // std::cout << " keep alive is set to : " << client.get_Alive() << std::endl;
         if (!client.get_Alive()) {
             closeClientConnection(index);
         } else {

@@ -110,6 +110,7 @@ std::string removeslashes(const std::string &line)
 
 bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client &client)
 {
+    client.set_Alive(false);
     std::string line, key, value;
     while (std::getline(ob, line))
     {
@@ -137,6 +138,10 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client 
             headers_map.clear();
             return false;
         }
+        trim_non_printable(value);
+        trim(value);
+        if (key == "Connection" && value == "keep-alive")
+            client.set_Alive(true);
         headers_map[key] = value;
     }
     return true;
@@ -193,6 +198,13 @@ bool out_root_dir(std::string &pa, std::string &res, Client &client)
         }
     }
     pa += oss.str();
+    int i = 0;
+    while(str[i]){
+        free(str[i]);
+        i++;
+    }
+    free(str);
+    str = NULL;
     return true;
 }
 
@@ -221,8 +233,7 @@ void hanlde_post_request(Client &client)
         trim_non_printable(extension);
 
         std::string file_name = root + "/" + generate_file_names(extension);
-        // std::cout << file_name << std::endl;
-        // exit(0);
+
         file.open(file_name.c_str());
         if (!file.is_open())
         {

@@ -4,7 +4,7 @@ void parse_request(Client &client)
 {
     client.get_request().set_parse_index(true);
 
-    std::string res = client.get_response().get_response();
+    std::string &res = client.get_response().get_response();
 
     std::string requestData = client.get_request().get_s_request();
     std::string line;
@@ -209,9 +209,8 @@ void check_request(Client &client)
         
 
         std::string check = transfer_encoding;
-        trim_non_printable(check);
 
-        if (content_type.find("boundary=") != std::string::npos && check == " chunked") {
+        if (content_type.find("boundary=") != std::string::npos && check == "chunked") {
             handle_boundary_chanked(client);
             // return;
         }
@@ -221,7 +220,7 @@ void check_request(Client &client)
             // return;
         }
 
-        else if (check == " chunked") {
+        else if (check == "chunked") {
             chunked(client);
             // return;
         }
@@ -230,8 +229,9 @@ void check_request(Client &client)
             handle_x_www_form_urlencoded(client);
             // return;
         }
-        else
+        else{
             hanlde_post_request(client);
+        }
         if (client.get_all_recv() == true){
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() <<  "\033[0m" << std::endl;
         }

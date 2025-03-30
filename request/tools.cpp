@@ -1,6 +1,22 @@
 #include "../webserver.hpp"
 std::string root = "www";
 
+void  trim(std::string& str) {
+    size_t start = 0;
+    size_t end = str.size();
+
+    while (start < end && std::isspace(str[start])) {
+        ++start;
+    }
+
+    while (end > start && std::isspace(str[end - 1])) {
+        --end;
+    }
+
+    str = str.substr(start, end - start);
+}
+
+
 void get_error_res(std::string &res, int status , Client &client)
 {
     if (status == 400)

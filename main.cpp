@@ -288,12 +288,12 @@ void boundary(Client &client)
         if (index == -1)
         {
             client.print_map();
-            return;
+            break;
         }
         else if (index == 0)
         {
             buffer = buffer.substr(boundary.size() + 4);
-            // std::cout << buffer << std::endl;
+
         }
         else
         {
@@ -302,6 +302,8 @@ void boundary(Client &client)
             fill_data_boudary(tmp, client);
         }
     }
+    buffer =  boundary = "";
+    i = 0;
 }
 
 
@@ -326,6 +328,7 @@ void handle_boundary_chanked(Client &client)
         if (size == 0){
             client.set_all_recv(true);
             client.get_request().set_s_request(result);
+            request  = result = "";
             boundary(client);
             return ;
         }
