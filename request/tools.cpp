@@ -1,5 +1,6 @@
 #include "../webserver.hpp"
 std::string root = "www";
+std::string not_found = "www/errors/404.html";
 
 void  trim(std::string& str) {
     size_t start = 0;

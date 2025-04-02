@@ -25,6 +25,7 @@
 
 
 extern std::string root;
+extern std::string not_found;
 
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);
