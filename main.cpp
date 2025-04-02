@@ -48,88 +48,34 @@ std::string generate_file_names(const std::string &extension)
 
 void chunked(Client &client)
 {
-    static int size;
-    static int writed;
-    static int d;
-
-    if (!d)
-    {
-        std::string extension = client.get_request().get_map_values("Content-Type");
-        if (extension == "NULL")
-        {
-            std::cout << "error" << std::endl;
-            exit(0);
+    static std::string request;
+    request += client.get_request().get_s_request();
+    static std::string result;
+    std::string line;
+    while (true) {
+        size_t pos = request.find("\r\n");
+        
+        if (pos == std::string::npos) {
+            return  ;
         }
-        trim_non_printable(extension);
-        size_t pos = extension.find("/");
-        if (pos == std::string::npos)
-        {
-            std::cout << "error" << std::endl;
-            exit(0);
-        }
-        extension = extension.substr(pos + 1);
-        extension = root + "/" + generate_file_names(extension);
 
-        client.get_request().file.open(extension.c_str());
-        d = 9;
-    }
-    std::string request = client.get_request().get_s_request();
-    size_t i = 0;
-    std::string chunk_size;
-
-    const int get_chunk_size = 0;
-    const int read_from_chunk = 1;
-    const int chunk_end = 2;
-    int state;
-    if (size == 0)
-        state = get_chunk_size;
-    else
-        state = read_from_chunk;
-
-    while (i < request.length())
-    {
-        if (state == get_chunk_size)
-        {
-            if (request[i] == '\r' && i + 1 < request.length() && request[i + 1] == '\n')
-            {
-                size = hex_to_int(chunk_size);
-                chunk_size = "";
-                i += 2;
-
-                if (size == 0){
-                    size = writed = d = 0;
-                    client.set_all_recv(true);
-                    break;
-                }
-                state = read_from_chunk;
-                writed = 0;
-            }
-            else
-            {
-                chunk_size += request[i];
-                i++;
-            }
+        line = request.substr(0 , pos + 2);
+        size_t size = hex_to_int(line);
+        if (size == 0){
+            client.set_all_recv(true);
+            client.get_request().set_s_request(result);
+            request  = result = "";
+            hanlde_post_request(client);
+            return ;
         }
-        else if (state == read_from_chunk)
-        {
-            client.get_request().file << request[i] << std::flush;
-            i++;
-            writed++;
-
-            if (writed >= size)
-                state = chunk_end;
+        std::string tmp = request.substr(pos + 2);
+        if (tmp.size() < size){
+            return ;
         }
-        else if (state == chunk_end)
-        {
-            i += 2;
-            state = get_chunk_size;
-        }
-        else
-        {
-            std::cout << "mochkila" << std::endl;
-            exit (0);
-        }
-        // std::cout << writed << std::endl;
+        request = request.substr(pos + 2);
+        result += request.substr(0 , size);
+        
+        request = request.substr(size + 2);
     }
 }
 
