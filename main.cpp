@@ -130,7 +130,6 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
                     exit(55);
                 }
                 std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
-                // std::cout << filename << std::endl;
                 filename  = root + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);
@@ -179,6 +178,7 @@ void boundary(Client &client)
 
     if (i == 0)
     {
+        std::cout << "one" << std::endl;
         std::istringstream ss(buffer);
         std::getline(ss, tmp);
         size_t pos = tmp.find_first_not_of("-");
@@ -188,30 +188,32 @@ void boundary(Client &client)
         buffer = buffer.substr(pos + 1);
         i++;
     }
-
     while (true)
     {
         int index = check_if_have_new_boundary(buffer, boundary, client);
         if (index == -1)
         {
-            client.print_map();
             break;
         }
-        else if (index == 0)
-        {
+        else if (index == 0){
             buffer = buffer.substr(boundary.size() + 4);
-
         }
         else
         {
+            std::cout << "here" << std::endl;
             tmp = buffer.substr(0, index - 2);
             buffer = buffer.substr(index);
             fill_data_boudary(tmp, client);
         }
     }
-    buffer =  boundary = "";
-    i = 0;
+    if (client.get_all_recv()){
+        buffer =  boundary = "";
+        i = 0;
+    }
 }
+
+
+
 
 
 
