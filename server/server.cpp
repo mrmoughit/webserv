@@ -334,9 +334,6 @@ void Server::startServer() {
                     clients[client_index].get_request().set_s_request(req);
                     check_request(clients[client_index]);
                     
-                    // clients[client_index].set_Alive();
-                    
-                    // If we've received all data, switch to write mode
                     if (clients[client_index].get_all_recv()) {
                         pollfds[idx].events = POLLOUT;
                     }
