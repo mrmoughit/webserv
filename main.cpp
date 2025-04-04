@@ -1,6 +1,5 @@
 #include "webserver.hpp"
 
-
 void trim_non_printable(std::string &str)
 {
     size_t start = 0;
@@ -52,63 +51,51 @@ void chunked(Client &client)
     request += client.get_request().get_s_request();
     static std::string result;
     std::string line;
-    while (true) {
+    while (true)
+    {
         size_t pos = request.find("\r\n");
-        
-        if (pos == std::string::npos) {
-            return  ;
+
+        if (pos == std::string::npos)
+        {
+            return;
         }
 
-        line = request.substr(0 , pos + 2);
+        line = request.substr(0, pos + 2);
         size_t size = hex_to_int(line);
-        if (size == 0){
+        if (size == 0)
+        {
             client.set_all_recv(true);
             client.get_request().set_s_request(result);
-            request  = result = "";
+            request = result = "";
             hanlde_post_request(client);
-            return ;
+            return;
         }
         std::string tmp = request.substr(pos + 2);
-        if (tmp.size() < size){
-            return ;
+        if (tmp.size() < size)
+        {
+            return;
         }
         request = request.substr(pos + 2);
-        result += request.substr(0 , size);
-        
+        result += request.substr(0, size);
+
         request = request.substr(size + 2);
     }
 }
 
-int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client &client , size_t size)
-{
-    boundary = "--" + boundary;
-
-    std::string tmp = buffer.substr(size);
-    size_t pos = tmp.find(boundary);
-
-    if (pos == std::string::npos)
-        return -1;
-
-    size_t last_Boundary = pos + boundary.size();
-
-    if (last_Boundary + 2 <= buffer.size() &&
-        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
-        client.set_all_recv(true);
-
-    return static_cast<int>(pos + size );
-}
-
-void fill_data_boudary(const std::string &tmp, Client &clinet)
+void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
 {
     std::istringstream ss(tmp);
     std::string line;
     std::ofstream file;
 
     std::getline(ss, line);
+    if (index != 0)
+        std::getline(ss, line);
+
+
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
     {
-        std::cout << tmp.size() << std::endl;
         size_t name_pos = line.find("name=\"");
         if (name_pos != std::string::npos)
         {
@@ -139,7 +126,6 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
 
                 while (1)
                 {
-                    std::cout << "bocling" << std::endl;
                     char c;
                     line = "";
                     while (ss.get(c))
@@ -171,53 +157,98 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
     }
 }
 
+
+int check_if_have_new_boundary(std::string &buffer, const std::string &boundary, Client &client, size_t size)
+{
+    std::string boundaryWithPrefix = "--" + boundary;
+
+    
+    if (size >= buffer.size()) {
+        return -1;
+    }
+    
+    std::string tmp = buffer.substr(size);
+    size_t pos = tmp.find(boundaryWithPrefix);
+    if (pos == std::string::npos)
+        return -1;
+        
+    size_t last_Boundary = size + pos + boundaryWithPrefix.size();
+    if (last_Boundary + 2 <= buffer.size() &&
+        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
+        client.set_all_recv(true);
+        
+    return static_cast<int>(pos + size);
+}
+
 void boundary(Client &client)
 {
     static std::string buffer;
     static int i = 0;
     static std::string boundary;
     std::string tmp;
-    static size_t size;
+    static size_t size = 0;
+    static int flag ;
+    
     buffer += client.get_request().get_s_request();
+    
     if (i == 0)
     {
+        
         std::istringstream ss(buffer);
         std::getline(ss, tmp);
+        
         size_t pos = tmp.find_first_not_of("-");
+        if (pos == std::string::npos) {
+            std::cerr << "Invalid boundary format" << std::endl;
+            return;
+        }
+        
         size_t end = tmp.find("\r");
+        if (end == std::string::npos) {
+            end = tmp.length();
+        }
+        
         boundary = tmp.substr(pos, end - pos);
-        // pos = buffer.find("\n");
-        // buffer = buffer.substr(pos + 1);
-    }
-    i++;
+        pos = buffer.find("\n");
+        
+        if (pos != std::string::npos) {
+            buffer = buffer.substr(pos + 1);
+        }
+        size = 0;
 
+
+    }
+    
+    i++;
+    
     while (true)
     {
-        int index = check_if_have_new_boundary(buffer, boundary, client  , size);
-        std::cout << buffer << std::endl;
-        std::cout << index << std::endl;
-        exit(0);
-        // if (index == -1)
-        // {
-        //     break;
-        // }
-        // else if (index == 0){
-        //     buffer += buffer.substr(boundary.size() + 4);
-        // }
-        // else
-        // {
-        //     tmp = buffer.substr(0, index - 2);
-        //     buffer = buffer.substr(index);
-        //     fill_data_boudary(tmp, client);
-        // }
-
+        int index = check_if_have_new_boundary(buffer, boundary, client, size);
+        if (index == -1)
+            break;
+        else
+        {
+            tmp = buffer.substr(0, index - 2);
+            if ((index + boundary.size()) < buffer.size()) {
+                buffer = buffer.substr(index + boundary.size());
+            } else {
+                buffer.clear();
+            }
+            fill_data_boudary(tmp, client , flag);
+            flag = 1;
+        }
     }
+    
     size = buffer.size();
-    if (client.get_all_recv()){
-        buffer =  boundary = "";
-        i = 0;
+    if (client.get_all_recv()) {
+        buffer.clear();
+        boundary.clear();
+        i = flag = 0;
+        size = 0;
     }
 }
+
+
 
 
 void handle_boundary_chanked(Client &client)
@@ -226,33 +257,36 @@ void handle_boundary_chanked(Client &client)
     request += client.get_request().get_s_request();
     static std::string result;
     std::string line;
-    while (true) {
+    while (true)
+    {
         size_t pos = request.find("\r\n");
-        
-        if (pos == std::string::npos) {
-            return  ;
+
+        if (pos == std::string::npos)
+        {
+            return;
         }
 
-        line = request.substr(0 , pos + 2);
+        line = request.substr(0, pos + 2);
         size_t size = hex_to_int(line);
-        if (size == 0){
+        if (size == 0)
+        {
             client.set_all_recv(true);
             client.get_request().set_s_request(result);
-            request  = result = "";
+            request = result = "";
             boundary(client);
-            return ;
+            return;
         }
         std::string tmp = request.substr(pos + 2);
-        if (tmp.size() < size){
-            return ;
+        if (tmp.size() < size)
+        {
+            return;
         }
         request = request.substr(pos + 2);
-        result += request.substr(0 , size);
-        
+        result += request.substr(0, size);
+
         request = request.substr(size + 2);
     }
 }
-
 
 int main(int ac, char **av)
 {
@@ -263,9 +297,8 @@ int main(int ac, char **av)
         Server S1;
         S1.startServer();
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
     }
-
 }
