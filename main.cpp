@@ -79,11 +79,12 @@ void chunked(Client &client)
     }
 }
 
-int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client &client)
+int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client &client , size_t size)
 {
     boundary = "--" + boundary;
 
-    size_t pos = buffer.find(boundary);
+    std::string tmp = buffer.substr(size);
+    size_t pos = tmp.find(boundary);
 
     if (pos == std::string::npos)
         return -1;
@@ -94,7 +95,7 @@ int check_if_have_new_boundary(std::string &buffer, std::string boundary, Client
         buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
         client.set_all_recv(true);
 
-    return static_cast<int>(pos);
+    return static_cast<int>(pos + size );
 }
 
 void fill_data_boudary(const std::string &tmp, Client &clinet)
@@ -107,6 +108,7 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
     {
+        std::cout << tmp.size() << std::endl;
         size_t name_pos = line.find("name=\"");
         if (name_pos != std::string::npos)
         {
@@ -134,8 +136,10 @@ void fill_data_boudary(const std::string &tmp, Client &clinet)
                 file.open(filename.c_str());
                 std::getline(ss, line);
                 std::getline(ss, line);
+
                 while (1)
                 {
+                    std::cout << "bocling" << std::endl;
                     char c;
                     line = "";
                     while (ss.get(c))
@@ -173,50 +177,47 @@ void boundary(Client &client)
     static int i = 0;
     static std::string boundary;
     std::string tmp;
-
+    static size_t size;
     buffer += client.get_request().get_s_request();
-
     if (i == 0)
     {
-        std::cout << "one" << std::endl;
         std::istringstream ss(buffer);
         std::getline(ss, tmp);
         size_t pos = tmp.find_first_not_of("-");
         size_t end = tmp.find("\r");
         boundary = tmp.substr(pos, end - pos);
-        pos = buffer.find("\n");
-        buffer = buffer.substr(pos + 1);
-        i++;
+        // pos = buffer.find("\n");
+        // buffer = buffer.substr(pos + 1);
     }
+    i++;
+
     while (true)
     {
-        int index = check_if_have_new_boundary(buffer, boundary, client);
-        if (index == -1)
-        {
-            break;
-        }
-        else if (index == 0){
-            buffer = buffer.substr(boundary.size() + 4);
-        }
-        else
-        {
-            std::cout << "here" << std::endl;
-            tmp = buffer.substr(0, index - 2);
-            buffer = buffer.substr(index);
-            fill_data_boudary(tmp, client);
-        }
+        int index = check_if_have_new_boundary(buffer, boundary, client  , size);
+        std::cout << buffer << std::endl;
+        std::cout << index << std::endl;
+        exit(0);
+        // if (index == -1)
+        // {
+        //     break;
+        // }
+        // else if (index == 0){
+        //     buffer += buffer.substr(boundary.size() + 4);
+        // }
+        // else
+        // {
+        //     tmp = buffer.substr(0, index - 2);
+        //     buffer = buffer.substr(index);
+        //     fill_data_boudary(tmp, client);
+        // }
+
     }
+    size = buffer.size();
     if (client.get_all_recv()){
         buffer =  boundary = "";
         i = 0;
     }
 }
-
-
-
-
-
-
 
 
 void handle_boundary_chanked(Client &client)
