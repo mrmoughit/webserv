@@ -92,6 +92,8 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
     if (index != 0)
         std::getline(ss, line);
 
+    std::cout << line << std::endl;
+    // return ;
 
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
@@ -162,7 +164,6 @@ int check_if_have_new_boundary(std::string &buffer, const std::string &boundary,
 {
     std::string boundaryWithPrefix = "--" + boundary;
 
-    
     if (size >= buffer.size()) {
         return -1;
     }
@@ -186,7 +187,7 @@ void boundary(Client &client)
     static int i = 0;
     static std::string boundary;
     std::string tmp;
-    static size_t size = 0;
+    static size_t size;
     static int flag ;
     
     buffer += client.get_request().get_s_request();
@@ -214,9 +215,6 @@ void boundary(Client &client)
         if (pos != std::string::npos) {
             buffer = buffer.substr(pos + 1);
         }
-        size = 0;
-
-
     }
     
     i++;
@@ -226,11 +224,13 @@ void boundary(Client &client)
         int index = check_if_have_new_boundary(buffer, boundary, client, size);
         if (index == -1)
             break;
+        if (index == 0)
+            std::cout << "here" << std::endl;
         else
         {
             tmp = buffer.substr(0, index - 2);
-            if ((index + boundary.size()) < buffer.size()) {
-                buffer = buffer.substr(index + boundary.size());
+            if ((size_t)index < buffer.size()) {
+                buffer = buffer.substr(index);
             } else {
                 buffer.clear();
             }
