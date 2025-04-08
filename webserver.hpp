@@ -26,6 +26,10 @@
 
 extern std::string root;
 extern std::string not_found;
+extern std::string suc;
+extern std::string bad;
+extern std::string method;
+extern std::string forb;
 
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);

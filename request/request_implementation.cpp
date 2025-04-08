@@ -112,7 +112,7 @@ void parse_request(Client &client)
     size_t size;
     ss >> size;
     client.get_request().set_content_length(size);
-    if (ss.fail()){
+    if (ss.fail() || size == 0){
         client.get_response().set_response_index(true);
         get_error_res(res, 400 , client);
     }
@@ -187,7 +187,6 @@ void check_request(Client &client)
         return;
     
 
-
     // client.get_request().print_headers();
     // exit (22);
     const std::string method = client.get_request().get_method();
@@ -203,9 +202,9 @@ void check_request(Client &client)
     
 
      if (method == "POST") {
-        // std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
-        //           << client.get_request().get_path() << " " 
-        //           << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+        std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
+                  << client.get_request().get_path() << " " 
+                  << client.get_request().get_version() << " " << "\033[0m" << std::endl;
         client.get_response().set_response_status(200);
         std::string res = "HTTP/1.1 200 File uploaded successfully \r\nContent-Type: text/html\r\n\r\n\
             <html><head><title>200 File uploaded successfully </title></head><body><center><h1>200 File uploaded successfully </h1></center>\
@@ -213,31 +212,31 @@ void check_request(Client &client)
         client.get_response().set_response(res);
         
 
-        // std::string check = transfer_encoding;
+        std::string check = transfer_encoding;
 
-        // if (content_type.find("boundary=") != std::string::npos && check == "chunked") {
-            // handle_boundary_chanked(client);
-            // return;
-        // }
+        if (content_type.find("boundary=") != std::string::npos && check == "chunked") {
+            handle_boundary_chanked(client);
+            return;
+        }
 
-        // else if (content_type.find("boundary=") != std::string::npos) {
+        else if (content_type.find("boundary=") != std::string::npos) {
             boundary(client);
-        // }
+        }
 
-        // else if (check == "chunked") {
-        //     chunked(client);
-        //     // return;
-        // }
+        else if (check == "chunked") {
+            chunked(client);
+            // return;
+        }
 
-        // else if (check == "application/x-www-form-urlencoded") {
-        //     handle_x_www_form_urlencoded(client);
-        //     // return;
-        // }
-        // else
-        //     hanlde_post_request(client);
-        // if (client.get_all_recv() == true){
-        //     std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() <<  "\033[0m" << std::endl;
-        // }
+        else if (check == "application/x-www-form-urlencoded") {
+            handle_x_www_form_urlencoded(client);
+            // return;
+        }
+        else
+            hanlde_post_request(client);
+        if (client.get_all_recv() == true){
+            std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() <<  "\033[0m" << std::endl;
+        }
     }
     else if (method == "DELETE"){
         client.set_all_recv(true); // check ila chi mecrob 3amr l headers b ktar mn buffer size
