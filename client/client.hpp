@@ -11,9 +11,9 @@ class Client{
         std::map<std::string , std::string> form_data;
         bool keep_alive;
         bool all_recv;
-        ServerBlock server_client_obj;
         
     public:
+        ServerBlock server_client_obj;
         void set_client_id(int fd);
         int get_client_id();
         Request  & get_request();

@@ -38,7 +38,7 @@ class RouteBlock;
 
 
 
-extern std::string root;
+// extern std::string root;
 extern std::string not_found;
 extern std::string suc;
 extern std::string bad;
@@ -62,7 +62,7 @@ void response_to_get(Client &client);
 
 
 void  trim(std::string& str);
-std::string generate_file_names(const std::string& extension) ;
+std::string ft_generate_file_names(Client &client, const std::string& extension);
 void boundary(Client &clinet);
 void chunked(Client &client);
 void trim_non_printable(std::string &str);

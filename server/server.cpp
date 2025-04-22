@@ -338,7 +338,9 @@ void Server::startServer() {
                     // Process the request data
                     std::string req(buffer, bytes_read);
                     clients[client_index].get_request().set_s_request(req);
+                    // std::cout <<"aaaaaaaaaaaaaa" << std::endl;
                     check_request(clients[client_index]);
+                    // std::cout <<"bbbbbbbbbbbb" << std::endl;
 
 
                     

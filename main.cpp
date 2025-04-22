@@ -28,7 +28,7 @@ int hex_to_int(const std::string &hexStr)
     return result;
 }
 
-std::string generate_file_names(const std::string &extension)
+std::string ft_generate_file_names( Client &client ,const std::string& extension)
 {
     static int index;
     std::string name;
@@ -38,7 +38,7 @@ std::string generate_file_names(const std::string &extension)
 
         ss << "file" << index << "." << extension;
         name = ss.str();
-        if (access((root + "/" + name).c_str(), F_OK) != 0)
+        if (access((client.server_client_obj.get_server_root() + "/" + name).c_str(), F_OK) != 0)
             return name;
         index++;
     }
@@ -121,7 +121,7 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                     exit(55);
                 }
                 std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
-                filename  = root + "/" + filename;
+                filename  =  clinet.server_client_obj.get_server_root() + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);
                 std::getline(ss, line);

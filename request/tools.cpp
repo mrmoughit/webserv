@@ -1,5 +1,4 @@
 #include "../webserver.hpp"
-std::string root = "www";
 std::string not_found = "www/pages/404.html";
 std::string suc = "www/pages/200.html";
 std::string bad = "www/pages/400.html";
@@ -97,9 +96,11 @@ std::string getContentType(std::string filePath) {
 
 
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Client &client) {
-    fileStream.open(filePath.c_str(), std::ios::binary | std::ios::ate);
+
+    fileStream.open(filePath.c_str(), std::ios::ate);
     
     if (!fileStream) {
+
         client.get_response().set_response_status(500);
         std::cout  << "Failed to open file: " << filePath << std::endl;
         return  "HTTP/1.1 500 internal error\r\nContent-Type: text/html\r\n\r\n\
@@ -118,6 +119,7 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
     response << "Connection: close\r\n";
     response << "\r\n";
     
+    std::cout << response.str() << std::endl;
     return response.str();
 }
 

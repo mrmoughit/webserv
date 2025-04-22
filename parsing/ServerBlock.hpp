@@ -49,4 +49,8 @@ class ServerBlock{
         std::map<int , std::string> get_error_pages(void);
         std::vector<RouteBlock> get_routes(void);
 
+
+
+        bool is_valid_method(std::string path , std::string method);
+
 };

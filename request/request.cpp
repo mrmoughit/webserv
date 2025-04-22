@@ -232,7 +232,7 @@ void hanlde_post_request(Client &client)
         std::string extension = content_type.substr(pos + 1);
         trim_non_printable(extension);
 
-        std::string file_name = root + "/" + generate_file_names(extension);
+        std::string file_name =  client.server_client_obj.get_server_root() + "/" + ft_generate_file_names(client ,extension);
 
         client.get_request().file.open(file_name.c_str());
         if (!client.get_request().file.is_open())

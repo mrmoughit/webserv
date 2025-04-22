@@ -106,6 +106,17 @@ void parse_request(Client &client)
     }
     std::string tmp = client.get_request().get_map_values("Content-Length");
 
+    if (pa[0] == '/')
+        pa = client.server_client_obj.get_server_root() + &pa[1];
+    if(!client.server_client_obj.is_valid_method(pa , method)){
+
+        std::cout << "here111111"<< std::endl;
+        std::string res = fill_response(client.get_response().get_fileStream(), forb, client);
+        client.get_response().set_response_status(403);
+        client.get_response().set_response(res);
+        client.get_response().set_response_index(true);
+        return ;
+    }
 
     if (method == "POST"){
     std::istringstream ss(tmp);
@@ -180,15 +191,13 @@ void  handle_delete_request(std::string path)
 void check_request(Client &client)
 {
 
-
     if (!client.get_request().get_parse_index())
         parse_request(client);
-    if (client.get_response().get_response_index())
+    if (client.get_response().get_response_index()){
+        client.set_all_recv(true);
         return;
-    
+    }
 
-    // client.get_request().print_headers();
-    // exit (22);
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
@@ -245,7 +254,7 @@ void check_request(Client &client)
         std::string res = "HTTP/1.1 200 File deleted \r\nContent-Type: text/html\r\n\r\n\
             <html><head><title>200 File deleted </title></head><body><center><h1>200 File deleted </h1></center>\
             <hr><center>42 webserv 0.1</center></body></html>";
-        std::string path = root  + client.get_request().get_path();
+        std::string path = client.server_client_obj.get_server_root()  + client.get_request().get_path();
         handle_delete_request(path);
         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() <<  "\033[0m" << std::endl;
     }
