@@ -1,93 +1,480 @@
-trim non print char in headres fill
-multi post request
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 6
+GET request ====> GET /video.mp4 
+Responsed by ====> 404
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 4330
+Accept-Ranges: bytes
+Connection: close
 
 
+From rcv Client disconnected. Socket FD: 6
+ from close function: Closing client connection. Socket FD: 6
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 6
+GET request ====> GET /favicon.ico 
+Responsed by ====> 404
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 4330
+Accept-Ranges: bytes
+Connection: close
 
 
-error pages dynamic
-auto index on off
-post req wihout body 
+From rcv Client disconnected. Socket FD: 6
+ from close function: Closing client connection. Socket FD: 6
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 6
+GET request ====> GET / 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 794
+Accept-Ranges: bytes
+Connection: close
 
 
+From rcv Client disconnected. Socket FD: 6
+ from close function: Closing client connection. Socket FD: 6
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 6
+GET request ====> GET /favicon.ico 
+Responsed by ====> 404
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 4330
+Accept-Ranges: bytes
+Connection: close
 
 
+From rcv Client disconnected. Socket FD: 6
+ from close function: Closing client connection. Socket FD: 6
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 6
+GET request ====> GET /healet-html/index.html 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 19986
+Accept-Ranges: bytes
+Connection: close
 
 
+From rcv Client disconnected. Socket FD: 6
+ from close function: Closing client connection. Socket FD: 6
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 6
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 12
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 13
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 14
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 15
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 16
+GET request ====> GET /healet-html/css/responsive.css 
+Responsed by ====> 200
+GET request ====> GET /healet-html/css/style.css 
+Responsed by ====> 200
+GET request ====> GET /healet-html/css/font-awesome.min.css 
+Responsed by ====> 200
+GET request ====> GET /healet-html/images/slider-bg.jpg 
+Responsed by ====> 200
+GET request ====> GET /healet-html/css/bootstrap.css 
+Responsed by ====> 200
+GET request ====> GET /healet-html/js/jquery-3.4.1.min.js 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:text/css
+Content-Length: 2020
+Accept-Ranges: bytes
+Connection: close
 
 
+ >>HTTP/1.1 200 OK
+Content-Type:text/css
+Content-Length: 18554
+Accept-Ranges: bytes
+Connection: close
 
 
+ >>HTTP/1.1 200 OK
+Content-Type:text/css
+Content-Length: 31000
+Accept-Ranges: bytes
+Connection: close
 
 
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 387472
+Accept-Ranges: bytes
+Connection: close
 
 
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
------------------------7894561212
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-----------------------------------7841212
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
---------------------------------------------------76543
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
-gfdasgfdagahgdhgfdagfda
----------------------------------------756432--------------
+ >>HTTP/1.1 200 OK
+Content-Type:text/css
+Content-Length: 192348
+Accept-Ranges: bytes
+Connection: close
+
+
+ >>HTTP/1.1 200 OK
+Content-Type:application/javascript
+Content-Length: 88145
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 16
+ from close function: Closing client connection. Socket FD: 16
+From rcv Client disconnected. Socket FD: 15
+ from close function: Closing client connection. Socket FD: 15
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 15
+From rcv Client disconnected. Socket FD: 14
+ from close function: Closing client connection. Socket FD: 14
+GET request ====> GET /healet-html/images/p1.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 114925
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 16
+GET request ====> GET /healet-html/images/p2.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 71102
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 24
+From rcv Client disconnected. Socket FD: 6
+ from close function: Closing client connection. Socket FD: 6
+GET request ====> GET /healet-html/images/p3.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 43912
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 25
+From rcv Client disconnected. Socket FD: 12
+ from close function: Closing client connection. Socket FD: 12
+GET request ====> GET /healet-html/images/p4.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 75820
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 26
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 27
+From rcv Client disconnected. Socket FD: 13
+ from close function: Closing client connection. Socket FD: 13
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 13
+From rcv Client disconnected. Socket FD: 15
+ from close function: Closing client connection. Socket FD: 15
+GET request ====> GET /healet-html/fonts/octin_sports_rg.ttf 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:
+Content-Length: 64496
+Accept-Ranges: bytes
+Connection: close
+
+
+GET request ====> GET /healet-html/js/jquery-3.4.1.min.js 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:application/javascript
+Content-Length: 88145
+Accept-Ranges: bytes
+Connection: close
+
+
+GET request ====> GET /healet-html/js/bootstrap.js 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:application/javascript
+Content-Length: 136799
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 16
+ from close function: Closing client connection. Socket FD: 16
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 16
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 30
+From rcv Client disconnected. Socket FD: 26
+ from close function: Closing client connection. Socket FD: 26
+From rcv Client disconnected. Socket FD: 24
+ from close function: Closing client connection. Socket FD: 24
+GET request ====> GET /healet-html/js/custom.js 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:application/javascript
+Content-Length: 818
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 26
+GET request ====> GET /healet-html/images/p5.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 43308
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 25
+ from close function: Closing client connection. Socket FD: 25
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 25
+From rcv Client disconnected. Socket FD: 27
+ from close function: Closing client connection. Socket FD: 27
+GET request ====> GET /healet-html/images/p6.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 97218
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 16
+ from close function: Closing client connection. Socket FD: 16
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 16
+From rcv Client disconnected. Socket FD: 13
+ from close function: Closing client connection. Socket FD: 13
+GET request ====> GET /healet-html/images/p7.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 30312
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 32
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 30
+GET request ====> GET /healet-html/images/p8.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 40082
+Accept-Ranges: bytes
+Connection: close
+
+
+GET request ====> GET /healet-html/images/o1.jpg 
+Responsed by ====> 200
+GET request ====> GET /healet-html/images/about-img.jpg 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 149767
+Accept-Ranges: bytes
+Connection: close
+
+
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 238226
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 36
+From rcv Client disconnected. Socket FD: 16
+ from close function: Closing client connection. Socket FD: 16
+From rcv Client disconnected. Socket FD: 25
+ from close function: Closing client connection. Socket FD: 25
+GET request ====> GET /healet-html/images/o2.jpg 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 77118
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 25
+From rcv Client disconnected. Socket FD: 26
+ from close function: Closing client connection. Socket FD: 26
+GET request ====> GET /healet-html/images/o3.jpg 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 54194
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 37
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 38
+GET request ====> GET /healet-html/images/b1.jpg 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 63734
+Accept-Ranges: bytes
+Connection: close
+
+
+GET request ====> GET /healet-html/images/b2.jpg 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 83620
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 36
+ from close function: Closing client connection. Socket FD: 36
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+From rcv Client disconnected. Socket FD: 32
+ from close function: Closing client connection. Socket FD: 32
+From rcv Client disconnected. Socket FD: 37
+ from close function: Closing client connection. Socket FD: 37
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 30
+From rcv Client disconnected. Socket FD: 25
+ from close function: Closing client connection. Socket FD: 25
+GET request ====> GET /healet-html/images/client.jpg 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/jpeg
+Content-Length: 48083
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 38
+ from close function: Closing client connection. Socket FD: 38
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 30
+GET request ====> GET /healet-html/js/custom.js 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:application/javascript
+Content-Length: 818
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 36
+GET request ====> GET /healet-html/js/bootstrap.js 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:application/javascript
+Content-Length: 136799
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+From rcv Client disconnected. Socket FD: 36
+ from close function: Closing client connection. Socket FD: 36
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 30
+GET request ====> GET /healet-html/fonts/fontawesome-webfont.woff2?v=4.7.0 
+Responsed by ====> 404
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 4330
+Accept-Ranges: bytes
+Connection: close
+
+
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 38
+GET request ====> GET /healet-html/index.html 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 19986
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+From rcv Client disconnected. Socket FD: 38
+ from close function: Closing client connection. Socket FD: 38
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 4 - Client FD: 30
+GET request ====> GET /healet-html/fonts/fontawesome-webfont.woff?v=4.7.0 
+Responsed by ====> 404
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 4330
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 30
+GET request ====> GET /healet-html/fonts/fontawesome-webfont.ttf?v=4.7.0 
+Responsed by ====> 404
+ >>HTTP/1.1 200 OK
+Content-Type:text/html
+Content-Length: 4330
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
+123
+New client connected on 127.0.0.1:8080 (Name: www.mywebsite.com)server fd: 5 - Client FD: 30
+GET request ====> GET /healet-html/images/favicon.png 
+Responsed by ====> 200
+ >>HTTP/1.1 200 OK
+Content-Type:image/png
+Content-Length: 18433
+Accept-Ranges: bytes
+Connection: close
+
+
+From rcv Client disconnected. Socket FD: 30
+ from close function: Closing client connection. Socket FD: 30
