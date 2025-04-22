@@ -290,15 +290,63 @@ void handle_boundary_chanked(Client &client)
 
 int main(int ac, char **av)
 {
-    (void)ac;
+
     (void)av;
-    try
+    Server S1;
+    if (ac == 2)
     {
-        Server S1;
+        std::ifstream infile(av[1]);
+        if (!infile.is_open())
+        {
+            std::cerr << "Error opening file!" << std::endl;
+            return (1);
+        }
+        std::string part;
+        std::vector<std::string> parts;
+        // std::vector<std::string>::iterator it = parts.begin();
+
+        while(std::getline(infile, part, ';'))
+            parts.push_back(part);
+        if (parts.empty())
+            std::cerr << "Error empty file!" << std::endl;
+        // for (size_t i = 0; i < parts.size(); ++i) {
+        //     std::cout << "part " << i + 1 << ": " << parts[i] << std::endl;
+        // }
+        size_t i = 0;
+	    while (parts.size() > i)
+	    {
+			// std::cout << "before replace: " << parts[i] << std::endl;
+			std::replace(parts[i].begin() , parts[i].end() , '\n' , ' ');
+			// std::replace(parts[i].begin(), parts[i].end(), '\r', ' ');
+			// std::cout << "fter replace: " << parts[i] << std::endl;
+			i++;
+	    }
+        // switch_parts(parts);
+        // exit(1);
+        Confile conf;
+
+        conf.set_server(parts);
+        if (conf.status == false)
+            return (std::cout << "Fixe config file and try again!" << std::endl, 1);
+        S1.number_of_servers = conf.number_of_server;
+        std::vector <ServerBlock> servers = conf.get_server();
+        // std::cout << servers[1].get_host() << std::endl;
+        // exit(1);
+        S1.server_block_obj = servers;
+        for (size_t i = 0; i < conf.number_of_server ; i++)
+        {
+            S1.addServerConfig(servers[i].get_host(), servers[i].get_host(), servers[i].get_port());
+        }
+    }
+    // return (0);
+    // try
+    // {
+     
+        
         S1.startServer();
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << '\n';
-    }
+    // }
+    // catch (const std::exception &e)
+    // {
+    //     std::cerr << e.what() << '\n';
+    // }
 }
