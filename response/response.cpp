@@ -65,7 +65,12 @@ void response_to_get(Client &client)
 
     if (stat(client.get_request().get_path().c_str(), &path_stat) == -1)
     {
-        res = fill_response(client.get_response().get_fileStream(), not_found, client);
+        std::string path = client.server_client_obj.find_error_page_path(404);
+        if(path == "NULL"){
+            std::cout << "you don't have a path of this code "<< std::endl;
+            exit (33);
+        }
+        res = fill_response(client.get_response().get_fileStream(), path, client);
         client.get_response().set_response_status(404);
         client.get_response().set_response(res);
 
@@ -76,7 +81,12 @@ void response_to_get(Client &client)
     {
         if (access(pat.c_str(), R_OK | W_OK | X_OK) == -1)
         {
-            res = fill_response(client.get_response().get_fileStream(), forb, client);
+        std::string path = client.server_client_obj.find_error_page_path(403);
+        if(path == "NULL"){
+            std::cout << "you don't have a path of this code "<< std::endl;
+            exit (33);
+        }
+            res = fill_response(client.get_response().get_fileStream(), path, client);
             client.get_response().set_response_status(403);
             client.get_response().set_response(res);
             return;
@@ -85,7 +95,12 @@ void response_to_get(Client &client)
 
         if (dir == NULL)
         {
-            res = fill_response(client.get_response().get_fileStream(), not_found, client);
+             std::string path = client.server_client_obj.find_error_page_path(404);
+        if(path == "NULL"){
+            std::cout << ""<< std::endl;
+            exit (33);
+        }
+            res = fill_response(client.get_response().get_fileStream(), path, client);
             client.get_response().set_response_status(404);
             client.get_response().set_response(res);
             return;
@@ -132,7 +147,12 @@ void response_to_get(Client &client)
     else
     {
         client.get_response().set_response_status(404);
-        res = fill_response(client.get_response().get_fileStream(), not_found, client);
+         std::string path = client.server_client_obj.find_error_page_path(404);
+        if(path == "NULL"){
+            std::cout << "you don't have a path of this code "<< std::endl;
+            exit (33);
+        }
+        res = fill_response(client.get_response().get_fileStream(), path, client);
     }
     client.get_response().set_response(res);
 }

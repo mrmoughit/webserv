@@ -1,9 +1,9 @@
 #include "../webserver.hpp"
-std::string not_found = "www/pages/404.html";
-std::string suc = "www/pages/200.html";
-std::string bad = "www/pages/400.html";
-std::string method = "www/pages/405.html";
-std::string forb = "www/pages/403.html";
+// std::string not_found = "www/pages/404.html";
+// std::string suc = "www/pages/200.html";
+// std::string bad = "www/pages/400.html";
+// std::string method = "www/pages/405.html";
+// std::string forb = "www/pages/403.html";
 
 
 

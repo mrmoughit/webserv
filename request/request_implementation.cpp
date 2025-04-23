@@ -111,7 +111,7 @@ void parse_request(Client &client)
     if(!client.server_client_obj.is_valid_method(pa , method)){
         path = client.server_client_obj.find_error_page_path(403);
         if(path == "NULL"){
-            std::cout << "you don't have a path of this code "<< std::endl;
+            std::cout << "you don't have a path of this code 222 "<< std::endl;
             exit (33);
         }
         std::string res = fill_response(client.get_response().get_fileStream(), path, client);
