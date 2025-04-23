@@ -152,3 +152,16 @@ bool ServerBlock::is_valid_method(std::string path, std::string method)
     }
     return true;
 }
+
+
+
+std::string ServerBlock::find_error_page_path(int n){
+    std::map<int , std::string>::iterator it = error_pages.begin();
+    while (it != error_pages.end())
+    {
+        if(it->first == n)
+            return it->second;
+        ++it;
+    }
+    return "NULL";
+}

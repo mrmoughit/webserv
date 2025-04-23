@@ -52,5 +52,6 @@ class ServerBlock{
 
 
         bool is_valid_method(std::string path , std::string method);
+        std::string find_error_page_path(int n);
 
 };

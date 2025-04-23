@@ -109,9 +109,12 @@ void parse_request(Client &client)
     if (pa[0] == '/')
         pa = client.server_client_obj.get_server_root() + &pa[1];
     if(!client.server_client_obj.is_valid_method(pa , method)){
-
-        std::cout << "here111111"<< std::endl;
-        std::string res = fill_response(client.get_response().get_fileStream(), forb, client);
+        path = client.server_client_obj.find_error_page_path(403);
+        if(path == "NULL"){
+            std::cout << "you don't have a path of this code "<< std::endl;
+            exit (33);
+        }
+        std::string res = fill_response(client.get_response().get_fileStream(), path, client);
         client.get_response().set_response_status(403);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
