@@ -43,7 +43,7 @@ class RouteBlock;
 // extern std::string suc;
 // extern std::string bad;
 // extern std::string forb;
-extern std::string method;
+// extern std::string method;
 
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);

@@ -111,7 +111,7 @@ size_t ServerBlock::get_client_body_size(void)
 
 void ServerBlock::set_error_pages(std::map<int, std::string> set_error_pages)
 {
-    error_pages = set_error_pages;
+    error_pages.insert(set_error_pages.begin() , set_error_pages.end()) ;
 }
 
 std::map<int, std::string> ServerBlock::get_error_pages(void)
@@ -132,11 +132,10 @@ std::vector<RouteBlock> ServerBlock::get_routes(void)
 bool ServerBlock::is_valid_method(std::string path, std::string method)
 {
     int i = 0;
-    (void)method;
-    (void)path;
+
     while (i < (int)routes.size())
     {
-        if(path == routes[i].get_root())
+        if(path == (routes[i].get_root() + routes[i].get_uri()))
         {
             std::cout << routes[i].get_root()<<std::endl;
             int j = 0;
@@ -160,10 +159,10 @@ std::string ServerBlock::find_error_page_path(int n){
     (void)n;
     while (it != error_pages.end())
     {
-        std::cout << it->first << std::endl;
-        std::cout << it->second << std::endl;
-        // if(it->first == n)
-        //     return it->second;
+        // std::cout << it->first << std::endl;
+        // std::cout << it->second << std::endl;
+        if(it->first == n)
+            return it->second;
         ++it;
     }
     return "NULL";

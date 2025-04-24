@@ -107,7 +107,7 @@ void parse_request(Client &client)
     std::string tmp = client.get_request().get_map_values("Content-Length");
 
     if (pa[0] == '/')
-        pa = client.server_client_obj.get_server_root() + &pa[1];
+        pa = client.server_client_obj.get_server_root() + "/" + &pa[1];
     if(!client.server_client_obj.is_valid_method(pa , method)){
         path = client.server_client_obj.find_error_page_path(403);
         if(path == "NULL"){

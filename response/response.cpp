@@ -47,16 +47,33 @@ Response::Response()
     Ready_to_send = false;
 };
 
+
+std::string check_auto_index(Client &client , int *index){
+
+    int i = 0;
+    *index = 2;
+    while(i < (int)client.server_client_obj.get_routes().size()){
+        if (client.get_request().get_path() == (client.server_client_obj.get_server_root() + client.server_client_obj.get_routes()[i].get_uri()))
+        {
+        if (!client.server_client_obj.get_routes()[i].get_autoindex()){
+                *index=1;
+            std::string path = client.server_client_obj.find_error_page_path(403);
+            if(path == "NULL"){
+                std::cout << "mochkil dyal path not exist"<< std::endl;
+                exit (33);
+            }
+            client.get_response().set_response_status(403);
+            return  fill_response(client.get_response().get_fileStream(), path, client);
+        }
+        }
+        i++;
+    }
+    return "";
+}
 void response_to_get(Client &client)
 {
     std::cout << "\033[34m" << "GET request ====> " << client.get_request().get_method() << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
     std::string res = client.get_response().get_response();
-
-    if (client.get_request().get_path() == "/")
-    {
-        std::string p = "/index.html";
-        client.get_request().set_path(p);
-    }
 
     std::string pat =  client.server_client_obj.get_server_root() + "/" + client.get_request().get_path().substr(1);
     client.get_request().set_path(pat);
@@ -81,8 +98,8 @@ void response_to_get(Client &client)
     {
         if (access(pat.c_str(), R_OK | W_OK | X_OK) == -1)
         {
-        std::string path = client.server_client_obj.find_error_page_path(403);
-        if(path == "NULL"){
+            std::string path = client.server_client_obj.find_error_page_path(403);
+            if(path == "NULL"){
             std::cout << "you don't have a path of this code "<< std::endl;
             exit (33);
         }
@@ -95,17 +112,37 @@ void response_to_get(Client &client)
 
         if (dir == NULL)
         {
-             std::string path = client.server_client_obj.find_error_page_path(404);
-        if(path == "NULL"){
-            std::cout << ""<< std::endl;
-            exit (33);
-        }
+            std::string path = client.server_client_obj.find_error_page_path(404);
+            if(path == "NULL"){
+                std::cout << "mochkil dyal path not exist"<< std::endl;
+                exit (33);
+            }
             res = fill_response(client.get_response().get_fileStream(), path, client);
             client.get_response().set_response_status(404);
             client.get_response().set_response(res);
             return;
         }
+        int flag = 0;
+          struct stat default_file;
+          std::string str = client.get_request().get_path() + "/" + "index.html";
+        if (stat(str.c_str(), &default_file) == -1)
+        {
+             flag = 0;
+            std::string test  = check_auto_index(client , &flag);
+            client.get_response().set_response(test);
+            if (flag == 1)
+            return;
+        }
+        else{
+            res = fill_response(client.get_response().get_fileStream(), str, client);
+            client.get_response().set_response(res);
+            return ;
+        }
 
+
+        if (flag == 0){
+
+        }
         struct dirent *entry;
         client.get_response().set_response_status(200);
         res = "HTTP/1.1 200 OK\r\n";
@@ -147,7 +184,7 @@ void response_to_get(Client &client)
     else
     {
         client.get_response().set_response_status(404);
-         std::string path = client.server_client_obj.find_error_page_path(404);
+        std::string path = client.server_client_obj.find_error_page_path(404);
         if(path == "NULL"){
             std::cout << "you don't have a path of this code "<< std::endl;
             exit (33);

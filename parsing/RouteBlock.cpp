@@ -14,6 +14,7 @@
 
 RouteBlock::RouteBlock()
 {
+    autoindex = false;
     // std::cout << "RouteBlock Default constructor " << std::endl;
 }
 RouteBlock::~RouteBlock()
