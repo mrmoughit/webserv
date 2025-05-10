@@ -378,6 +378,7 @@ void Server::startServer() {
                     // Switch back to POLLIN for next request
                     pollfds[idx].events = POLLIN;
                     
+                    std::cout << "conection status : " <<  client.get_Alive() << std::endl;
                     // Check if we need to close the connection
                     if (!client.get_Alive()) {
                         closeClientConnection(idx);
@@ -421,7 +422,7 @@ void Server::handleClientWrite(size_t index) {
     if (!client.get_request().is_string_req_send) {
         const std::string& response = client.get_response().get_response();
         ssize_t bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
-        std::cout << " >>" << response << std::endl;
+        std::cout << "response >>" << response << std::endl;
         if (bytes_sent < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 return; // Retry in next POLLOUT
