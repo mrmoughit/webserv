@@ -82,19 +82,18 @@ void chunked(Client &client)
     }
 }
 
+
+
 void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
 {
     std::istringstream ss(tmp);
     std::string line;
     std::ofstream file;
-
     std::getline(ss, line);
     if (index != 0)
         std::getline(ss, line);
-
     std::cout << line << std::endl;
     // return ;
-
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
     {
@@ -125,7 +124,6 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                 file.open(filename.c_str());
                 std::getline(ss, line);
                 std::getline(ss, line);
-
                 while (1)
                 {
                     char c;
@@ -158,74 +156,72 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
         }
     }
 }
-
-
 int check_if_have_new_boundary(std::string &buffer, const std::string &boundary, Client &client, size_t size)
 {
     std::string boundaryWithPrefix = "--" + boundary;
-
     if (size >= buffer.size()) {
         return -1;
     }
-    
+
     std::string tmp = buffer.substr(size);
     size_t pos = tmp.find(boundaryWithPrefix);
     if (pos == std::string::npos)
         return -1;
-        
+
     size_t last_Boundary = size + pos + boundaryWithPrefix.size();
     if (last_Boundary + 2 <= buffer.size() &&
-        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-')
+        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-'){
         client.set_all_recv(true);
-        
+        std::cout << "my job done here " << std::endl;
+        // exit(15);
+    }
+
     return static_cast<int>(pos + size);
 }
-
 void boundary(Client &client)
 {
+
     static std::string buffer;
     static int i = 0;
     static std::string boundary;
     std::string tmp;
     static size_t size;
     static int flag ;
-    
+
     buffer += client.get_request().get_s_request();
-    
+
     if (i == 0)
     {
-        
+
         std::istringstream ss(buffer);
         std::getline(ss, tmp);
-        
+
         size_t pos = tmp.find_first_not_of("-");
         if (pos == std::string::npos) {
             std::cerr << "Invalid boundary format" << std::endl;
             return;
         }
-        
+
         size_t end = tmp.find("\r");
         if (end == std::string::npos) {
             end = tmp.length();
         }
-        
+
         boundary = tmp.substr(pos, end - pos);
         pos = buffer.find("\n");
-        
+
         if (pos != std::string::npos) {
             buffer = buffer.substr(pos + 1);
         }
     }
-    
     i++;
-    
+
     while (true)
     {
         int index = check_if_have_new_boundary(buffer, boundary, client, size);
-        if (index == -1)
+        if (index == -1){
             break;
-        if (index == 0)
-            std::cout << "here" << std::endl;
+        }
         else
         {
             tmp = buffer.substr(0, index - 2);
@@ -238,7 +234,7 @@ void boundary(Client &client)
             flag = 1;
         }
     }
-    
+
     size = buffer.size();
     if (client.get_all_recv()) {
         buffer.clear();
@@ -253,38 +249,58 @@ void boundary(Client &client)
 
 void handle_boundary_chanked(Client &client)
 {
-    static std::string request;
-    request += client.get_request().get_s_request();
-    static std::string result;
-    std::string line;
+    static std::string backup;
+    std::string request = backup + client.get_request().get_s_request();
+    backup.clear(); // Clear backup after using it
+    
     while (true)
     {
+        // Find the next chunk size line
         size_t pos = request.find("\r\n");
-
         if (pos == std::string::npos)
         {
+            // Incomplete chunk line, store and wait for more data
+            backup = request;
             return;
         }
-
-        line = request.substr(0, pos + 2);
-        size_t size = hex_to_int(line);
+        
+        // Extract the chunk size line
+        std::string line_size = request.substr(0, pos);
+        size_t size = hex_to_int(line_size);
+        
+        // Check if we've reached the last chunk (size 0)
         if (size == 0)
         {
             client.set_all_recv(true);
-            client.get_request().set_s_request(result);
-            request = result = "";
+            client.get_request().set_s_request(request);
+            backup.clear();
             boundary(client);
             return;
         }
-        std::string tmp = request.substr(pos + 2);
-        if (tmp.size() < size)
+        
+        // Verify we have enough data for this chunk
+        if (request.size() < pos + 2 + size + 2)  // +2 for \r\n after size, +2 for \r\n after content
+        {
+            // Not enough data yet, store and wait for more
+            backup = request;
+            return;
+        }
+        
+        // Extract the chunk content
+        std::string chunk = request.substr(pos + 2, size);
+        
+        // Set the request to the extracted chunk and process it
+        client.get_request().set_s_request(chunk);
+        boundary(client);
+        
+        // Move to the next chunk
+        request = request.substr(pos + 2 + size + 2);  // +2 for \r\n after size, +2 for \r\n after content
+        
+        // If no more data, stop processing for now
+        if (request.empty())
         {
             return;
         }
-        request = request.substr(pos + 2);
-        result += request.substr(0, size);
-
-        request = request.substr(size + 2);
     }
 }
 

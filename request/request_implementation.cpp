@@ -213,7 +213,7 @@ void check_request(Client &client)
     }
     
 
-     if (method == "POST") {
+    if (method == "POST") {
         std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
                   << client.get_request().get_path() << " " 
                   << client.get_request().get_version() << " " << "\033[0m" << std::endl;
