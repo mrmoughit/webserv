@@ -70,12 +70,19 @@ std::string check_auto_index(Client &client , int *index){
     }
     return "";
 }
+
+
+
+
+
 void response_to_get(Client &client)
 {
     std::cout << "\033[34m" << "GET request ====> " << client.get_request().get_method() << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
     std::string res = client.get_response().get_response();
+    std::string pat =  client.get_request().get_path();
 
-    std::string pat =  client.server_client_obj.get_server_root() + "/" + client.get_request().get_path().substr(1);
+
+
     client.get_request().set_path(pat);
 
     struct stat path_stat;
@@ -167,8 +174,11 @@ void response_to_get(Client &client)
         while ((entry = readdir(dir)) != NULL)
         {
             std::string fileName = entry->d_name;
-            res += "<li><a href=\"/" + pat.substr(4) + "/" + fileName + "\">" + fileName + "</a></li>\n";
-            // 4 must be changed to adjust for the root directory size
+
+            if (client.server_client_obj.is_location_url)
+                res += "<li><a href=\"/" + client.get_request().get_path().substr(client.server_client_obj.is_location_url) + "/" + fileName + "\">" + fileName + "</a></li>\n";
+            else
+                res += "<li><a href=\"/" + client.get_request().get_path().substr(client.server_client_obj.get_server_root().size()) + "/" + fileName + "\">" + fileName + "</a></li>\n";
         }
 
         res += "</ul>\n</div>\n</body>\n</html>\n";

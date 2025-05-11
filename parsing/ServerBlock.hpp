@@ -18,7 +18,7 @@ class RouteBlock;
 class ServerBlock{
     private:
         std::string                    Host;
-        int                             Port;
+        int                            Port;
         std::vector<std::string>       Server_names;
         std::string                    server_root;
         size_t                         client_body_size;
@@ -27,7 +27,8 @@ class ServerBlock{
         std::map<int, std::string>     error_pages;
         // std::string                    client_body_temp_path;
     public:
-    size_t brace_count;
+        int is_location_url;
+        size_t brace_count;
         ServerBlock();
         ~ServerBlock();
         ServerBlock(const ServerBlock& other);
@@ -53,5 +54,6 @@ class ServerBlock{
 
         bool is_valid_method(std::string path , std::string method);
         std::string find_error_page_path(int n);
+        std::string  is_location_path(std::string path);
 
 };

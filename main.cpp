@@ -180,7 +180,6 @@ int check_if_have_new_boundary(std::string &buffer, const std::string &boundary,
 }
 void boundary(Client &client)
 {
-
     static std::string buffer;
     static int i = 0;
     static std::string boundary;

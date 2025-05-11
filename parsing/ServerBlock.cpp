@@ -15,6 +15,7 @@
 ServerBlock::ServerBlock()
 {
     brace_count = 0;
+    is_location_url = false;
     // std::cout << "ServerBlock Default constructor called" << std::endl;
 }
 ServerBlock::~ServerBlock()
@@ -132,12 +133,14 @@ std::vector<RouteBlock> ServerBlock::get_routes(void)
 bool ServerBlock::is_valid_method(std::string path, std::string method)
 {
     int i = 0;
+    size_t pos;
 
     while (i < (int)routes.size())
     {
-        if(path == (routes[i].get_root() + routes[i].get_uri()))
+        pos = path.find(routes[i].get_root()+ routes[i].get_uri());
+        if(pos != std::string::npos)
         {
-            std::cout << routes[i].get_root()<<std::endl;
+            // std::cout << pos <<  "i find it " << std::endl;
             int j = 0;
             while(j < (int)routes[i].get_methods().size())
             {
@@ -149,9 +152,33 @@ bool ServerBlock::is_valid_method(std::string path, std::string method)
         }
         i++;
     }
+    // std::cout  <<  "nOOOOOOOOOOOOOOO " << std::endl;
+
     return true;
 }
 
+std::string  ServerBlock::is_location_path(std::string path){
+    int i = 0;
+
+    path = path.substr(1);
+    size_t pos = path.find("/");
+
+
+    path = "/" + path;
+    if (pos == 0 || pos == std::string::npos){
+        pos = path.size();
+    }
+    
+    while (i < (int)routes.size())
+    {
+        if(!strncmp(path.c_str() , routes[i].get_uri().c_str() , pos)){
+            is_location_url = i;
+            return routes[i].get_root() + path;
+        }
+        i++;
+    }
+    return "";
+}
 
 
 std::string ServerBlock::find_error_page_path(int n){

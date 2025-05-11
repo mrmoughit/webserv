@@ -1,5 +1,6 @@
 #include "../webserver.hpp"
 
+
 void parse_request(Client &client)
 {
     client.get_request().set_parse_index(true);
@@ -106,8 +107,14 @@ void parse_request(Client &client)
     }
     std::string tmp = client.get_request().get_map_values("Content-Length");
 
-    if (pa[0] == '/')
-        pa = client.server_client_obj.get_server_root() + "/" + &pa[1];
+    std::string tmp1 = pa;
+    pa = client.server_client_obj.is_location_path(pa);
+    if (tmp1[0] == '/' && pa.size() == 0){
+        pa = client.server_client_obj.get_server_root() + "/" + &tmp1[1];
+        std::cout << pa << std::endl;
+    }
+    if (pa.size() > 0)
+        client.get_request().set_path(pa);
     if(!client.server_client_obj.is_valid_method(pa , method)){
         path = client.server_client_obj.find_error_page_path(403);
         if(path == "NULL"){
@@ -120,7 +127,7 @@ void parse_request(Client &client)
         client.get_response().set_response_index(true);
         return ;
     }
-
+    
     if (method == "POST"){
     std::istringstream ss(tmp);
     size_t size;
