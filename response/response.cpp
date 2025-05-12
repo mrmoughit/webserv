@@ -74,8 +74,6 @@ std::string check_auto_index(Client &client , int *index){
 
 
 
-
-
 void response_to_get(Client &client)
 {
     std::cout << "\033[34m" << "GET request ====> " << client.get_request().get_method() << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
@@ -132,7 +130,30 @@ void response_to_get(Client &client)
         }
         int flag = 0;
         struct stat default_file;
-        std::string str = client.get_request().get_path() + "/" + "index.html";
+        std::string str ;
+
+
+        if (!client.server_client_obj.get_index().size() && client.server_client_obj.is_location_url == -1)               // i don't have a indexes and the url is not location 
+            str =  client.get_request().get_path() + "/" + "index.html";
+        
+        else if (client.server_client_obj.is_location_url  > -1){                          //  if i have locaion 
+            if (client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index().size() == 0)
+                str =  client.get_request().get_path() + "/" + "index.html";
+            else {
+
+            }
+                // loop for avery index then find one is valid 
+        }
+
+        else if (client.server_client_obj.is_location_url == -1 && client.server_client_obj.get_index().size()) {
+            
+            for (size_t i = 0 ; i < client.server_client_obj.get_index().size() ; i++){
+                str = client.get_request().get_path() + "/" + client.server_client_obj.get_index()[i];
+                std::cout << str << std::endl;
+                if (stat(str.c_str(), &default_file) == 0)
+                    break ;
+            }
+        }
 
 
         
