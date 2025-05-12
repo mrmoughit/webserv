@@ -212,7 +212,7 @@ void Server::closeClientConnection(size_t index) {
     }
     
     // Close socket and remove from main pollfds
-    std::cout << "\033[31m from clodse function Closing client connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
+    // std::cout << "\033[31m from clodse function Closing client connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
     close(client_fd);
     pollfds.erase(pollfds.begin() + index);
 }
@@ -326,11 +326,11 @@ void Server::startServer() {
                     // exit(1);
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
-                            std::cout << "\033[31mFrom rcv Client disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
+                            // std::cout << "\033[31mFrom rcv Client disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
                         } else {
                             std::cerr << "Recv error on fd " << client_fd << ": " << strerror(errno) << std::endl;
                         }
-                        std::cout << bytes_read << " hereeeeeeeeeeeeeeeeeeeee" << std::endl;
+                        // std::cout << bytes_read << " hereeeeeeeeeeeeeeeeeeeee" << std::endl;
                         closeClientConnection(idx);
                         continue;
                     }
@@ -378,7 +378,7 @@ void Server::startServer() {
                     // Switch back to POLLIN for next request
                     pollfds[idx].events = POLLIN;
                     
-                    std::cout << "conection status : " <<  client.get_Alive() << std::endl;
+                    // std::cout << "conection status : " <<  client.get_Alive() << std::endl;
                     // Check if we need to close the connection
                     if (!client.get_Alive()) {
                         closeClientConnection(idx);
@@ -422,7 +422,7 @@ void Server::handleClientWrite(size_t index) {
     if (!client.get_request().is_string_req_send) {
         const std::string& response = client.get_response().get_response();
         ssize_t bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
-        std::cout << "response >>" << response << std::endl;
+        // std::cout << "response >>" << response << std::endl;
         if (bytes_sent < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 return; // Retry in next POLLOUT

@@ -133,8 +133,6 @@ void response_to_get(Client &client)
         struct stat default_file;
         std::string str = client.get_request().get_path() + "/" + "index.html";
 
-        // client.get_request().set_path(str);
-
 
         
         if (stat(str.c_str(), &default_file) == -1)
@@ -146,15 +144,14 @@ void response_to_get(Client &client)
             return;
         }
         else{
+            std::cout <<"str ====>"<< str << std::endl;
             res = fill_response(client.get_response().get_fileStream(), str, client);
             client.get_response().set_response(res);
             return ;
         }
 
+        exit (52);
 
-        if (flag == 0){
-
-        }
         struct dirent *entry;
         client.get_response().set_response_status(200);
         res = "HTTP/1.1 200 OK\r\n";
@@ -181,16 +178,10 @@ void response_to_get(Client &client)
         while ((entry = readdir(dir)) != NULL)
         {
             std::string fileName = entry->d_name;
-            std::cout <<"the fucking number   "<<  client.server_client_obj.is_location_url << std::endl;
-            
             if (client.server_client_obj.is_location_url > -1){
-                std::cout << "----------------> " << client.get_request().get_path() << std::endl;
-                std::cout << "----------------> " << client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_uri() << std::endl;
                 res += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_root().size() ) + "/" + fileName + "\">" + fileName + "</a></li>\n";
             }
             else{
-                
-                // std::cout <<"no location condition" << std::endl;
                 res += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_server_root().size()) + "/" + fileName + "\">" + fileName + "</a></li>\n";
             }
         }
