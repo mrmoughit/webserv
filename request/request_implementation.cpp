@@ -207,6 +207,11 @@ void  handle_delete_request(std::string path)
 
 void check_request(Client &client)
 {
+
+    std::cout << client.get_request().get_s_request() << std::endl;
+    // return ;
+
+
     client.server_client_obj.is_location_url = -1;
     if (!client.get_request().get_parse_index())
         parse_request(client);

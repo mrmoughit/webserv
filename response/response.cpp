@@ -53,8 +53,9 @@ std::string check_auto_index(Client &client , int *index){
     int i = 0;
     *index = 2;
     while(i < (int)client.server_client_obj.get_routes().size()){
-        if (client.get_request().get_path() == (client.server_client_obj.get_server_root() + client.server_client_obj.get_routes()[i].get_uri()))
+        if (client.get_request().get_path() == (client.server_client_obj.get_routes()[i].get_root() + client.server_client_obj.get_routes()[i].get_uri()))
         {
+
         if (!client.server_client_obj.get_routes()[i].get_autoindex()){
                 *index=1;
             std::string path = client.server_client_obj.find_error_page_path(403);
@@ -141,16 +142,25 @@ void response_to_get(Client &client)
             std::string test = check_auto_index(client , &flag);
             client.get_response().set_response(test);
             if (flag == 1)
-            return;
+                return;
+        }
+
+        if (flag == 2 && client.server_client_obj.is_location_url == -1){
+            std::string path = client.server_client_obj.find_error_page_path(403);
+            if(path == "NULL"){
+                std::cout << "mochkil dyal path not exist"<< std::endl;
+                exit (33);
+            }
+            client.get_response().set_response_status(403);
+            std::string res = fill_response(client.get_response().get_fileStream(), path, client);
+            client.get_response().set_response(res);
+            return ;
         }
         else{
-            std::cout <<"str ====>"<< str << std::endl;
             res = fill_response(client.get_response().get_fileStream(), str, client);
             client.get_response().set_response(res);
             return ;
         }
-
-        exit (52);
 
         struct dirent *entry;
         client.get_response().set_response_status(200);
