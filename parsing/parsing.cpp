@@ -297,6 +297,7 @@ std::vector<std::string> pars_server_names(std::vector<std::string> words, bool&
 
 std::vector <std::string> pars_index(std::vector <std::string> words,std::string root, bool& status)
 {
+	(void) root;
 	std::vector<std::string> vec_index;
 	if (words.size() == 1)
 		return (status = false, std::cout << "Error no Index" << std::endl, vec_index);
@@ -305,10 +306,10 @@ std::vector <std::string> pars_index(std::vector <std::string> words,std::string
 		if (words[i].find('{') != std::string::npos || words[i].find('}') != std::string::npos)
 		return (status = false, std::cout << "Error unwanted braces" << std::endl, vec_index);
 	}
-	if (check_index(words, root))
-		return (vec_index);
+	// if (check_index(words, root))
+	// 	return (vec_index);
 	vec_index = words;
-	// vec_index.erase(vec_index.begin());
+	vec_index.erase(vec_index.begin());
 
 	// std::cout << "#==> index get parsed" << std::endl;
 	return vec_index;
@@ -479,7 +480,9 @@ bool fill_rest(ServerBlock& server, std::vector<std::string> &lines, size_t &i)
 		else if (words[0] == "server_name")
 			server.set_server_names(pars_server_names(words, status));
 		else if (words[0] == "index")
+		{
 			server.set_index(pars_index(words, server.get_server_root(), status));
+		}
 		else if (words[0] == "client_max_body_size")
 			server.set_client_body_size(pars_cbs(words, status));
 		else if (words[0] == "error_page")

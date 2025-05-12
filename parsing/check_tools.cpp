@@ -30,7 +30,7 @@ size_t check_type(std::string &path)
 		else if (S_ISDIR(info.st_mode))
 			return 0;
 	}
-	return 2;	
+	return 2;
 }
 
 int check_index(std::vector <std::string> &index, std::string root)
