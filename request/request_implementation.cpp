@@ -1,5 +1,7 @@
 #include "../webserver.hpp"
 
+std::string status_400 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>404 Not Found</title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>404</h1><p>Oops! The page you are looking for could not be found.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
+
 
 void parse_request(Client &client)
 {
@@ -10,10 +12,17 @@ void parse_request(Client &client)
     std::string requestData = client.get_request().get_s_request();
     std::string line;
 
+    std::string error_path;
     size_t bodyStart = requestData.find("\r\n\r\n");
     if (bodyStart == std::string::npos)
     {
-        get_error_res(res, 400 , client);
+        error_path = client.server_client_obj.find_error_page_path(400);
+        if(error_path == "NULL"){
+            std::cout << "you don't have a path of this code 222 "<< std::endl;
+            exit (33);
+        }
+        std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+        client.get_response().set_response_status(400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         std::cout << "ha wahd l error";
@@ -29,7 +38,13 @@ void parse_request(Client &client)
 
     if (!check_request_line(line))
     {
-        get_error_res(res, 400 , client);
+        error_path = client.server_client_obj.find_error_page_path(400);
+        if(error_path == "NULL"){
+            std::cout << "you don't have a path of this code 222 "<< std::endl;
+            exit (33);
+        }
+        std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+        client.get_response().set_response_status(400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         return;
@@ -40,7 +55,13 @@ void parse_request(Client &client)
 
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
     {
-        get_error_res(res, 400 , client);
+        error_path = client.server_client_obj.find_error_page_path(400);
+        if(error_path == "NULL"){
+            std::cout << "you don't have a path of this code 222 "<< std::endl;
+            exit (33);
+        }
+        std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+        client.get_response().set_response_status(400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         return;
@@ -54,13 +75,27 @@ void parse_request(Client &client)
     {
         if (!is_upper(client.get_request().get_method()))
         {
-            get_error_res(res, 400 , client);
+            error_path = client.server_client_obj.find_error_page_path(400);
+            if(error_path == "NULL"){
+                std::cout << "you don't have a path of this code 222 "<< std::endl;
+                exit (33);
+            }
+            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+            client.get_response().set_response_status(400);
+            client.get_response().set_response(res);
             client.get_response().set_response_index(true);
             return;
         }
         else
         {
-            get_error_res(res, 405 , client);
+            error_path = client.server_client_obj.find_error_page_path(405);
+            if(error_path == "NULL"){
+                std::cout << "you don't have a path of this code 222 "<< std::endl;
+                exit (33);
+            }
+            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+            client.get_response().set_response_status(405);
+            client.get_response().set_response(res);
             client.get_response().set_response_index(true);
             return;
         }
@@ -70,14 +105,26 @@ void parse_request(Client &client)
     {
         if (strncmp(client.get_request().get_version().c_str(), "HTTP/", 5) > 0)
         {
-            get_error_res(res, 400 , client);
+            error_path = client.server_client_obj.find_error_page_path(400);
+            if(error_path == "NULL"){
+                std::cout << "you don't have a path of this code 222 "<< std::endl;
+                exit (33);
+            }
+            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+            client.get_response().set_response_status(400);
             client.get_response().set_response(res);
             client.get_response().set_response_index(true);
             return;
         }
         else
         {
-            get_error_res(res, 505 , client);
+            error_path = client.server_client_obj.find_error_page_path(505);
+            if(error_path == "NULL"){
+                std::cout << "you don't have a path of this code 222 "<< std::endl;
+                exit (33);
+            }
+            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+            client.get_response().set_response_status(505);
             client.get_response().set_response(res);
             client.get_response().set_response_index(true);
             return;
@@ -87,7 +134,13 @@ void parse_request(Client &client)
     std::string pa = client.get_request().get_path();
     if (pa[0] != '/')
     {
-        get_error_res(res, 400 , client);
+        error_path = client.server_client_obj.find_error_page_path(400);
+        if(error_path == "NULL"){
+            std::cout << "you don't have a path of this code 222 "<< std::endl;
+            exit (33);
+        }
+        std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+        client.get_response().set_response_status(400);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         return;
@@ -110,10 +163,9 @@ void parse_request(Client &client)
     std::string tmp1 = pa;
 
     pa = client.server_client_obj.is_location_path(pa);
-
+    
     if (tmp1[0] == '/' && pa.size() == 0){
         pa = client.server_client_obj.get_server_root() + "/" + &tmp1[1];
-        std::cout << pa << std::endl;
     }
 
 
@@ -122,14 +174,14 @@ void parse_request(Client &client)
         client.get_request().set_path(pa);
     
 
-    if(!client.server_client_obj.is_valid_method(pa , method)){
-        path = client.server_client_obj.find_error_page_path(403);
+    if (!client.server_client_obj.is_valid_method(pa , method)){
+        path = client.server_client_obj.find_error_page_path(405);
         if(path == "NULL"){
             std::cout << "you don't have a path of this code 222 "<< std::endl;
             exit (33);
         }
         std::string res = fill_response(client.get_response().get_fileStream(), path, client);
-        client.get_response().set_response_status(403);
+        client.get_response().set_response_status(405);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
         return ;
@@ -141,8 +193,15 @@ void parse_request(Client &client)
     ss >> size;
     client.get_request().set_content_length(size);
     if (ss.fail() || size == 0){
+        error_path = client.server_client_obj.find_error_page_path(400);
+        if(error_path == "NULL"){
+            std::cout << "you don't have a path of this code 222 "<< std::endl;
+            exit (33);
+        }
+        std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+        client.get_response().set_response_status(400);
+        client.get_response().set_response(res);
         client.get_response().set_response_index(true);
-        get_error_res(res, 400 , client);
     }
 }
 

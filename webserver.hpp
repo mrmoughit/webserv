@@ -37,6 +37,20 @@ class RouteBlock;
 #include "./parsing/RouteBlock.hpp"
 
 
+
+//the global error pages 
+
+extern std::string status_200;
+extern std::string status_400;
+extern std::string status_403;
+extern std::string status_404;
+extern std::string status_405;
+
+
+
+
+
+
 bool check_request_line(std::string & line);
 std::string removeslashes(const std::string& line);
 bool out_root_dir(std::string &pa , std::string &res , Client &clinet);

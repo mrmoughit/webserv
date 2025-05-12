@@ -163,12 +163,12 @@ std::string  ServerBlock::is_location_path(std::string path){
     path = path.substr(1);
     size_t pos = path.find("/");
 
-
+    if (path.size() == 0)
+        return "";
     path = "/" + path;
     if (pos == 0 || pos == std::string::npos){
         pos = path.size();
     }
-    
     while (i < (int)routes.size())
     {
         if(!strncmp(path.c_str() , routes[i].get_uri().c_str() , pos)){
