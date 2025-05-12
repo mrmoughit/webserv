@@ -200,7 +200,7 @@ void  handle_delete_request(std::string path)
 
 void check_request(Client &client)
 {
-
+    client.server_client_obj.is_location_url = -1;
     if (!client.get_request().get_parse_index())
         parse_request(client);
     if (client.get_response().get_response_index()){

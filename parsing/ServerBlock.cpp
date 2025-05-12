@@ -15,7 +15,7 @@
 ServerBlock::ServerBlock()
 {
     brace_count = 0;
-    is_location_url = false;
+    is_location_url = -1;
     // std::cout << "ServerBlock Default constructor called" << std::endl;
 }
 ServerBlock::~ServerBlock()

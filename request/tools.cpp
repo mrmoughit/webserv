@@ -99,14 +99,16 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
 
     fileStream.open(filePath.c_str(), std::ios::ate);
     
-    if (!fileStream) {
 
+    if (!fileStream) {
+        
         client.get_response().set_response_status(500);
         std::cout  << "Failed to open file: " << filePath << std::endl;
         return  "HTTP/1.1 500 internal error\r\nContent-Type: text/html\r\n\r\n\
         <html><head><title>500 internal server Error</title></head><body><center><h1>500 internal server Error</h1></center>\
         <hr><center>42 webserv 0.1</center></body></html>";
     }
+    
 
     std::streampos fileSize = fileStream.tellg();
     fileStream.seekg(0, std::ios::beg);
@@ -118,8 +120,8 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
     response << "Accept-Ranges: bytes\r\n";
     response << "Connection: close\r\n";
     response << "\r\n";
-    
-    std::cout << response.str() << std::endl;
+
+
     return response.str();
 }
 

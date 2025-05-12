@@ -250,24 +250,23 @@ void handle_boundary_chanked(Client &client)
 {
     static std::string backup;
     std::string request = backup + client.get_request().get_s_request();
-    backup.clear(); // Clear backup after using it
+    backup.clear();
     
     while (true)
     {
-        // Find the next chunk size line
+       
         size_t pos = request.find("\r\n");
         if (pos == std::string::npos)
         {
-            // Incomplete chunk line, store and wait for more data
+           
             backup = request;
             return;
         }
         
-        // Extract the chunk size line
+        
         std::string line_size = request.substr(0, pos);
         size_t size = hex_to_int(line_size);
         
-        // Check if we've reached the last chunk (size 0)
         if (size == 0)
         {
             client.set_all_recv(true);
@@ -277,25 +276,20 @@ void handle_boundary_chanked(Client &client)
             return;
         }
         
-        // Verify we have enough data for this chunk
-        if (request.size() < pos + 2 + size + 2)  // +2 for \r\n after size, +2 for \r\n after content
+       
+        if (request.size() < pos + 2 + size + 2)  
         {
-            // Not enough data yet, store and wait for more
             backup = request;
             return;
         }
         
-        // Extract the chunk content
         std::string chunk = request.substr(pos + 2, size);
         
-        // Set the request to the extracted chunk and process it
         client.get_request().set_s_request(chunk);
         boundary(client);
         
-        // Move to the next chunk
-        request = request.substr(pos + 2 + size + 2);  // +2 for \r\n after size, +2 for \r\n after content
+        request = request.substr(pos + 2 + size + 2); 
         
-        // If no more data, stop processing for now
         if (request.empty())
         {
             return;

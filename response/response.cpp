@@ -130,12 +130,17 @@ void response_to_get(Client &client)
             return;
         }
         int flag = 0;
-          struct stat default_file;
-          std::string str = client.get_request().get_path() + "/" + "index.html";
+        struct stat default_file;
+        std::string str = client.get_request().get_path() + "/" + "index.html";
+
+        // client.get_request().set_path(str);
+
+
+        
         if (stat(str.c_str(), &default_file) == -1)
         {
-             flag = 0;
-            std::string test  = check_auto_index(client , &flag);
+            flag = 0;
+            std::string test = check_auto_index(client , &flag);
             client.get_response().set_response(test);
             if (flag == 1)
             return;
@@ -171,14 +176,23 @@ void response_to_get(Client &client)
         res += "<div class='container'>\n";
         res += "<h1>Found Files in Directory</h1>\n<ul>\n";
 
+
+
         while ((entry = readdir(dir)) != NULL)
         {
             std::string fileName = entry->d_name;
-
-            if (client.server_client_obj.is_location_url)
-                res += "<li><a href=\"/" + client.get_request().get_path().substr(client.server_client_obj.is_location_url) + "/" + fileName + "\">" + fileName + "</a></li>\n";
-            else
-                res += "<li><a href=\"/" + client.get_request().get_path().substr(client.server_client_obj.get_server_root().size()) + "/" + fileName + "\">" + fileName + "</a></li>\n";
+            std::cout <<"the fucking number   "<<  client.server_client_obj.is_location_url << std::endl;
+            
+            if (client.server_client_obj.is_location_url > -1){
+                std::cout << "----------------> " << client.get_request().get_path() << std::endl;
+                std::cout << "----------------> " << client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_uri() << std::endl;
+                res += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_root().size() ) + "/" + fileName + "\">" + fileName + "</a></li>\n";
+            }
+            else{
+                
+                // std::cout <<"no location condition" << std::endl;
+                res += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_server_root().size()) + "/" + fileName + "\">" + fileName + "</a></li>\n";
+            }
         }
 
         res += "</ul>\n</div>\n</body>\n</html>\n";
