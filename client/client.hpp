@@ -1,7 +1,9 @@
 #pragma once 
 
+class ServerBlock;
+
 #include "../webserver.hpp"
-#include "../parsing/ServerBlock.hpp" 
+
 class Client{
     private:
         int client_id;

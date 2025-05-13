@@ -3,41 +3,46 @@
 /*                                                        :::      ::::::::   */
 /*   ServerBlock.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmoumni <zmoumni@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 00:36:22 by marvin            #+#    #+#             */
-/*   Updated: 2025/04/22 12:15:36 by zmoumni          ###   ########.fr       */
+/*   Updated: 2025/03/27 00:36:22 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../webserver.hpp"
 
+
 ServerBlock::ServerBlock()
 {
-    brace_count = 0;
     is_location_url = -1;
+    dupindex = 0;
+    Port = -1;
+    client_body_size = 1048576;
+    server_root = "/html";
+    Server_names = "test.com";
     // std::cout << "ServerBlock Default constructor called" << std::endl;
 }
 ServerBlock::~ServerBlock()
 {
-    brace_count = 0;
     // std::cout << "ServerBlock Destructor called" << std::endl;
 }
 
-ServerBlock::ServerBlock(const ServerBlock &other)
+ServerBlock::ServerBlock(const ServerBlock& other)
 {
     *this = other;
     // std::cout << "ServerBlock Copy Constructor called" << std::endl;
+    
 }
 
-ServerBlock &ServerBlock::operator=(const ServerBlock &other)
+ServerBlock& ServerBlock::operator=(const ServerBlock& other)
 {
     // std::cout << "ServerBlock Copy assignment operator called" << std::endl;
     if (this != &other)
     {
         this->Host = other.Host;
         this->Port = other.Port;
-        this->Server_names.clear(); // maybe it's a shallow
+        this->Server_names.clear();//maybe it's a shallow
         this->Server_names = other.Server_names;
         this->server_root = other.server_root;
         this->client_body_size = other.client_body_size;
@@ -45,17 +50,18 @@ ServerBlock &ServerBlock::operator=(const ServerBlock &other)
         this->routes.clear();
         this->routes = other.routes;
         this->error_pages = other.error_pages;
-        this->brace_count = other.brace_count;
+        this->dupindex = other.dupindex;
     }
     return *this;
 }
+
 
 void ServerBlock::set_server_root(std::string server_root_arg)
 {
     server_root = server_root_arg;
 }
 
-std::string &ServerBlock::get_server_root(void)
+std::string& ServerBlock::get_server_root(void)
 {
     return (server_root);
 }
@@ -63,16 +69,20 @@ std::string &ServerBlock::get_server_root(void)
 void ServerBlock::set_host(std::string set_host)
 {
     // std::cout << "set host called for : " << set_host << std::endl;
+    if (!Host.empty())
+        dupindex++;
     Host = set_host;
 }
 
-std::string &ServerBlock::get_host(void)
+std::string& ServerBlock::get_host(void)
 {
     return Host;
 }
 
 void ServerBlock::set_port(int set_port)
 {
+    if (Port != -1)
+        dupindex++;
     Port = set_port;
 }
 
@@ -81,21 +91,29 @@ int ServerBlock::get_port(void)
     return Port;
 }
 
-void ServerBlock::set_server_names(std::vector<std::string> set_server_names)
+void ServerBlock::set_server_names(std::string set_server_names)
 {
+    if (!Server_names.empty())
+        dupindex++;
     Server_names = set_server_names;
+    
 }
 
-std::vector<std::string> ServerBlock::get_server_names(void)
+std::string  ServerBlock::get_server_names(void)
 {
     return Server_names;
 }
 
-void ServerBlock::set_index(std::vector<std::string> set_index)
+void ServerBlock::set_index(std::vector <std::string>  set_index)
 {
-    index = set_index;
+    size_t i = 0;
+    while (i < set_index.size())
+    {
+        index.push_back(set_index[i]);
+        i++;
+    }
 }
-std::vector<std::string> ServerBlock::get_index(void)
+std::vector <std::string> ServerBlock::get_index(void)
 {
     return index;
 }
@@ -110,25 +128,37 @@ size_t ServerBlock::get_client_body_size(void)
     return client_body_size;
 }
 
-void ServerBlock::set_error_pages(std::map<int, std::string> set_error_pages)
+void ServerBlock::set_error_pages(std::map<int , std::string> set_error_pages)
 {
-    error_pages.insert(set_error_pages.begin() , set_error_pages.end()) ;
+    
+    error_pages.insert(set_error_pages.begin(), set_error_pages.end());
 }
 
-std::map<int, std::string> ServerBlock::get_error_pages(void)
+std::map<int , std::string> ServerBlock::get_error_pages(void)
 {
     return error_pages;
 }
 
 void ServerBlock::set_routes(std::vector<RouteBlock> set_routes)
 {
-    routes = set_routes;
+    routes.insert(routes.end(), set_routes.begin(), set_routes.end());
 }
 
 std::vector<RouteBlock> ServerBlock::get_routes(void)
 {
     return routes;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 bool ServerBlock::is_valid_method(std::string path, std::string method)
 {
@@ -193,4 +223,10 @@ std::string ServerBlock::find_error_page_path(int n){
         ++it;
     }
     return "NULL";
+}
+
+void ServerBlock::set_dafault_data()
+{
+    Host = "127.0.0.1";   
+    Port = 8080;
 }

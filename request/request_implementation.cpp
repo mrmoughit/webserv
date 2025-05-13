@@ -13,20 +13,25 @@ void parse_request(Client &client)
     std::string line;
 
     std::string error_path;
-    size_t bodyStart = requestData.find("\r\n\r\n");
+    size_t bodyStart = requestData.find("\r\n\r\n");         //check if size = 0 and become -4 
     if (bodyStart == std::string::npos)
     {
+
+        bodyStart = requestData.size() -4 ;
+        if (bodyStart < 0){
+
         error_path = client.server_client_obj.find_error_page_path(400);
         if(error_path == "NULL"){
             std::cout << "you don't have a path of this code 222 "<< std::endl;
             exit (33);
         }
-        std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
+
         client.get_response().set_response_status(400);
+        res = fill_response(client.get_response().get_fileStream(), error_path, client);
         client.get_response().set_response(res);
         client.get_response().set_response_index(true);
-        std::cout << "ha wahd l error";
         return;
+    }
     }
     std::string new_request = requestData.substr(bodyStart + 4);
     client.get_request().set_s_request(new_request);
