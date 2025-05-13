@@ -20,7 +20,6 @@ ServerBlock::ServerBlock()
     Port = -1;
     client_body_size = 1048576;
     server_root = "/html";
-    Server_names = "test.com";
     // std::cout << "ServerBlock Default constructor called" << std::endl;
 }
 ServerBlock::~ServerBlock()
@@ -229,4 +228,5 @@ void ServerBlock::set_dafault_data()
 {
     Host = "127.0.0.1";   
     Port = 8080;
+    Server_names = "test.com";
 }

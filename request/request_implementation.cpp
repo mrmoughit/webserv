@@ -18,7 +18,7 @@ void parse_request(Client &client)
     {
 
         bodyStart = requestData.size() -4 ;
-        if (bodyStart < 0){
+        if ((int)bodyStart < 0){
 
         error_path = client.server_client_obj.find_error_page_path(400);
         if(error_path == "NULL"){
