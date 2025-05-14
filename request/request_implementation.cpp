@@ -199,9 +199,7 @@ void handle_delete_request(std::string path)
 
     if (stat(path.c_str(), &buf) == -1)
     {
-        std::cerr << "Failed to stat path: " << path << std::endl;
         throw std::runtime_error("Invalid path");
-        // exit (0);
     }
     if (S_ISDIR(buf.st_mode))
     {
@@ -250,6 +248,8 @@ void check_request(Client &client)
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
+
+
 
     if (method == "GET")
     {
@@ -303,12 +303,18 @@ void check_request(Client &client)
     {
         client.set_all_recv(true); // check ila chi mecrob 3amr l headers b ktar mn buffer size
         std::cout << "\033[1;31m" << "DELETE request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
-        client.get_response().set_response_status(200);
-        std::string res = "HTTP/1.1 200 File deleted \r\nContent-Type: text/html\r\n\r\n\
-            <html><head><title>200 File deleted </title></head><body><center><h1>200 File deleted </h1></center>\
-            <hr><center>42 webserv 0.1</center></body></html>";
-        std::string path = client.server_client_obj.get_server_root() + client.get_request().get_path();
-        handle_delete_request(path);
+        
+        
+        std::string path = client.get_request().get_path();
+        try
+        {
+            handle_delete_request(path);
+            set_response_error(&client , 204);
+        }
+        catch(const std::exception& e)
+        {
+            set_response_error(&client , 404);
+        }
         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
     }
 }

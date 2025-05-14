@@ -427,7 +427,7 @@ std::map <int, std::string> pars_error_pages(std::vector <std::string> words, bo
         }
 		std::stringstream ss(words[i]);
 		ss >> code;
-		if (code != 200 && code != 400 && code != 405 && code != 403 && code != 401 && code != 404)
+		if (code != 200 && code != 400 && code != 405 && code != 403 && code != 401 && code != 404 && code != 204)
 			return (status = false, std:: cout << "Error invalid code" << std::endl , pages);
 		pages[code] = words[last];
 		i++;
