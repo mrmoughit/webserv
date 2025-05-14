@@ -155,9 +155,6 @@ void response_to_get(Client &client)
                     break ;
             }
         }
-
-
-        std::cout << "str ..............." << str << std::endl;
         if (stat(str.c_str(), &default_file) == -1)
         {
             flag = 0;

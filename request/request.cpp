@@ -110,7 +110,7 @@ std::string removeslashes(const std::string &line)
 bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client &client)
 {
     (void)res;
-    client.set_Alive(false);
+    // client.set_Alive(false);
     std::string error_path;
     std::string line, key, value;
     while (std::getline(ob, line))
@@ -158,8 +158,11 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client 
         }
         trim_non_printable(value);
         trim(value);
-        if (key == "Connection" && value == "keep-alive")
-            client.set_Alive(true);
+        // if (key == "Connection" && value == "keep-alive")
+        //     client.set_Alive(true);
+            if (key == "Connection" && value == "close")
+                client.set_Alive(false);
+
         headers_map[key] = value;
     }
     return true;
