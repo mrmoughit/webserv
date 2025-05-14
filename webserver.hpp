@@ -80,24 +80,10 @@ void chunked(Client &client);
 void trim_non_printable(std::string &str);
 void handle_boundary_chanked(Client & client);
 
+void set_response_error(Client *client , int status);
+
 
 //parsing
-
-// std::vector<std::string> get_words(std::string& line);
-// int check_line(std::vector<std::string>& lines, size_t& i);
-// std::string get_root(std::vector <std::string> lines,size_t& i);
-// bool fill_rest(ServerBlock& server, std::vector<std::string>& lines, size_t& i);
-// std::string trimstr(std::string str);
-// std::vector <std::string> get_lines(std::vector <std::string> parts);
-// void switch_parts(std::vector <std::string> parts);
-// std::vector <RouteBlock> pars_routes(std::vector <std::string>& lines, size_t& i, bool& status);
-// std::string get_root(std::vector <std::string> lines,size_t& i);
-// std::vector <std::string> pars_index(std::vector <std::string> words, bool& status);
-// bool check_status(ServerBlock& server);
-// bool check_path(std::string &path);
-// size_t check_type(std::string &path);
-// int check_index(std::vector <std::string> &index, std::string root);
-
 
 std::vector<std::string> get_words(std::string& line);
 int check_line(std::vector<std::string>& lines, size_t& i);
