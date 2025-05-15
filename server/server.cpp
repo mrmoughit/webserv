@@ -293,8 +293,8 @@ void Server::startServer() {
                     // Process client request
                     char buffer[16384] = {0};
                     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-                    std::cout << "req ;" << buffer << std::endl;
-                    std::cout << "size ;" << bytes_read << std::endl;
+                    // std::cout << "req ;" << buffer << std::endl;
+                    // std::cout << "size ;" << bytes_read << std::endl;
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
                             std::cout << "\033[31mClient disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
