@@ -131,9 +131,13 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                     while (ss.get(c))
                         line += c;
                     if (line.empty())
-                        return ;
+                        break ;
                     file << line << std::flush;
                 }
+            }
+            else{
+                set_response_error(&clinet ,  415);
+                return ;
             }
             std::getline(ss, line);
             while (1)
@@ -223,6 +227,7 @@ void boundary(Client &client)
         }
         if (index == 0){
             /////////////////////////////////////////
+            buffer = buffer.substr(boundary.size());
         }
         else
         {
