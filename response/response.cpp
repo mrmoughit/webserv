@@ -152,12 +152,12 @@ void response_to_get(Client &client)
                 set_response_error(&client , 404);
                 return ;
             }
-            res = fill_response(client.get_response().get_fileStream(), str, client);
+            res = fill_response(client.get_response().get_fileStream(), str, client , 200);
             client.get_response().set_response(res);
             return ;
         }
         else if (flag == 0){
-            res = fill_response(client.get_response().get_fileStream(), str, client);
+            res = fill_response(client.get_response().get_fileStream(), str, client , 200);
             client.get_response().set_response(res);
             return ;
         }
@@ -203,7 +203,7 @@ void response_to_get(Client &client)
 
     else if (S_ISREG(path_stat.st_mode))
     {
-        res = fill_response(client.get_response().get_fileStream(), pat, client);
+        res = fill_response(client.get_response().get_fileStream(), pat, client , 200);
         client.get_response().set_response(res);
     }
     else

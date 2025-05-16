@@ -5,17 +5,20 @@ std::string status_404 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\
 std::string status_403 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>403 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>403</h1><p>Oops! Forbiden.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
 std::string status_200 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>200 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>200</h1><p>Oops! Succes.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
 std::string status_405 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>405 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>405</h1><p>Oops! Not allawed method.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
+std::string status_500 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>500 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>500</h1><p>Internal server error.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
 
 void set_response_error(Client *client, int status)
 {
     std::string error_path = client->server_client_obj.find_error_page_path(status);
+    
     if (error_path == "NULL")
     {
-        std::string res = "HTTP/1.1 200 OK\r\n";
+        std::string res = "HTTP/1.1 ";
+        res +=  status ;
+        res += " OK\r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
         res += "Connection: close\r\n";
         res += "\r\n";
-
         if (status == 400)
             res += status_400;
         if (status == 404)
@@ -26,17 +29,33 @@ void set_response_error(Client *client, int status)
             res += status_200;
         if (status == 405)
             res += status_405;
+        if (status == 500)
+            res += status_500;
         
-        client->get_response().set_response(res);
+
+
         client->get_response().set_response_status(status);
+        client->get_response().set_response(res);
         client->get_response().set_response_index(true);
+
+
+
+
         return ;
     }
     
+    std::string res = fill_response(client->get_response().get_fileStream(), error_path, *client , status );
+    if (res.empty()){
+        res = "HTTP/1.1 500 OK\r\n";
+        res += "Content-Type: text/html; charset=UTF-8\r\n";
+        res += "Connection: close\r\n";
+        res += "\r\n";
+        res += status_500;
+    }
     client->get_response().set_response_status(status);
-    std::string res = fill_response(client->get_response().get_fileStream(), error_path, *client);
     client->get_response().set_response(res);
     client->get_response().set_response_index(true);
+
 }
 
 void parse_request(Client &client)
@@ -239,11 +258,30 @@ void check_request(Client &client)
 
     if (!client.get_request().get_parse_index())
         parse_request(client);
-    if (client.get_response().get_response_index())
-    {
-        client.set_all_recv(true);
-        return;
-    }
+    // if (client.get_response().get_response_index())
+    // {
+    //     std::string method = client.get_request().get_method();
+    //     client.set_all_recv(true);
+    //     if (method == "GET"){
+    //         std::cout << "\033[34m" << "GET request ====> " << method << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
+    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+    //     }
+    //     else if (method == "POST"){
+    //         std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
+    //               << client.get_request().get_path() << " "
+    //               << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+    //     }
+    //     else if (method == "DELETE"){
+    //         std::cout << "\033[1;31m" << "DELETE request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+    //     }
+    //     else{
+    //         std::cout << "\033[1;31m" << "UNKNOWN request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+    //     }
+    //     return;
+    // }
 
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
@@ -254,8 +292,8 @@ void check_request(Client &client)
 
     if (method == "GET")
     {
-        client.set_all_recv(true);
         response_to_get(client);
+        client.set_all_recv(true);
         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         return;
     }
@@ -265,11 +303,9 @@ void check_request(Client &client)
         std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
                   << client.get_request().get_path() << " "
                   << client.get_request().get_version() << " " << "\033[0m" << std::endl;
-        client.get_response().set_response_status(200);
-        std::string res = "HTTP/1.1 200 File uploaded successfully \r\nContent-Type: text/html\r\n\r\n\
-            <html><head><title>200 File uploaded successfully </title></head><body><center><h1>200 File uploaded successfully </h1></center>\
-            <hr><center>42 webserv 0.1</center></body></html>";
-        client.get_response().set_response(res);
+
+        set_response_error(&client , 201);
+
 
         std::string check = transfer_encoding;
 
@@ -302,10 +338,8 @@ void check_request(Client &client)
     }
     else if (method == "DELETE")
     {
-        client.set_all_recv(true); // check ila chi mecrob 3amr l headers b ktar mn buffer size
+        client.set_all_recv(true);
         std::cout << "\033[1;31m" << "DELETE request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
-        
-        
         std::string path = client.get_request().get_path();
         try
         {

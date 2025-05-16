@@ -151,79 +151,8 @@ int Server::acceptClient(int server_fd, ServerBlock& server_block_obj) {
     
     return client_fd;
 }
-// -----------------------------------------------
-// void Server::closeClientConnection(size_t index) {
-//     // Check if there are any clients at all
-//     if (clients.size() == 0) {
-//         return;
-//     }
-    
-//     // Check if the index is valid
-//     if (index >= pollfds.size()) {
-//         std::cerr << "\033[31mInvalid pollfd index in closeClientConnection\033[0m" << std::endl;
-//         return;
-//     }
-    
-//     int client_fd = pollfds[index].fd;
-    
-//     // Find the client by fd
-//     size_t client_index;
-//     getClientIndexByFd(client_fd, client_index);
-    
-//     // Check if client was found
-//     if (client_index >= clients.size()) {
-//         // Client not found, just close the socket and remove from pollfds
-//         std::cout << "\033[31mClient not found in vector, closing socket FD: " << client_fd << "\033[0m" << std::endl;
-//         close(client_fd);
-//         pollfds.erase(pollfds.begin() + index);
-//         return;
-//     }
-    
-//     // Store the keep-alive status
-//     bool keepAlive = (clients[client_index].get_Alive() == 1);
-    
-//     // Close any open file streams
-//     std::ifstream& fileStream = clients[client_index].get_response().get_fileStream();
-//     if (fileStream.is_open()) {
-//         fileStream.close();
-//     }
-    
-//     if (!keepAlive) {
-//         // If keep-alive is off (0), close the socket, remove from pollfds and clients vector
-//         std::cout << "\033[31mClosing client connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
-        
-//         // Find and remove from pollfds_clients
-//         for (size_t i = 0; i < pollfds_clients.size(); i++) {
-//             if (pollfds_clients[i].fd == client_fd) {
-//                 pollfds_clients.erase(pollfds_clients.begin() + i);
-//                 break;
-//             }
-//         }
-        
-//         // Remove from clients vector
-//         clients.erase(clients.begin() + client_index);
-        
-//         // Close socket and remove from pollfds
-//         close(client_fd);
-//         pollfds.erase(pollfds.begin() + index);
-//     } else {
-//         // If keep-alive is on (1), keep the connection open
-//         std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
-        
-//         // Reset the client state for the next request instead of removing it
-//         clients[client_index].reset(); // You might need to implement this method
-//     }
-// }
-
-
 
 void Server::closeClientConnection(size_t index) {
-    // Check if there are any clients at all
-    if (clients.size() == 0) {
-        return;
-    }
-    
-    // Check if the index is valid
     if (index >= pollfds.size()) {
         std::cerr << "\033[31mInvalid pollfd index in closeClientConnection\033[0m" << std::endl;
         return;
@@ -235,26 +164,13 @@ void Server::closeClientConnection(size_t index) {
     size_t client_index;
     getClientIndexByFd(client_fd, client_index);
     
-    // Check if client was found
-    if (client_index >= clients.size()) {
-        // Client not found, just close the socket and remove from pollfds
-        std::cout << "\033[31mClient not found in vector, closing socket FD: " << client_fd << "\033[0m" << std::endl;
-        close(client_fd);
-        pollfds.erase(pollfds.begin() + index);
-        return;
-    }
-    
-    // Store the keep-alive status before we remove the client
-    bool keepAlive = (clients[client_index].get_Alive() == 1);
-    
-    // Close any open file streams
-    std::ifstream& fileStream = clients[client_index].get_response().get_fileStream();
-    if (fileStream.is_open()) {
-        fileStream.close();
-    }
-    
-    if (!keepAlive) {
-        // If keep-alive is off (0), completely close the connection
+    // Clean up resources if client found
+    if (client_index < clients.size()) {
+        // Close any open file streams
+        std::ifstream& fileStream = clients[client_index].get_response().get_fileStream();
+        if (fileStream.is_open()) {
+            fileStream.close();
+        }
         
         // Find and remove from pollfds_clients
         for (size_t i = 0; i < pollfds_clients.size(); i++) {
@@ -266,30 +182,14 @@ void Server::closeClientConnection(size_t index) {
         
         // Remove from clients vector
         clients.erase(clients.begin() + client_index);
-        
-        // Close socket and remove from pollfds
-        std::cout << "\033[31mClosing client connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
-        close(client_fd);
-        pollfds.erase(pollfds.begin() + index);
-    } else {
-        // If keep-alive is on (1), keep the connection open
-        // std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
-        
-        // CRITICAL FIX: Temporarily disable events for this FD to prevent immediate re-triggering
-        pollfds[index].events = 0;  // Disable all events temporarily
-        
-        // Reset the client state but keep it in the vector
-        clients[client_index].reset(); // You need to implement this method
-        
-        // After a short delay, re-enable POLLIN events
-        // This should be done in a separate function that gets called after handling the current
-        // batch of events (or with a timer if you have that capability)
-        // For now we'll just re-enable it here, but this might not be ideal
-        pollfds[index].events = POLLIN;
     }
+    
+    // Close socket and remove from main pollfds
+    std::cout << "\033[31mClosing client connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
+    close(client_fd);
+    pollfds.erase(pollfds.begin() + index);
 }
 
-// -----------------------------------------------
 void Server::closeServer() {
     // Close all client connections
     for (size_t i = 0; i < clients.size(); i++) {
@@ -385,7 +285,7 @@ void Server::startServer() {
                     
                     if (client_index >= clients.size()) {
                         // Client not found - close connection
-                        // std::cerr << "No matching client found for fd: " << client_fd << std::endl;
+                        std::cerr << "No matching client found for fd: " << client_fd << std::endl;
                         closeClientConnection(idx);
                         continue;
                     }
@@ -393,23 +293,17 @@ void Server::startServer() {
                     // Process client request
                     char buffer[16384] = {0};
                     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+                    // std::cout << "req ;" << buffer << std::endl;
+                    // std::cout << "size ;" << bytes_read << std::endl;
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
-                            if (clients[client_index].get_Alive() == 0)
-                            {
-                                std::cout << "yeeeeeees" << std::endl;
-                                std::cout << "\033[31mClient disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
-                            }
-
+                            std::cout << "\033[31mClient disconnected. Socket FD: " << client_fd << "\033[0m" << std::endl;
                         } else {
                             std::cerr << "Recv error on fd " << client_fd << ": " << strerror(errno) << std::endl;
                         }
                         closeClientConnection(idx);
                         continue;
                     }
-                    // std::cout << "before check_request" << std::endl;
-                    // std::cout << "Received data from client. Socket FD: " << client_fd << std::endl;
-                    // std::cout << "status alive : " << clients[client_index].get_Alive() << std::endl << std::endl << std::endl;
                     
                     // Process the request data
                     std::string req(buffer, bytes_read);
@@ -438,10 +332,7 @@ void Server::startServer() {
                 }
                 
                 Client& client = clients[client_index];
-                // std::cout << "after check_request" << std::endl;
-                // // client.set_Alive(1);
-                // std::cout << "Sending response to client. Socket FD: " << client_fd << std::endl;
-                // std::cout << "status alive : " << client.get_Alive() << std::endl;
+                
                 // Send the response
                 handleClientWrite(idx);
                 
@@ -486,8 +377,9 @@ void Server::handleClientWrite(size_t index) {
     // Send the string response if not yet sent
     if (!client.get_request().is_string_req_send) {
         const std::string& response = client.get_response().get_response();
+        std::cout << "\033[31m" << client.get_response().get_response() << "\033[0m" << std::endl;
         ssize_t bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
-        // std::cout << "response sent" << response << std::endl;
+        
         if (bytes_sent < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 return; // Retry in next POLLOUT
@@ -508,28 +400,28 @@ void Server::handleClientWrite(size_t index) {
         
         if (bytes_read > 0) {
             // Check if socket is still writable
-            // struct pollfd pfd;
-            // pfd.fd = client_fd;
-            // pfd.events = POLLOUT;
-            // pfd.revents = 0;
+            struct pollfd pfd;
+            pfd.fd = client_fd;
+            pfd.events = POLLOUT;
+            pfd.revents = 0;
             
-            // if (poll(&pfd, 1, 0) <= 0) {
-            //     std::cerr << "Socket poll error before send: " << strerror(errno) << std::endl;
-            //     closeClientConnection(index);
-            //     return;
-            // } else if (pfd.revents & POLLERR) {
-            //     std::cerr << "Socket error condition (POLLERR) before send" << strerror(errno) << std::endl;
-            //     closeClientConnection(index);
-            //     return;
-            // } else if (pfd.revents & POLLHUP) {
-            //     std::cerr << "Socket hung up (POLLHUP) before send" << strerror(errno) << std::endl;
-            //     closeClientConnection(index);
-            //     return;
-            // } else if (pfd.revents & POLLNVAL) {
-            //     std::cerr << "Invalid socket descriptor (POLLNVAL) before send" << strerror(errno) << std::endl;
-            //     closeClientConnection(index);
-            //     return;
-            // }
+            if (poll(&pfd, 1, 0) <= 0) {
+                std::cerr << "Socket poll error before send: " << strerror(errno) << std::endl;
+                closeClientConnection(index);
+                return;
+            } else if (pfd.revents & POLLERR) {
+                std::cerr << "Socket error condition (POLLERR) before send" << strerror(errno) << std::endl;
+                closeClientConnection(index);
+                return;
+            } else if (pfd.revents & POLLHUP) {
+                std::cerr << "Socket hung up (POLLHUP) before send" << strerror(errno) << std::endl;
+                closeClientConnection(index);
+                return;
+            } else if (pfd.revents & POLLNVAL) {
+                std::cerr << "Invalid socket descriptor (POLLNVAL) before send" << strerror(errno) << std::endl;
+                closeClientConnection(index);
+                return;
+            }
             
             // Socket is writable, proceed with send
             ssize_t bytes_sent = send(client_fd, buffer, bytes_read, MSG_NOSIGNAL);
