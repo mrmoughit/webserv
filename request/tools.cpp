@@ -55,13 +55,13 @@ std::string getContentType(std::string filePath) {
 
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Client &client , int status ) {
 
+    fileStream.close();
     fileStream.open(filePath.c_str(), std::ios::ate);
-    
 
-    if (!fileStream) {
+    if (!fileStream.is_open()) {
+        std::cout << "cat't open " << filePath << std::endl; 
         return "";
     }
-    
 
     std::streampos fileSize = fileStream.tellg();
     fileStream.seekg(0, std::ios::beg);

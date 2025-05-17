@@ -32,14 +32,9 @@ void set_response_error(Client *client, int status)
         if (status == 500)
             res += status_500;
         
-
-
         client->get_response().set_response_status(status);
         client->get_response().set_response(res);
         client->get_response().set_response_index(true);
-
-
-
 
         return ;
     }
@@ -187,6 +182,31 @@ void parse_request(Client &client)
             set_response_error(&client, 400);
         }
     }
+
+
+    pa = client.get_request().get_path();
+
+    size_t pos = pa.find_last_of('.');
+    if (pos != std::string::npos) {
+        std::string ex = pa.substr(pos);
+        if ( ex == ".php" || ex == ".py"){
+            if (client.server_client_obj.is_location_url > -1){
+                std::vector<std::string > vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
+                for (size_t i = 0 ; i < vec.size() ; i++){
+                    if (vec[i] == ex){
+                        std::cout << "sir l cgi " << std::endl;
+                        exit (88);
+                    }
+                }
+
+            }
+            else{
+                 std::cout << "sir l cgi " << std::endl;
+                        exit (88);
+            }
+        }
+    }
+
 }
 
 void handle_x_www_form_urlencoded(Client &client)
@@ -258,30 +278,30 @@ void check_request(Client &client)
 
     if (!client.get_request().get_parse_index())
         parse_request(client);
-    // if (client.get_response().get_response_index())
-    // {
-    //     std::string method = client.get_request().get_method();
-    //     client.set_all_recv(true);
-    //     if (method == "GET"){
-    //         std::cout << "\033[34m" << "GET request ====> " << method << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
-    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
-    //     }
-    //     else if (method == "POST"){
-    //         std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
-    //               << client.get_request().get_path() << " "
-    //               << client.get_request().get_version() << " " << "\033[0m" << std::endl;
-    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
-    //     }
-    //     else if (method == "DELETE"){
-    //         std::cout << "\033[1;31m" << "DELETE request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
-    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
-    //     }
-    //     else{
-    //         std::cout << "\033[1;31m" << "UNKNOWN request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
-    //         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
-    //     }
-    //     return;
-    // }
+    if (client.get_response().get_response_index())
+    {
+        std::string method = client.get_request().get_method();
+        client.set_all_recv(true);
+        if (method == "GET"){
+            std::cout << "\033[34m" << "GET request ====> " << method << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
+            std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+        }
+        else if (method == "POST"){
+            std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
+                  << client.get_request().get_path() << " "
+                  << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+            std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+        }
+        else if (method == "DELETE"){
+            std::cout << "\033[1;31m" << "DELETE request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+            std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+        }
+        else{
+            std::cout << "\033[1;31m" << "UNKNOWN request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+            std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
+        }
+        return;
+    }
 
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
@@ -305,34 +325,27 @@ void check_request(Client &client)
                   << client.get_request().get_version() << " " << "\033[0m" << std::endl;
 
         set_response_error(&client , 201);
-
-
+        client.get_response().set_response_index(false);
+        
         std::string check = transfer_encoding;
-
+        
         if (content_type.find("boundary=") != std::string::npos && check == "chunked")
-        {
             handle_boundary_chanked(client);
-            return;
-        }
-
+        
         else if (content_type.find("boundary=") != std::string::npos)
-        {
             boundary(client);
-        }
-
+        
         else if (check == "chunked")
-        {
             chunked(client);
-        }
-
+        
         else if (check == "application/x-www-form-urlencoded")
-        {
             handle_x_www_form_urlencoded(client);
-        }
         else
             hanlde_post_request(client);
+        
         if (client.get_all_recv() == true)
         {
+            client.get_response().set_response_index(true);
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
     }

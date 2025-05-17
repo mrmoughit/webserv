@@ -20,7 +20,7 @@ class RouteBlock{
         std::vector<std::string> methods;
         bool autoindex;
         std::vector <std::string>  index;
-         std::vector<std::string> cgi_extension;  
+        std::vector<std::string> cgi_extension;  
         std::string client_body_temp_path;   
         std::map <int, std::string> redirections;
     public:
