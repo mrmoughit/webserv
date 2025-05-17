@@ -22,6 +22,16 @@
 #include <netdb.h>
 
 
+#include <sys/types.h>
+
+#include <stddef.h>
+#include <poll.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+
+
 class Request;
 class Response;
 class Client;
@@ -109,3 +119,6 @@ int set_default_page();
 
 
 
+//cgi 
+
+int cgi_handler(std::string full_path);

@@ -194,15 +194,16 @@ void parse_request(Client &client)
                 std::vector<std::string > vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
                 for (size_t i = 0 ; i < vec.size() ; i++){
                     if (vec[i] == ex){
-                        std::cout << "sir l cgi " << std::endl;
-                        exit (88);
+                        std::cout << "mcha l cgi " << std::endl;
+                        std::cout << "the value =============>  " << cgi_handler(pa) << std::endl;
+                        // exit (88);
                     }
                 }
-
+                
             }
             else{
-                 std::cout << "sir l cgi " << std::endl;
-                        exit (88);
+                std::cout << "the value =============> " << cgi_handler(pa) << std::endl;
+                std::cout << "mcha l cgi " << std::endl;
             }
         }
     }

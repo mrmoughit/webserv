@@ -11,7 +11,8 @@ SRC = request/request.cpp \
 	  parsing/parsing.cpp\
 	  parsing/pars_route.cpp\
 	  parsing/check_tools.cpp\
-	  main.cpp 
+	  main.cpp \
+	  cgi.cpp
 
 
 OBJ = $(SRC:.cpp=.o)
