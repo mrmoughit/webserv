@@ -30,8 +30,11 @@ int check_extension(std::string full_path)
     return 0;
 }
 
-int exec_script(std::string full_path, char *envp[], const char *interpreter)
+int exec_script(std::string full_path, char *envp[], const char *interpreter , Client &client)
 {
+
+
+    (void)client;
     char *argv[] = {(char *)interpreter, (char *)full_path.c_str(), NULL};
 
     int fd[2];
@@ -186,12 +189,19 @@ int exec_script(std::string full_path, char *envp[], const char *interpreter)
     {
         return (std::cerr << "500 Internal Server Error: Script terminated by signal " << WTERMSIG(status) << std::endl, 1);
     }
-    std::cout << "####content###" << std::endl;
-    std::cout << content;
+
+    // std::cout << content;
+
+
+    std::string str = client.get_response().get_response();
+    str += content ;
+
+    client.get_response().set_response(str);
+
     return 0;
 }
 
-int cgi_handler(std::string full_path)
+int cgi_handler(Client &client)
 {
 
     // fill
@@ -228,7 +238,7 @@ int cgi_handler(std::string full_path)
     // check_methods(method, routes[i]);
     // if its valid execute script
 
-    int code = check_extension(full_path);
+    int code = check_extension(client.get_request().get_path());
     const char *interpreter;
     if (code > 0)
     {
@@ -239,7 +249,7 @@ int cgi_handler(std::string full_path)
         }
         else if (code == 2)
             interpreter = "/usr/bin/python3";
-        int status = exec_script(full_path, envp, interpreter);
+        int status = exec_script(client.get_request().get_path(), envp, interpreter , client);
         return status;
     }
     else

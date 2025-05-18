@@ -194,15 +194,27 @@ void parse_request(Client &client)
                 std::vector<std::string > vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
                 for (size_t i = 0 ; i < vec.size() ; i++){
                     if (vec[i] == ex){
-                        std::cout << "mcha l cgi " << std::endl;
-                        std::cout << "the value =============>  " << cgi_handler(pa) << std::endl;
+
+
+                        std::string res =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+                        
+
+                        client.get_response().set_response_index(true);
+                        client.get_response().set_response(res);
+                        client.get_response().set_response_status(200);
+                        std::cout << "the value =============>  " << cgi_handler(client) << std::endl;
                         // exit (88);
                     }
                 }
                 
             }
             else{
-                std::cout << "the value =============> " << cgi_handler(pa) << std::endl;
+
+
+
+
+
+                std::cout << "the value =============> " << cgi_handler(client) << std::endl;
                 std::cout << "mcha l cgi " << std::endl;
             }
         }
@@ -277,6 +289,8 @@ void check_request(Client &client)
 {
     client.server_client_obj.is_location_url = -1;
 
+
+
     if (!client.get_request().get_parse_index())
         parse_request(client);
     if (client.get_response().get_response_index())
@@ -303,6 +317,7 @@ void check_request(Client &client)
         }
         return;
     }
+
 
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
