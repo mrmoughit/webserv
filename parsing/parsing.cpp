@@ -279,22 +279,26 @@ std::string pars_host(std::vector<std::string> words, bool& status)
 
 int pars_port(std::vector<std::string> words, bool& status)
 {
-	if (words.size() == 1 || words.size() > 2)
-		return -1;
-	std::string port = words[1];
-	int i = 0;
-	while(port[i])
-	{
-		if (!isdigit(port[i]))
-			return (status = false, std::cout << "Error port include non-digit" << std::endl, -1);
-		i++;
-	}
-	std::stringstream ss(port);
-	int portnumbr;
-	ss >> portnumbr;
-	if (portnumbr < 1024 || portnumbr > 65535)
-		return (status = false, std::cout << "Error Invalid port's range" << std::endl, -1);
-	return portnumbr;
+    if (words.size() != 2)
+    {
+        std::cerr << "Error invalid listen direcitve (too many ports)" << std::endl;
+        status = false;
+        return (-1);
+    }
+    std::string port = words[1];
+    int i = 0;
+    while(port[i])
+    {
+        if (!isdigit(port[i]))
+            return (status = false, std::cout << "Error port include non-digit" << std::endl, -1);
+        i++;
+    }
+    std::stringstream ss(port);
+    int portnumbr;
+    ss >> portnumbr;
+    if (portnumbr < 1 || portnumbr > 65535)
+        return (status = false, std::cout << "Error Invalid port's range" << std::endl, -1);
+    return portnumbr;
 }
 
 int check_words(std::string str)
@@ -437,14 +441,14 @@ std::map <int, std::string> pars_error_pages(std::vector <std::string> words, bo
 
 bool check_status(ServerBlock& server)
 {
-	std::string tmp = server.get_host();
-	if (tmp.empty())
-		return (std::cerr << "Error host directive not found" << std::endl, false);
+    std::string tmp = server.get_host();
+    if (tmp.empty())
+        return (std::cerr << "Error host directive not found" << std::endl, false);
 
-	int port = server.get_port();
-	if (port < 0)
-		return (std::cerr << "Error listen directive not found" << std::endl, false);
-	return true;
+    std::vector <int> port = server.get_port();
+    if (port.empty())
+        return (std::cerr << "Error listen directive not found" << std::endl, false);
+    return true;
 }
 
 bool fill_rest(ServerBlock& server, std::vector<std::string> &lines, size_t &i)

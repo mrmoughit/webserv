@@ -9,23 +9,23 @@
 #include <sstream>
 
 #define DEFAULT_PORT 8080
-#define MAX_CLIENTS 128
 
 // Structure to hold server configuration
 struct ServerConfig {
     int server_index;
     std::string host;
-    int port;
+    std::vector<int> ports;
+    // int port;
     int fd;
     std::string server_name;
     struct sockaddr_in addr;
     
     // Constructor with default values
-    ServerConfig() : server_index(0), host("localhost"), port(DEFAULT_PORT), fd(-1), server_name("default") {}
+    // ServerConfig() : server_index(0), host("localhost"), port(DEFAULT_PORT), fd(-1), server_name("default") {}
     
     // Constructor with parameters
-    ServerConfig(const std::string& h, int p, std::string sn = "default") : 
-        server_index(0), host(h), port(p), fd(-1), server_name(sn) {}
+    ServerConfig(const std::string& h, std::vector<int> p, std::string sn = "default") : 
+        server_index(0), host(h), ports(p), fd(-1), server_name(sn) {}
 };
 
 class Server {
@@ -50,7 +50,7 @@ public:
     ~Server();
 
     // Configuration methods
-    void addServerConfig(const std::string& host, int port, std::string server_name = "default");
+    void addServerConfig(const std::string& host, std::vector<int> port, std::string server_name = "default");
     ServerConfig& getServerConfig(size_t index);
     size_t getServerCount() const;
     

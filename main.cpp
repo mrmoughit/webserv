@@ -429,6 +429,7 @@ int main(int ac, char **av)
         S1.server_block_obj = servers;
         for (size_t i = 0; i < conf.number_of_server ; i++)
         {
+            // S1.addServerConfig(servers[i].get_host(), servers[i].get_port(), servers[i].get_server_names());
             S1.addServerConfig(servers[i].get_host(), servers[i].get_port(), servers[i].get_server_names());
         }
     }

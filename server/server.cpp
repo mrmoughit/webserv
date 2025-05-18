@@ -13,9 +13,14 @@ Server::~Server() {
     this->closeServer();
 }
 
-void Server::addServerConfig(const std::string& host, int port, std::string server_name) {
-    ServerConfig config(host, port, server_name);
-    server_configs.push_back(config);
+void Server::addServerConfig(const std::string& host, std::vector<int> port, std::string server_name) {
+    // Create a single ServerConfig for each port
+    for (size_t i = 0; i < port.size(); i++) {
+        // Create a ServerConfig with a single port
+        std::vector<int> single_port(1, port[i]);
+        ServerConfig config(host, single_port, server_name);
+        server_configs.push_back(config);
+    }
 }
 
 ServerConfig& Server::getServerConfig(size_t index) {
@@ -47,16 +52,19 @@ void Server::initializeServers() {
             pollfds.push_back(server_poll);
             pollfds_servers.push_back(server_poll);
             
-            std::cout << "\033[33mServer initialized on " << config.host << ":" << config.port 
+            std::cout << "\033[33mServer initialized on " << config.host << ":" << config.ports[0] 
                       << " (FD: " << config.fd << ")\033[0m" << std::endl;
         }
     }
 }
 
 int Server::createServer(ServerConfig& config) {
+    // Since we now have one config per port, just use the first port in the vector
+    int port = config.ports[0];
+    
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
-        std::cerr << "Socket creation failed for " << config.host << ":" << config.port 
+        std::cerr << "Socket creation failed for " << config.host << ":" << port 
                   << " (Name: " << config.server_name << ") - " << strerror(errno) << std::endl;
         return -1;
     }
@@ -68,7 +76,7 @@ int Server::createServer(ServerConfig& config) {
     // Set socket options
     int opt = 1;
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0) {
-        std::cerr << "Setsockopt failed for " << config.host << ":" << config.port 
+        std::cerr << "Setsockopt failed for " << config.host << ":" << port 
                   << " (Name: " << config.server_name << ") - " << strerror(errno) << std::endl;
         close(server_fd);
         return -1;
@@ -77,22 +85,22 @@ int Server::createServer(ServerConfig& config) {
     // Set up address structure
     memset(&config.addr, 0, sizeof(config.addr));
     config.addr.sin_family = AF_INET;
-    config.addr.sin_port = htons(config.port);
+    config.addr.sin_port = htons(port);
     
     // Always use INADDR_ANY (0.0.0.0) for binding
     config.addr.sin_addr.s_addr = INADDR_ANY;
 
     // Bind the socket
     if (bind(server_fd, (struct sockaddr*)&config.addr, sizeof(config.addr)) < 0) {
-        std::cerr << "Bind failed for " << config.host << ":" << config.port 
+        std::cerr << "Bind failed for " << config.host << ":" << port 
                   << " (Name: " << config.server_name << ") - " << strerror(errno) << std::endl;
         close(server_fd);
         return -1;
     }
 
     // Listen for connections
-    if (listen(server_fd, MAX_CLIENTS) < 0) {
-        std::cerr << "Listen failed for " << config.host << ":" << config.port 
+    if (listen(server_fd, SOMAXCONN) < 0) {
+        std::cerr << "Listen failed for " << config.host << ":" << port 
                   << " (Name: " << config.server_name << ") - " << strerror(errno) << std::endl;
         close(server_fd);
         return -1;
@@ -140,7 +148,7 @@ int Server::acceptClient(int server_fd, ServerBlock& server_block_obj) {
     
     if (server_index >= 0) {
         std::ostringstream ss;
-        ss << server_configs[server_index].host << ":" << server_configs[server_index].port 
+        ss << server_configs[server_index].host << ":" << server_configs[server_index].ports[0] 
            << " (Name: " << server_configs[server_index].server_name << ")";
         server_info = ss.str();
     } else {
@@ -217,12 +225,70 @@ int Server::acceptClient(int server_fd, ServerBlock& server_block_obj) {
 
 
 
-void Server::closeClientConnection(size_t index) {
-    // Check if there are any clients at all
-    if (clients.size() == 0) {
-        return;
-    }
+// void Server::closeClientConnection(size_t index) {
+//     // Check if there are any clients at all
+//     if (clients.size() == 0) {
+//         return;
+//     }
     
+//     // Check if the index is valid
+//     if (index >= pollfds.size()) {
+//         std::cerr << "\033[31mInvalid pollfd index in closeClientConnection\033[0m" << std::endl;
+//         return;
+//     }
+    
+//     int client_fd = pollfds[index].fd;
+    
+//     // Find the client by fd
+//     size_t client_index;
+//     getClientIndexByFd(client_fd, client_index);
+//     // Check if client was found
+//     if (client_index >= clients.size()) {
+//         // Client not found, just close the socket and remove from pollfds
+//         std::cout << "\033[31mClient not found in vector, closing socket FD: " << client_fd << "\033[0m" << std::endl;
+//         close(client_fd);
+//         pollfds.erase(pollfds.begin() + index);
+//         return;
+//     }
+    
+//     // Store the keep-alive status before we remove the client
+//     bool keepAlive = (clients[client_index].get_Alive() == 1);
+    
+//     // Close any open file streams
+//     std::ifstream& fileStream = clients[client_index].get_response().get_fileStream();
+//     if (fileStream.is_open()) {
+//         fileStream.close();
+//     }
+    
+//     if (keepAlive == 0) {
+//         // Find and remove from pollfds_clients
+//         for (size_t i = 0; i < pollfds_clients.size(); i++) {
+//             if (pollfds_clients[i].fd == client_fd) {
+//                 pollfds_clients.erase(pollfds_clients.begin() + i);
+//                 clients.erase(clients.begin() + client_index);
+//                 break;
+//             }
+//         }
+//         // Close socket and remove from pollfds
+//         std::cout << "\033[31mClosing client connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
+//         close(client_fd);
+//         pollfds.erase(pollfds.begin() + index);
+//         std::cout << "clients size == == " << clients.size()  << std::endl;        
+//     } else {
+//         // If keep-alive is on (1), keep the connection open
+//         // std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
+        
+//         // CRITICAL FIX: Temporarily disable events for this FD to prevent immediate re-triggering
+//         // pollfds[index].events = 0;  // Disable all events temporarily
+        
+//         // Reset the client state but keep it in the vector
+//         clients[client_index].reset(); // You need to implement this method
+//         pollfds[index].events = POLLIN;
+//     }
+// }
+
+
+void Server::closeClientConnection(size_t index) {
     // Check if the index is valid
     if (index >= pollfds.size()) {
         std::cerr << "\033[31mInvalid pollfd index in closeClientConnection\033[0m" << std::endl;
@@ -254,17 +320,21 @@ void Server::closeClientConnection(size_t index) {
     }
     
     if (!keepAlive) {
-        // If keep-alive is off (0), completely close the connection
-        
-        // Find and remove from pollfds_clients
+        // Find client index in pollfds_clients
+        size_t client_poll_index = SIZE_MAX;
         for (size_t i = 0; i < pollfds_clients.size(); i++) {
             if (pollfds_clients[i].fd == client_fd) {
-                pollfds_clients.erase(pollfds_clients.begin() + i);
+                client_poll_index = i;
                 break;
             }
         }
         
-        // Remove from clients vector
+        // Remove from pollfds_clients if found
+        if (client_poll_index != SIZE_MAX) {
+            pollfds_clients.erase(pollfds_clients.begin() + client_poll_index);
+        }
+        
+        // Remove from clients vector - careful with the order!
         clients.erase(clients.begin() + client_index);
         
         // Close socket and remove from pollfds
@@ -272,19 +342,13 @@ void Server::closeClientConnection(size_t index) {
         close(client_fd);
         pollfds.erase(pollfds.begin() + index);
     } else {
-        // If keep-alive is on (1), keep the connection open
-        // std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
+        // If keep-alive is on, keep the connection open
+        std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
         
-        // CRITICAL FIX: Temporarily disable events for this FD to prevent immediate re-triggering
-        pollfds[index].events = 0;  // Disable all events temporarily
+        // Reset the client state for the next request but keep it in the vectors
+        clients[client_index].reset();
         
-        // Reset the client state but keep it in the vector
-        clients[client_index].reset(); // You need to implement this method
-        
-        // After a short delay, re-enable POLLIN events
-        // This should be done in a separate function that gets called after handling the current
-        // batch of events (or with a timer if you have that capability)
-        // For now we'll just re-enable it here, but this might not be ideal
+        // Make sure we switch back to listening for new requests
         pollfds[index].events = POLLIN;
     }
 }
@@ -554,6 +618,15 @@ void Server::handleClientWrite(size_t index) {
                 return; // Try again later
             }
         }
+        
+        // std::cout << "size == " << clients.size() << std::endl;
+
+        if (fileStream.eof()) {
+            // File stream has ended, close it
+            fileStream.close();
+            // client.get_response().set_fileStream(fileStream);
+        }
+
     }
 }
 
@@ -577,31 +650,31 @@ int Server::getServerIndexByFd(int fd) {
     return -1; // Not found
 }
 
-int Server::getServerIndexByHostPortName(const std::string& host, int port, const std::string& server_name) {
-    // First, check for exact match of host, port, and server name
-    for (size_t i = 0; i < server_configs.size(); i++) {
-        if (server_configs[i].host == host && 
-            server_configs[i].port == port && 
-            server_configs[i].server_name == server_name) {
-            return static_cast<int>(i);
-        }
-    }
+// int Server::getServerIndexByHostPortName(const std::string& host, int port, const std::string& server_name) {
+//     // First, check for exact match of host, port, and server name
+//     for (size_t i = 0; i < server_configs.size(); i++) {
+//         if (server_configs[i].host == host && 
+//             server_configs[i].port == port && 
+//             server_configs[i].server_name == server_name) {
+//             return static_cast<int>(i);
+//         }
+//     }
     
-    // If not found, check for match with just host and port
-    for (size_t i = 0; i < server_configs.size(); i++) {
-        if (server_configs[i].host == host && server_configs[i].port == port) {
-            return static_cast<int>(i);
-        }
-    }
+//     // If not found, check for match with just host and port
+//     for (size_t i = 0; i < server_configs.size(); i++) {
+//         if (server_configs[i].host == host && server_configs[i].port == port) {
+//             return static_cast<int>(i);
+//         }
+//     }
     
-    return -1; // Not found
-}
+//     return -1; // Not found
+// }
 
-ServerBlock Server::get_ServerConfByIndex(int fd_server) {
-    int index = getServerIndexByFd(fd_server);
-    if (index >= 0 && index < static_cast<int>(server_block_obj.size())) {
-        return server_block_obj[index];
-    }
-    // Return a default ServerBlock if not found
-    return ServerBlock();
-}
+// ServerBlock Server::get_ServerConfByIndex(int fd_server) {
+//     int index = getServerIndexByFd(fd_server);
+//     if (index >= 0 && index < static_cast<int>(server_block_obj.size())) {
+//         return server_block_obj[index];
+//     }
+//     // Return a default ServerBlock if not found
+//     return ServerBlock();
+// }

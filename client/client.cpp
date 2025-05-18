@@ -11,7 +11,7 @@ Client::Client(int fd, struct sockaddr_in Add, ServerBlock obj)
     response_object = new Response();
     client_id = fd;
     Client_Addr = Add;
-    keep_alive = true;
+    keep_alive = false;
     all_recv = false;
     server_client_obj = obj;
     // std::cout << "Client created with fd: " << client_id << std::endl;
