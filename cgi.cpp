@@ -213,7 +213,7 @@ int cgi_handler(Client &client)
         (char *)"GATEWAY_INTERFACE=CGI/1.1",
         (char *)"SERVER_PROTOCOL=HTTP/1.1",
         (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
-        (char *)"REQUEST_METHOD=GET",         // or POST
+        (char *)"REQUEST_METHOD=POST",         // or POST
         (char *)"PATH_INFO=/some/extra/path", // optional
         (char *)"PATH_TRANSLATED=/var/www/html/some/extra/path",
         (char *)"SCRIPT_NAME=/cgi-bin/hello.py",

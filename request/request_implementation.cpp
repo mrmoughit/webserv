@@ -291,6 +291,9 @@ void check_request(Client &client)
 
 
 
+
+    std::cout << client.get_request().get_s_request() << std::endl;
+    
     if (!client.get_request().get_parse_index())
         parse_request(client);
     if (client.get_response().get_response_index())
