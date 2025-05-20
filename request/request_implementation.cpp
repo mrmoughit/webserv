@@ -196,13 +196,14 @@ void parse_request(Client &client)
                     if (vec[i] == ex){
 
 
-                        std::string res =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-                        
+                        std::string res =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
+                        res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
+
 
                         client.get_response().set_response_index(true);
                         client.get_response().set_response(res);
                         client.get_response().set_response_status(200);
-                        std::cout << "the value =============>  " << cgi_handler(client) << std::endl;
+                        std::cout << "the value =============>  " << cgi_handler(client , new_request) << std::endl;
                         // exit (88);
                     }
                 }
@@ -214,7 +215,7 @@ void parse_request(Client &client)
 
 
 
-                std::cout << "the value =============> " << cgi_handler(client) << std::endl;
+                std::cout << "the value =============> " << cgi_handler(client , new_request) << std::endl;
                 std::cout << "mcha l cgi " << std::endl;
             }
         }
@@ -292,7 +293,8 @@ void check_request(Client &client)
 
 
 
-    std::cout << client.get_request().get_s_request() << std::endl;
+    // std::cout << client.get_request().get_s_request() << std::endl;
+
     
     if (!client.get_request().get_parse_index())
         parse_request(client);

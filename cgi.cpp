@@ -1,8 +1,6 @@
 #include "./webserver.hpp"
 
-
-// Define a reasonable timeout (in seconds)
-#define CGI_TIMEOUT 3
+#define CGI_TIMEOUT 20
 
 int check_extension(std::string full_path)
 {
@@ -30,19 +28,32 @@ int check_extension(std::string full_path)
     return 0;
 }
 
-int exec_script(std::string full_path, char *envp[], const char *interpreter , Client &client)
+int exec_script(std::string full_path, char *envp[], const char *interpreter , Client &client,   const std::string& post_data)
 {
-
 
     (void)client;
     char *argv[] = {(char *)interpreter, (char *)full_path.c_str(), NULL};
 
     int fd[2];
+    int input_fd[2];
+    
     if (pipe(fd) == -1)
     {
         std::cerr << "Pipe creation failed: " << strerror(errno) << std::endl;
         return -1;
     }
+
+
+    bool has_post_data = !post_data.empty();
+    if (has_post_data) {
+        if (pipe(input_fd) == -1) {
+            std::cerr << "Input pipe creation failed" << std::endl;
+            close(fd[0]);
+            close(fd[1]);
+            return -1;
+        }
+    }
+
 
     // Set pipe to non-blocking mode
     int flags = fcntl(fd[0], F_GETFL, 0);
@@ -54,13 +65,31 @@ int exec_script(std::string full_path, char *envp[], const char *interpreter , C
         std::cerr << "Fork failed: " << strerror(errno) << std::endl;
         close(fd[0]);
         close(fd[1]);
+        if (has_post_data) 
+        {
+            close(input_fd[0]);
+            close(input_fd[1]);
+        }
         return -1;
     }
 
     if (pid == 0)
     {
-        // Child process
         close(fd[0]);
+        if (has_post_data)
+        {
+            close(input_fd[1]);
+            if (dup2(input_fd[0], STDIN_FILENO) == -1)
+            {
+                std::cerr << "dup2 for stdin failed" << std::endl;
+                close(input_fd[0]);
+                close(fd[1]);
+                exit(1);
+            }
+            close(input_fd[0]);
+        }
+
+
         if (dup2(fd[1], STDOUT_FILENO) == -1)
         {
             std::cerr << "dup2 failed: " << strerror(errno) << std::endl;
@@ -70,13 +99,35 @@ int exec_script(std::string full_path, char *envp[], const char *interpreter , C
 
         close(fd[1]);
         execve(argv[0], argv, envp);
-        // If execve returns, it failed
         std::cerr << "execve failed: " << strerror(errno) << std::endl;
         exit(1);
     }
 
-    // Parent process
     close(fd[1]);
+    if (has_post_data) 
+    {
+        close(input_fd[0]);
+        ssize_t written = 0;
+        size_t total_written = 0;
+        size_t data_size = post_data.size();
+        bool write_error = false;
+        
+        while (total_written < data_size && !write_error)
+        {
+            written = write(input_fd[1], post_data.c_str() + total_written, data_size - total_written);
+            if (written > 0) {
+                total_written += written;
+            } else if (written == 0) {
+                continue;
+            } else {
+                std::cerr << "Failed to write POST data" << std::endl;
+                write_error = true;
+                break;
+            }
+        }
+        close(input_fd[1]);
+    }
+
 
     struct pollfd pfd;
     pfd.fd = fd[0];
@@ -84,86 +135,67 @@ int exec_script(std::string full_path, char *envp[], const char *interpreter , C
 
     char buffer[10000];
     std::string content;
-    // ssize_t bytes_read = 0;
     bool timeout_occurred = false;
 
-    // Start the timer
     time_t start_time = time(NULL);
 
-    // Read with timeout handling and output buffer management
-    while (true)
+    while (true) 
     {
         // Check if we've exceeded our timeout
-        if (time(NULL) - start_time > CGI_TIMEOUT)
-        {
+        if (time(NULL) - start_time > CGI_TIMEOUT) {
             std::cerr << "CGI script execution timed out after " << CGI_TIMEOUT << " seconds" << std::endl;
-            kill(pid, SIGTERM); // Try to terminate gracefully first (Allows proper resource release: Closing files, network connections, releasing memory)
-            usleep(100000);     // Wait a bit
-
+            kill(pid, SIGTERM);  // Try to terminate gracefully first
+            usleep(100000);      // Wait a bit
+            
             // Check if process ended
             int status;
-            if (waitpid(pid, &status, WNOHANG) == 0)
-            {
+            if (waitpid(pid, &status, WNOHANG) == 0) {
                 // Process still running, force kill
                 kill(pid, SIGKILL);
             }
-
+            
             timeout_occurred = true;
             break;
         }
-
+        
         // Poll with a short timeout to keep checking our execution time
-        int poll_result = poll(&pfd, 1, 100); // 100ms timeout for poll
-
-        if (poll_result == -1)
-        {
+        int poll_result = poll(&pfd, 1, 100);  // 100ms timeout for poll
+        
+        if (poll_result == -1) {
             // Poll error
-            std::cerr << "Poll error: " << strerror(errno) << std::endl;
+            std::cerr << "Poll error" << std::endl;
             break;
-        }
-        else if (poll_result > 0)
-        {
+        } else if (poll_result > 0) {
             // Data available to read
-            // ssize_t n = read(fd[0], buffer + bytes_read, sizeof(buffer) - bytes_read - 1);
             ssize_t n = read(fd[0], buffer, sizeof(buffer));
-            if (n < 0)
-            {
-                if (errno == EAGAIN || errno == EWOULDBLOCK)
-                {
-                    // No data available right now, try again
-                    continue;
-                }
-                else
-                {
-                    // Actual error
-                    std::cerr << "Read error: " << strerror(errno) << std::endl;
-                    break;
-                }
-            }
-            else if (n == 0)
-            {
+            if (n > 0) {
+                // Data read successfully
+                content.append(buffer, n);
+            } else if (n == 0) {
                 // End of file
                 break;
             }
-            else
+             else 
             {
-                content.append(buffer, n);
+                    std::cerr << "Read error" << std::endl; //you should retrun -1 to serve error page
+                    break;
             }
         }
-
+        
         // Check if process has ended naturally
         int status;
         pid_t result = waitpid(pid, &status, WNOHANG);
-        if (result == pid)
-        {
+        if (result == pid) {
             // Process has ended
             break;
         }
     }
 
     close(fd[0]);
-
-    // Wait for child if it's still running
+    if (!content.empty())
+        std::cout << "contetnt: " << content << std::endl;
+    else
+            std::cout << "contetnt emptyyyyyyyyyyy " << std::endl;
     int status;
     if (!timeout_occurred)
     {
@@ -189,10 +221,6 @@ int exec_script(std::string full_path, char *envp[], const char *interpreter , C
     {
         return (std::cerr << "500 Internal Server Error: Script terminated by signal " << WTERMSIG(status) << std::endl, 1);
     }
-
-    // std::cout << content;
-
-
     std::string str = client.get_response().get_response();
     str += content ;
 
@@ -201,12 +229,8 @@ int exec_script(std::string full_path, char *envp[], const char *interpreter , C
     return 0;
 }
 
-int cgi_handler(Client &client)
+int cgi_handler(Client &client , std::string body)
 {
-
-    // fill
-
-
 
     char *envp[] = {
 
@@ -249,7 +273,7 @@ int cgi_handler(Client &client)
         }
         else if (code == 2)
             interpreter = "/usr/bin/python3";
-        int status = exec_script(client.get_request().get_path(), envp, interpreter , client);
+        int status = exec_script(client.get_request().get_path(), envp, interpreter , client, body);
         return status;
     }
     else

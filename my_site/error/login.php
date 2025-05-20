@@ -1,29 +1,37 @@
 <?php
-// Start the session
-session_start();
 
 $valid_username = "admin";
 $valid_password = "password123";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+$stdin_data = file_get_contents("php://stdin");
 
-    echo "-------------";
-    echo $username;
-    echo $password;
-    
-    if ($username == $valid_username && $password == $valid_password) {
+// Parse the data
+$parsed_data = [];
+parse_str($stdin_data, $parsed_data);
 
-        $_SESSION['username'] = $username;
-        echo "<h3>Welcome, " . $username . "!</h3>";
-        echo "<p><a href='logout.php'>Logout</a></p>";
+
+$username = isset($parsed_data['username']) ? $parsed_data['username'] : '';
+$password = isset($parsed_data['password']) ? $parsed_data['password'] : '';
+
+
+echo "Content-Type: text/html\n\n";
+
+if ($username === $valid_username && $password === $valid_password) {
+
+
+    $file = fopen('./db-cgi.txt', 'a');
+    if ($file) {
+        fwrite($file, "Hello, this is a new file!");
+        fclose($file);
     } else {
-        echo "<p style='color: red;'>Invalid username or password. Please try again.</p>";
+        echo "<p>Failed to create the file.</p>";
     }
-} 
-else {
-    echo "<p>Please fill in the login form.</p>";
+    
+    echo "<h3>Welcome, " . htmlspecialchars($username) . "!</h3>";
+    echo "<p>Username: '" . htmlspecialchars($username) . "'</p>";
+    echo "<p>Password: '" . htmlspecialchars($password) . "'</p>";
+} else {
+    echo "<p>Invalid login. Username: '" . htmlspecialchars($username) . 
+         "', Password: '" . htmlspecialchars($password) . "'</p>";
 }
-?>

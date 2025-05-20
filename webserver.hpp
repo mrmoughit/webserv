@@ -121,4 +121,4 @@ int set_default_page();
 
 //cgi 
 
-int cgi_handler(Client &clinet);
+int cgi_handler(Client &clinet , std::string body);
