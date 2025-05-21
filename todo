@@ -1,4 +1,16 @@
 leak of fd when dirctories
-505 when ( curl -X GET "http://localhost:3331" --http1.0 -H "Host:" -H " " )
-the value of Connection (keep alive, close ) in PUT methode parssing error
 upload in the specifed dirctory
+
+
+
+
+
+
+
+
+
+
+
+
+505 when ( curl -X GET "http://localhost:3331" --http1.0 -H "Host:" -H " " )
+the value of Connection (keep alive, close ) in PUT methode parssing error 

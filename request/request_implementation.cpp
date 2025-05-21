@@ -56,6 +56,8 @@ void set_response_error(Client *client, int status)
 void parse_request(Client &client)
 {
     client.get_request().set_parse_index(true);
+    client.set_Alive(false);
+
 
     std::string &res = client.get_response().get_response();
 
@@ -298,6 +300,9 @@ void check_request(Client &client)
     
     if (!client.get_request().get_parse_index())
         parse_request(client);
+
+
+    // std::cout << client.get_request().get_map_values("Connection") << std::endl;
     if (client.get_response().get_response_index())
     {
         std::string method = client.get_request().get_method();
