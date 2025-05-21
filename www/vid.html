@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Stress Test</title>
+    <style>
+        body {background: #477d70; font-family: Arial, sans-serif; margin: 20px; }
+        .controls { margin-bottom: 20px; padding: 15px; background: #f5f5f5; }
+        input { padding: 8px; width: 300px; margin-right: 10px; }
+        button { padding: 8px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        video { width: 100%; background: #000; }
+        .status { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Stress Test</h1>
+        
+        <div class="controls">
+            <input type="text" id="videoUrl" value="/videos/test.mp4" placeholder="Video URL">
+            <input type="number" id="count" value="10" min="1" max="50">
+            <button onclick="loadVideos()">Load Videos</button>
+            <button onclick="stopAll()">Stop All</button>
+        </div>
+        
+        <div class="status">
+            <strong>Status:</strong> <span id="status">Ready</span>
+            <div id="stats"></div>
+        </div>
+        
+        <div class="video-grid" id="videoContainer"></div>
+    </div>
+
+    <script>
+        let activeVideos = [];
+        let startTime;
+        let loadedCount = 0;
+        const totalCount = () => parseInt(document.getElementById('count').value);
+
+        function loadVideos() {
+            // Clear previous
+            document.getElementById('videoContainer').innerHTML = '';
+            activeVideos = [];
+            loadedCount = 0;
+            
+            // Get config
+            const videoUrl = document.getElementById('videoUrl').value;
+            const count = totalCount();
+            
+            if (!videoUrl) {
+                document.getElementById('status').textContent = "Enter video URL!";
+                return;
+            }
+
+            document.getElementById('status').textContent = `Loading ${count} instances...`;
+            startTime = performance.now();
+            
+            // Load same video multiple times
+            for (let i = 0; i < count; i++) {
+                createVideoElement(videoUrl, i);
+            }
+        }
+
+        function createVideoElement(url, index) {
+            const container = document.createElement('div');
+            const video = document.createElement('video');
+            video.controls = true;
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = true; // Required for autoplay in most browsers
+            
+            const info = document.createElement('div');
+            info.className = 'video-info';
+            info.textContent = `Instance ${index+1}`;
+            
+            container.appendChild(video);
+            container.appendChild(info);
+            document.getElementById('videoContainer').appendChild(container);
+            
+            // Start loading
+            video.src = url;
+            activeVideos[index] = video;
+            
+            video.oncanplay = function() {
+                loadedCount++;
+                updateStats();
+                video.play().catch(e => {
+                    info.textContent += ` (autoplay blocked)`;
+                });
+            };
+            
+            video.onerror = function() {
+                info.textContent += ` - Failed to load`;
+            };
+        }
+
+        function stopAll() {
+            activeVideos.forEach(video => {
+                if (video) {
+                    video.pause();
+                    video.removeAttribute('src');
+                    video.load();
+                }
+            });
+            document.getElementById('status').textContent = `Stopped (${loadedCount}/${totalCount()} loaded)`;
+        }
+
+        function updateStats() {
+            const elapsed = ((performance.now() - startTime)/1000).toFixed(2);
+            document.getElementById('stats').innerHTML = `
+                Loaded: ${loadedCount}/${totalCount()} | Time: ${elapsed}s | Rate: ${(loadedCount/elapsed).toFixed(2)} videos/s
+            `;
+            
+            if (loadedCount === totalCount()) {
+                document.getElementById('status').textContent = "All instances loaded!";
+            }
+        }
+    </script>
+</body>
+</html>
