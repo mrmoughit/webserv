@@ -1,6 +1,6 @@
 #include "./webserver.hpp"
 
-#define CGI_TIMEOUT 20
+#define CGI_TIMEOUT 2
 
 int check_extension(std::string full_path)
 {

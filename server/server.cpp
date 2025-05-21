@@ -211,7 +211,7 @@ void Server::closeClientConnection(size_t index) {
         pollfds.erase(pollfds.begin() + index);
     } else {
         // If keep-alive is on, keep the connection open
-        std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
+        // std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
         
         // Reset the client state for the next request but keep it in the vectors
         clients[client_index].reset();

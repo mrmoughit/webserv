@@ -429,7 +429,7 @@ int main(int ac, char **av)
         S1.server_block_obj = servers;
         for (size_t i = 0; i < conf.number_of_server ; i++)
         {
-            S1.addServerConfig(servers[i].get_host(), servers[i].get_port(), servers[i].get_server_names());
+            S1.addServerConfig(i, servers[i].get_host(), servers[i].get_port(), servers[i].get_server_names());
         }
     }
     else
@@ -443,7 +443,7 @@ int main(int ac, char **av)
             return 1;
         S1.number_of_servers = 1;
         S1.server_block_obj = servers;
-        S1.addServerConfig(servers[0].get_host(), servers[0].get_port(), servers[0].get_server_names());
+        S1.addServerConfig(0, servers[0].get_host(), servers[0].get_port(), servers[0].get_server_names());
         // std::cout << "Usage: ./webserv <config_file>" << std::endl;
     }
     S1.startServer();
