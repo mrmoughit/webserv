@@ -16,8 +16,8 @@
 ServerBlock::ServerBlock()
 {
     is_location_url = -1;
-    dupindex = 0;
-    Port = -1;
+    // dupindex = 0;
+    // Port = -1;
     client_body_size = 1048576;
     server_root = "/html";
     // std::cout << "ServerBlock Default constructor called" << std::endl;
@@ -80,12 +80,13 @@ std::string& ServerBlock::get_host(void)
 
 void ServerBlock::set_port(int set_port)
 {
-    if (Port != -1)
-        dupindex++;
-    Port = set_port;
+    // if (Port != -1)
+    //     dupindex++;
+    if (set_port > 0)
+        Port.push_back(set_port);
 }
 
-int ServerBlock::get_port(void)
+ std::vector <int> ServerBlock::get_port(void)
 {
     return Port;
 }
@@ -227,6 +228,6 @@ std::string ServerBlock::find_error_page_path(int n){
 void ServerBlock::set_dafault_data()
 {
     Host = "127.0.0.1";   
-    Port = 8080;
+    Port.push_back(8080);
     Server_names = "test.com";
 }

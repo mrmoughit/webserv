@@ -17,7 +17,7 @@
 class ServerBlock{
     private:
         std::string                    Host;
-        int                            Port;
+        std::vector <int>                           Port;
         std::string                    Server_names;
         std::string                    server_root;
         size_t                         client_body_size;
@@ -42,7 +42,7 @@ class ServerBlock{
         void set_error_pages(std::map<int , std::string> set_error_pages);
         std::string& get_server_root(void);
         std::string& get_host(void);
-        int get_port(void);
+        std::vector <int> get_port(void);
         std::string  get_server_names(void);
         std::vector <std::string>  get_index(void);
         size_t get_client_body_size(void);
