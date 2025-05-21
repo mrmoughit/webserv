@@ -261,7 +261,8 @@ void hanlde_post_request(Client &client)
         if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: File is not open" << std::endl;
-            exit(0);
+            std::cout<<  "exit 33" << std::endl;
+            exit(33);
             return;
         }
         client.get_request().file << client.get_request().get_s_request() << std::flush;
