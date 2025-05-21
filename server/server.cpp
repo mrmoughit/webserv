@@ -169,7 +169,7 @@ void Server::closeClientConnection(size_t index) {
     // Find the client by fd
     size_t client_index;
     getClientIndexByFd(client_fd, client_index);
-    
+    // std::cout << clients[client_index].get_request().get_map_values("Connection") << std::endl;
     // Check if client was found
     if (client_index >= clients.size()) {
         // Client not found, just close the socket and remove from pollfds
@@ -211,8 +211,10 @@ void Server::closeClientConnection(size_t index) {
         pollfds.erase(pollfds.begin() + index);
     } else {
         // If keep-alive is on, keep the connection open
+
         // std::cout << "\033[35mClient connection kept alive. Socket FD: " << client_fd << "\033[0m" << std::endl;
         
+        // exit(0);
         // Reset the client state for the next request but keep it in the vectors
         clients[client_index].reset();
         
@@ -330,6 +332,8 @@ void Server::startServer() {
                     // Process client request
                     char buffer[16384] = {0};
                     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+                    // std::cout << "Bytes read: " << bytes_read << std::endl;
+                    // std::cout << "Buffer: " << buffer << std::endl;
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
                             if (clients[client_index].get_Alive() == 0) {
@@ -415,7 +419,8 @@ void Server::handleClientWrite(size_t index) {
     if (!client.get_request().is_string_req_send) {
         const std::string& response = client.get_response().get_response();
         ssize_t bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
-        
+        // std::cout << "Bytes sent: " << bytes_sent << std::endl;
+        // std::cout << "Response: " << response << std::endl;
         if (bytes_sent < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 return; // Retry in next POLLOUT
