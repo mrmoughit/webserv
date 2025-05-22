@@ -7,26 +7,24 @@
     <title>Login Page</title>
 </head>
 <body>
-<form action="script.py" method="POST" class="display">
-        <h2>Login Form</h2>
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required><br><br>
+    <div id="content">
+        <form action="script.py" method="POST" class="display">
+            <h2>Login Form</h2>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br><br>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+            
+            <input type="submit" value="Login">
+        </form>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required><br><br>
-
-    <input type="submit" value="Login">
-</form>
-
-<div id="content"></div>
-
+    </div>
 <script>
     
     let key = getCookie("session_id");
-    document.getElementById('content').innerHTML = ''
     
     if (key) {
-        // Send a request to the backend with the session ID
         const url = 'session.py';
 
         fetch(url, {

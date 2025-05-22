@@ -92,7 +92,7 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
     std::getline(ss, line);
     if (index != 0)
         std::getline(ss, line);
-    std::cout << line << std::endl;
+    // std::cout << line << std::endl;
     // return ;
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
@@ -119,7 +119,10 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                     std::cout << "error" << std::endl;
                     exit(55);
                 }
-                std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
+                // std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
+                std::string filename = get_file_name(&clinet , line.substr(filename_pos, file_name_end - filename_pos));
+                if (filename.empty()) // // must be test the cityoen error 
+                    return ;
                 filename  =  clinet.server_client_obj.get_server_root() + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);
@@ -352,56 +355,7 @@ int get_parts(char **av, std::vector <std::string>& parts)
 }
 
 
-// void print_content(Confile Configuration)
-// {
-//     std::vector <ServerBlock> servers = Configuration.get_server();
-//     std::cout << "##### server 1 #####" << std::endl;
-//     std::cout << "port: " << servers[0].get_port() << std::endl;
-//     std::cout << "host: " << servers[0].get_host() << std::endl;
-//     std::cout << "server root: " << servers[0].get_server_root() << std::endl;
-//     std::vector<std::string> indx = servers[0].get_index();
-//     std::cout << "index size: " << indx.size() << std::endl;
-//     for (size_t x = 0; x < indx.size() ; x++)
-//     {
-//         std::cout << "index " << x << ": "<< indx[x] << std::endl;
-//     } 
-//     std::cout << "clientbodymax: " << servers[0].get_client_body_size() << std::endl;
-//     std::map <int, std::string> error_pages = servers[0].get_error_pages();
-//     for (std::map<int, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
-//         std::cout << "Error code: " << it->first << " => Page: " << it->second << std::endl;
-//     }
-//     //location block
-//     std::vector<RouteBlock>        routes = servers[0].get_routes();
-//     std::cout << "size of routes: "  << routes.size() << std::endl;
-//     std::cout << "***route 1 of server 1: " << std::endl;
-//     std::cout << "uri: " << routes[0].get_uri() << std::endl; 
-//     std::cout << "location's root: " << routes[0].get_root() << std::endl;
-//     std::vector<std::string> methods = routes[0].get_methods();
-//     for (size_t i = 0; i < methods.size(); ++i) {
-//         std::cout << "Method: " << methods[i] << std::endl;
-//     }
-//     std::cout << "autoindex: " << routes[0].get_autoindex() << std::endl; 
-//     std::map<int , std::string> redirection = routes[0].get_redirections();
-//     if (redirection.empty())
-//     std::cout << "there is no redirection" << std::endl;
-//     for (std::map<int, std::string>::iterator it2 = redirection.begin(); it2 != redirection.end(); ++it2) {
-//         std::cout << "status code: " << it2->first << " => target URL: " << it2->second << std::endl;
-//     }
-//     std::cout << "***route 2 of server 1: " << std::endl;
-//     std::cout << "uri: " << routes[1].get_uri() << std::endl; 
-//     std::cout << "location's root: " << routes[1].get_root() << std::endl;
-//     std::vector<std::string> methods2 = routes[1].get_methods();
-//     for (size_t i = 0; i < methods2.size(); ++i) {
-//         std::cout << "Method: " << methods2[i] << std::endl;
-//     }
-//     std::cout << "autoindex: " << routes[1].get_autoindex() << std::endl; 
-//     std::map<int , std::string> redirection2 = routes[1].get_redirections();
-//     if (redirection.empty())
-//     std::cout << "there is no redirection" << std::endl;
-//     for (std::map<int, std::string>::iterator it3 = redirection2.begin(); it3 != redirection2.end(); ++it3) {
-//         std::cout << "status code: " << it3->first << " => target URL: " << it3->second << std::endl;
-//     }
-// }
+
 
 
 
@@ -412,7 +366,6 @@ int main(int ac, char **av)
     Server S1;
     if (ac == 2)
     {
-
         std::vector <std::string> parts;
         if (get_parts(av, parts))
              return 1;
@@ -447,6 +400,6 @@ int main(int ac, char **av)
         // std::cout << "Usage: ./webserv <config_file>" << std::endl;
     }
     S1.startServer();
-   
+
 }
 

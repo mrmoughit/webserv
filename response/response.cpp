@@ -213,3 +213,59 @@ void response_to_get(Client &client)
     }
     client.get_response().set_response(res);
 }
+
+
+
+
+std::string get_file_name(Client *client , std::string file){
+
+    if (client->server_client_obj.is_location_url != -1){
+
+        std::string dir = client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_client_body_temp_path();
+
+        struct stat statbuf;
+
+        std::cout << dir << std::endl;
+
+        if (stat(dir.c_str(), &statbuf) == -1) { // if not exist path 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if (!S_ISDIR(statbuf.st_mode)) { // not a dir 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if ((statbuf.st_mode & S_IWUSR) == 0) {  // for permession 
+            set_response_error(client , 502);
+            return "";
+        }
+
+        return dir + "/" + file;
+    }
+    else{
+
+        std::string dir = "upload";
+
+        struct stat statbuf;
+
+        if (stat(dir.c_str(), &statbuf) == -1) { // if not exist path 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if (!S_ISDIR(statbuf.st_mode)) { // not a dir 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if ((statbuf.st_mode & S_IWUSR) == 0) {  // for permession 
+            set_response_error(client , 502);
+            return "";
+        }
+        return dir + "/" + file;
+        
+    }
+    return "";
+}

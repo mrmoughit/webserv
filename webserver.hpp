@@ -115,7 +115,8 @@ int check_dup_serv(std::vector <ServerBlock>& vector_serv, ServerBlock& current_
 
 
 int set_default_page();
-
+std::string get_file_name(Client *clinet , std::string file);
+// bool check_post_body_size(Client *clinet);
 
 
 

@@ -75,3 +75,12 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
 }
 
 
+
+
+
+// bool check_post_body_size(Client *clinet){
+//     if (clinet->server_client_obj.is_location_url != -1){
+//         if (clinet->get_request().get_content_length() > clinet->server_client_obj.get_routes()[clinet->server_client_obj.is_location_url].get)
+//     }
+//     return false;
+// }

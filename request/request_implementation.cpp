@@ -179,9 +179,14 @@ void parse_request(Client &client)
         size_t size;
         ss >> size;
         client.get_request().set_content_length(size);
-        if (ss.fail() || size == 0)
-        {
+        if (ss.fail() || size == 0){
             set_response_error(&client, 400);
+            return ;
+        }
+        if (size > client.server_client_obj.get_client_body_size())
+        {
+            set_response_error(&client, 413);
+            return;
         }
     }
 
@@ -196,7 +201,6 @@ void parse_request(Client &client)
                 std::vector<std::string > vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
                 for (size_t i = 0 ; i < vec.size() ; i++){
                     if (vec[i] == ex){
-
 
                         std::string res =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
                         res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
@@ -332,8 +336,6 @@ void check_request(Client &client)
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
-
-
 
 
     if (method == "GET")

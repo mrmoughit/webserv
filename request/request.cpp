@@ -233,10 +233,15 @@ void hanlde_post_request(Client &client)
         size_t pos = content_type.find("/");
         std::string extension = content_type.substr(pos + 1);
         trim_non_printable(extension);
+        
+        
+        // std::string file_name = client.server_client_obj.get_server_root() + "/" + ft_generate_file_names(client, extension);
 
-        std::string file_name = client.server_client_obj.get_server_root() + "/" + ft_generate_file_names(client, extension);
-
+        std::string file_name = get_file_name(&client , ft_generate_file_names(client, extension));
+        if (file_name.empty())
+            return ; // must be test the cityoen error 
         client.get_request().file.open(file_name.c_str());
+
         if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: Could not open file " << file_name << std::endl;
