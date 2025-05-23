@@ -23,10 +23,10 @@ CFLAGS =  -Wall -Wextra -Werror -std=c++98 #-g -fsanitize=address
 all : $(NAME)
 
 %.o : %.cpp ${HEDER} Makefile
-	g++ ${CFLAGS} -c $< -o $@ && rm -rf html && mkdir html
+	c++ ${CFLAGS} -c $< -o $@ && rm -rf html && mkdir html
 
 $(NAME) : $(OBJ) ${HEDER}
-	 g++ ${CFLAGS} $(OBJ) -o $@
+	c++ ${CFLAGS} $(OBJ) -o $@
 
 clean :
 	rm -rf $(OBJ)

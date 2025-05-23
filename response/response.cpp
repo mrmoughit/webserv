@@ -246,7 +246,7 @@ std::string get_file_name(Client *client , std::string file){
     }
     else{
 
-        std::string dir = "upload";
+        std::string dir = "./upload";
 
         struct stat statbuf;
 
