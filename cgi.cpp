@@ -327,7 +327,7 @@ int cgi_handler(Client &client , std::string body)
         NULL
     };
 	std::string full_path =client.get_request().get_path();
-	std::string method = "POST";
+	std::string method = client.get_request().get_method();
 	//check_methods(method, routes[i]);
 	//if method valid and not exist (error not allowed) 
 	//if method not valid (error not implemented)
