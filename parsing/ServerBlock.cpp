@@ -41,12 +41,10 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& other)
     {
         this->Host = other.Host;
         this->Port = other.Port;
-        this->Server_names.clear();//maybe it's a shallow
         this->Server_names = other.Server_names;
         this->server_root = other.server_root;
         this->client_body_size = other.client_body_size;
         this->index = other.index;
-        this->routes.clear();
         this->routes = other.routes;
         this->error_pages = other.error_pages;
         this->dupindex = other.dupindex;
@@ -68,8 +66,8 @@ std::string& ServerBlock::get_server_root(void)
 void ServerBlock::set_host(std::string set_host)
 {
     // std::cout << "set host called for : " << set_host << std::endl;
-    if (!Host.empty())
-        dupindex++;
+    // if (!Host.empty())
+    //     dupindex++;
     Host = set_host;
 }
 
@@ -86,15 +84,15 @@ void ServerBlock::set_port(int set_port)
         Port.push_back(set_port);
 }
 
- std::vector <int> ServerBlock::get_port(void)
+std::vector <int> ServerBlock::get_port(void)
 {
     return Port;
 }
 
 void ServerBlock::set_server_names(std::string set_server_names)
 {
-    if (!Server_names.empty())
-        dupindex++;
+    // if (!Server_names.empty())
+    //     dupindex++;
     Server_names = set_server_names;
     
 }
@@ -148,16 +146,6 @@ std::vector<RouteBlock> ServerBlock::get_routes(void)
 {
     return routes;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 bool ServerBlock::is_valid_method(std::string path, std::string method)

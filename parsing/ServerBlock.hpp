@@ -17,7 +17,7 @@
 class ServerBlock{
     private:
         std::string                    Host;
-        std::vector <int>                           Port;
+        std::vector <int>              Port;
         std::string                    Server_names;
         std::string                    server_root;
         size_t                         client_body_size;
@@ -48,13 +48,6 @@ class ServerBlock{
         size_t get_client_body_size(void);
         std::map<int , std::string> get_error_pages(void);
         std::vector<RouteBlock> get_routes(void);
-
-
-
-
-
-
-
         bool is_valid_method(std::string path , std::string method);
         std::string find_error_page_path(int n);
         std::string  is_location_path(std::string path);
