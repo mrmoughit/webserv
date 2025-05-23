@@ -26,7 +26,7 @@ all : $(NAME)
 	c++ ${CFLAGS} -c $< -o $@ && rm -rf html && mkdir html
 
 $(NAME) : $(OBJ) ${HEDER}
-	 c++ ${CFLAGS} $(OBJ) -o $@
+	c++ ${CFLAGS} $(OBJ) -o $@
 
 clean :
 	rm -rf $(OBJ)

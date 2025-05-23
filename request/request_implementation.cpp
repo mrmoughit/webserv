@@ -56,6 +56,8 @@ void set_response_error(Client *client, int status)
 void parse_request(Client &client)
 {
     client.get_request().set_parse_index(true);
+    client.set_Alive(false);
+
 
     std::string &res = client.get_response().get_response();
 
@@ -177,14 +179,21 @@ void parse_request(Client &client)
         size_t size;
         ss >> size;
         client.get_request().set_content_length(size);
-        if (ss.fail() || size == 0)
-        {
+        if (ss.fail() || size == 0){
             set_response_error(&client, 400);
+            return ;
+        }
+        if (size > client.server_client_obj.get_client_body_size())
+        {
+            set_response_error(&client, 413);
+            return;
         }
     }
 
 
     pa = client.get_request().get_path();
+    check_if_have_redirection(&client);
+
 
     size_t pos = pa.find_last_of('.');
     if (pos != std::string::npos) {
@@ -194,15 +203,27 @@ void parse_request(Client &client)
                 std::vector<std::string > vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
                 for (size_t i = 0 ; i < vec.size() ; i++){
                     if (vec[i] == ex){
-                        std::cout << "mcha l cgi " << std::endl;
-                        std::cout << "the value =============>  " << cgi_handler(pa) << std::endl;
+
+                        std::string res =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
+                        res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
+
+
+                        client.get_response().set_response_index(true);
+                        client.get_response().set_response(res);
+                        client.get_response().set_response_status(200);
+                        std::cout << "the value =============>  " << cgi_handler(client , new_request) << std::endl;
                         // exit (88);
                     }
                 }
                 
             }
             else{
-                std::cout << "the value =============> " << cgi_handler(pa) << std::endl;
+
+
+
+
+
+                std::cout << "the value =============> " << cgi_handler(client , new_request) << std::endl;
                 std::cout << "mcha l cgi " << std::endl;
             }
         }
@@ -277,8 +298,17 @@ void check_request(Client &client)
 {
     client.server_client_obj.is_location_url = -1;
 
+
+
+
+    // std::cout << client.get_request().get_s_request() << std::endl;
+
+    
     if (!client.get_request().get_parse_index())
         parse_request(client);
+
+
+    // std::cout << client.get_request().get_map_values("Connection") << std::endl;
     if (client.get_response().get_response_index())
     {
         std::string method = client.get_request().get_method();
@@ -304,11 +334,10 @@ void check_request(Client &client)
         return;
     }
 
+
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
-
-
 
 
     if (method == "GET")
@@ -349,6 +378,8 @@ void check_request(Client &client)
             client.get_response().set_response_index(true);
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
+
+
     }
     else if (method == "DELETE")
     {

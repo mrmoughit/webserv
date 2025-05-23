@@ -14,12 +14,12 @@
 
 RouteBlock::RouteBlock()
 {
-    root = "/html";
+    root = "./html";
     methods.push_back("GET");
     methods.push_back("POST");
     methods.push_back("DELETE");
     autoindex = false;
-    client_body_temp_path = "/";
+    client_body_temp_path = "./upload";
     // std::cout << "RouteBlock Default constructor " << std::endl;
 }
 RouteBlock::~RouteBlock()
@@ -41,7 +41,6 @@ RouteBlock& RouteBlock::operator=(const RouteBlock& other)
     {
         this->URI = other.URI;
         this->root= other.root;
-        this->methods.clear();
         this->methods = other.methods;//maybe it's a shallow copy
         this->autoindex = other.autoindex;
         this->index = other.index;

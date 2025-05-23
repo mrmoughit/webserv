@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+import sys
+import cgi
+
+# Get POST data
+post_data = sys.stdin.read()
+
+# Parse the POST data into a dictionary
+params = dict(p.split('=') for p in post_data.split('&'))
+key = params.get('session_id', '')
+
+key_found = False
+username = 'Guest'
+
+# Check the session key in db_cgi.txt
+with open('db_cgi.txt', 'r') as file:
+    for line in file:
+        if f'key {key}' in line:
+            key_found = True
+            username = line.split()[1]  # Extract username from the file
+            break
+
+# Send the correct Content-Type header
+print("Content-Type: text/html\n")
+
+# Check if the key was found and create the appropriate response
+if key_found:
+    print(f"""
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                text-align: center;
+                
+            }}
+            h1 {{
+                color: #4CAF50;
+                font-size: 36px;
+            }}
+            p {{
+                font-size: 18px;
+                margin: 10px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Key Found from session script </h1>
+        <p>Welcome, {username}!</p>
+        <p>Your key was found and is valid.</p>
+    </body>
+    </html>
+    """)
+else:
+    print(f"""
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                text-align: center;
+            }}
+            h1 {{
+                color: #FF0000;
+                font-size: 36px;
+            }}
+            p {{
+                font-size: 18px;
+                margin: 10px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Session Key Not Found</h1>
+        <p>The session key you provided was not found. Please log in again.</p>
+    </body>
+    </html>
+    """)

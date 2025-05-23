@@ -9,31 +9,27 @@
 #include <sstream>
 
 #define DEFAULT_PORT 8080
-#define MAX_CLIENTS 128
 
 // Structure to hold server configuration
 struct ServerConfig {
-    int server_index;
+    int server_block_index;  // Index to map back to server_block_obj
     std::string host;
-    int port;
+    int port;                // Single port
     int fd;
     std::string server_name;
     struct sockaddr_in addr;
     
-    // Constructor with default values
-    ServerConfig() : server_index(0), host("localhost"), port(DEFAULT_PORT), fd(-1), server_name("default") {}
-    
     // Constructor with parameters
-    ServerConfig(const std::string& h, int p, std::string sn = "default") : 
-        server_index(0), host(h), port(p), fd(-1), server_name(sn) {}
+    ServerConfig(int block_idx, const std::string& h, int p, const std::string& sn = "default") : 
+        server_block_index(block_idx), host(h), port(p), fd(-1), server_name(sn) {}
 };
 
 class Server {
 private:
     // Server properties
-    std::vector<ServerConfig> server_configs;
     
     // Client management
+    std::vector<ServerConfig> server_configs;  // One config per port per server
     std::vector<Client> clients;
     
     // Polling structures
@@ -42,6 +38,7 @@ private:
     std::vector<pollfd> pollfds_servers;   // Only server file descriptors
     
 public:
+    // All server blocks from configuration file
     std::vector<ServerBlock> server_block_obj;
     size_t number_of_servers;
     
@@ -50,14 +47,14 @@ public:
     ~Server();
 
     // Configuration methods
-    void addServerConfig(const std::string& host, int port, std::string server_name = "default");
+    void addServerConfig(int server_idx, const std::string& host, std::vector<int> ports, const std::string& server_name = "default");
     ServerConfig& getServerConfig(size_t index);
     size_t getServerCount() const;
     
     // Server management
     void initializeServers();
     int createServer(ServerConfig& config);
-    int acceptClient(int server_fd, ServerBlock& server_block_obj);
+    int acceptClient(int server_fd, ServerBlock& server_block);
     void closeServer();
     
     // Main server loop

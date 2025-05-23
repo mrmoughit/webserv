@@ -279,8 +279,12 @@ std::string pars_host(std::vector<std::string> words, bool& status)
 
 int pars_port(std::vector<std::string> words, bool& status)
 {
-	if (words.size() == 1 || words.size() > 2)
-		return -1;
+	if (words.size() != 2)
+	{
+		std::cerr << "Error invalid listen direcitve (too many ports)" << std::endl;
+		status = false;
+		return (-1);
+	}
 	std::string port = words[1];
 	int i = 0;
 	while(port[i])
@@ -292,7 +296,7 @@ int pars_port(std::vector<std::string> words, bool& status)
 	std::stringstream ss(port);
 	int portnumbr;
 	ss >> portnumbr;
-	if (portnumbr < 1024 || portnumbr > 65535)
+	if (portnumbr < 1 || portnumbr > 65535)
 		return (status = false, std::cout << "Error Invalid port's range" << std::endl, -1);
 	return portnumbr;
 }
@@ -427,7 +431,7 @@ std::map <int, std::string> pars_error_pages(std::vector <std::string> words, bo
         }
 		std::stringstream ss(words[i]);
 		ss >> code;
-		if (code != 201 && code != 400 && code != 405 && code != 403 && code != 401 && code != 404 && code != 204 && code != 415)
+		if (code != 200 && code != 400 && code != 405 && code != 403 && code != 401 && code != 404)
 			return (status = false, std:: cout << "Error invalid code" << std::endl , pages);
 		pages[code] = words[last];
 		i++;
@@ -441,8 +445,8 @@ bool check_status(ServerBlock& server)
 	if (tmp.empty())
 		return (std::cerr << "Error host directive not found" << std::endl, false);
 
-	int port = server.get_port();
-	if (port < 0)
+	std::vector <int> port = server.get_port();
+	if (port.empty())
 		return (std::cerr << "Error listen directive not found" << std::endl, false);
 	return true;
 }

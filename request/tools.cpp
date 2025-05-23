@@ -1,10 +1,4 @@
 #include "../webserver.hpp"
-// std::string not_found = "www/pages/404.html";
-// std::string suc = "www/pages/200.html";
-// std::string bad = "www/pages/400.html";
-// std::string method = "www/pages/405.html";
-// std::string forb = "www/pages/403.html";
-
 
 
 void  trim(std::string& str) {
@@ -63,21 +57,36 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
         return "";
     }
 
+
     std::streampos fileSize = fileStream.tellg();
     fileStream.seekg(0, std::ios::beg);
     client.get_response().set_response_status(200);
     std::ostringstream response;
+
     response << "HTTP/1.1 ";
-    response <<  status ;
-    response << " OK\r\n";
+    
+    int redirection = client.get_request().redirection;
+
+    std::cout << status << std::endl;
+
+    if (redirection != -1 && status == 200){
+        if (client.get_request().redirection  == 301){
+            response <<  "301 Moved Permanently\r\n";
+        }
+        else if (client.get_request().redirection  == 302){
+            response <<  "302 Found\r\n";
+        }
+
+    }
+    else{
+        response <<  status ;
+        response << " OK\r\n";
+    }
     response << "Content-Type:" + getContentType(filePath)  + "\r\n";
     response << "Content-Length: " << fileSize << "\r\n";
     response << "Accept-Ranges: bytes\r\n";
     response << "Connection: close\r\n";
     response << "\r\n";
 
-
     return response.str();
 }
-
-

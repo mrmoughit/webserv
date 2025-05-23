@@ -131,12 +131,12 @@ void Confile::set_server(std::vector<std::string> parts)
         ServerBlock tmp_server = pars_server(parts, i);
         if (status == true)
         {
-            if (check_dup_serv(servers, tmp_server) || tmp_server.dupindex > 0)
-            {
-                status = false;
-                std::cerr << "Error duplicated infos invalid config file" << std::endl;//check resources
-                return ;
-            }
+            // if (check_dup_serv(servers, tmp_server) || tmp_server.dupindex > 0)
+            // {
+            //     status = false;
+            //     std::cerr << "Error duplicated infos invalid config file" << std::endl;//check resources
+            //     return ;
+            // }
             servers.push_back(tmp_server);
             number_of_server++;
         }

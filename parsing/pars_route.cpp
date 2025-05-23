@@ -6,7 +6,7 @@
 /*   By: kid-ouis <kid-ouis@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 12:01:28 by kid-ouis          #+#    #+#             */
-/*   Updated: 2025/05/13 14:35:12 by kid-ouis         ###   ########.fr       */
+/*   Updated: 2025/05/18 14:52:36 by kid-ouis         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,25 +132,23 @@ std::map <int, std::string> get_redirection(std::vector<std::string> words, bool
     size_t j = 0;
     int code;
     std::map <int, std::string> redirection;
-    if(words.size() < 3)
-        return (status = false, std::cout << "Error invalid return redirection directive" << std::endl, redirection);
-    size_t last = words.size() - 1;
-    while (i < last)
+    if(words.size() != 3)
+        return (status = false, std::cout << "Error invalid number of arguments in return directive" << std::endl, redirection);
+    while(j < words[i].size())
     {
-        j = 0;
-        while(j < words[i].size())
-        {
-            if (!isdigit(words[i][j]))
-                return (status = false, std:: cout << "Error invalid redirection's status code" << std::endl , redirection);
-            j++;
-        }
-        std::stringstream ss(words[i]);
-        ss >> code;
-        if (code != 301 && code != 302 && code != 303 && code != 307 && code != 308)
-            return (status = false, std:: cout << "Error invalid code" << std::endl , redirection);
-        redirection[code] = words[last];
-        i++;
+        if (!isdigit(words[i][j]))
+		{
+			
+            return (status = false, std:: cout << "Error invalid redirection's status code : " << i << std::endl , redirection);
+		}
+        j++;
     }
+    std::stringstream ss(words[i]);
+    ss >> code;
+    if (code != 301 && code != 302 && code != 303 && code != 307 && code != 308)
+        return (status = false, std:: cout << "Error invalid code" << std::endl , redirection);
+    redirection[code] = words[2];
+    i++;
     return redirection;
 }
 
@@ -158,7 +156,6 @@ std::map <int, std::string> get_redirection(std::vector<std::string> words, bool
 bool fill_route(RouteBlock& route, std::vector <std::string>& lines,  size_t& i)
 {
 	bool status = true;
-	
 	std::vector<std::string> words = get_words(lines[i]);
 	while (i < lines.size())
 	{

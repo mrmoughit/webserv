@@ -1,0 +1,23 @@
+leak of fd when dirctories
+upload in the specifed dirctory
+the value of Connection (keep alive, close ) in PUT methode parssing error 
+505 when ( curl -X GET "http://localhost:3331" --http1.0 -H "Host:" -H " " )
+
+
+
+
+
+
+
+
+
+
+
+upload dirctories
+cokies test
+
+
+
+
+redirection 
+read all request buufer in error cases all methods
