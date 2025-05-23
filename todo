@@ -1,0 +1,23 @@
+-add defailt upload to routes
+- remove the continue part after removing errno
+1.switch to php-CGI && set the var of envp to 1
+3.trim comnets form comfig file
+#4. add error pages 
+
+
+
+Permissions Issues: If the default temporary directory 
+(/var/lib/nginx/body or similar) is not accessible to the 
+Nginx process(e.g., if the directory doesn't exist or if there are incorrect permissions), 
+Nginx may fail to process requests that require temporary file storage. This can result in errors like:
+
+502 Bad Gateway (directory not exist permission issues) 
+or 
+413 Request Entity Too Large errors (This error can occur when Nginx receives a request body 
+that's larger than the maximum allowed size (as defined by the client_max_body_size directive)).
+
+===========
+
+- check permission in case of we define directive  
+- does upload need to be inside root directory 
+- case of upload with server only no location block exist 

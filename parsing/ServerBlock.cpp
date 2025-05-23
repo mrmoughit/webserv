@@ -16,8 +16,8 @@
 ServerBlock::ServerBlock()
 {
     is_location_url = -1;
-    dupindex = 0;
-    Port = -1;
+    // dupindex = 0;
+    // Port = -1;
     client_body_size = 1048576;
     server_root = "/html";
     // std::cout << "ServerBlock Default constructor called" << std::endl;
@@ -41,12 +41,10 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& other)
     {
         this->Host = other.Host;
         this->Port = other.Port;
-        this->Server_names.clear();//maybe it's a shallow
         this->Server_names = other.Server_names;
         this->server_root = other.server_root;
         this->client_body_size = other.client_body_size;
         this->index = other.index;
-        this->routes.clear();
         this->routes = other.routes;
         this->error_pages = other.error_pages;
         this->dupindex = other.dupindex;
@@ -68,8 +66,8 @@ std::string& ServerBlock::get_server_root(void)
 void ServerBlock::set_host(std::string set_host)
 {
     // std::cout << "set host called for : " << set_host << std::endl;
-    if (!Host.empty())
-        dupindex++;
+    // if (!Host.empty())
+    //     dupindex++;
     Host = set_host;
 }
 
@@ -80,20 +78,21 @@ std::string& ServerBlock::get_host(void)
 
 void ServerBlock::set_port(int set_port)
 {
-    if (Port != -1)
-        dupindex++;
-    Port = set_port;
+    // if (Port != -1)
+    //     dupindex++;
+    if (set_port > 0)
+        Port.push_back(set_port);
 }
 
-int ServerBlock::get_port(void)
+std::vector <int> ServerBlock::get_port(void)
 {
     return Port;
 }
 
 void ServerBlock::set_server_names(std::string set_server_names)
 {
-    if (!Server_names.empty())
-        dupindex++;
+    // if (!Server_names.empty())
+    //     dupindex++;
     Server_names = set_server_names;
     
 }
@@ -147,16 +146,6 @@ std::vector<RouteBlock> ServerBlock::get_routes(void)
 {
     return routes;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 bool ServerBlock::is_valid_method(std::string path, std::string method)
@@ -227,6 +216,6 @@ std::string ServerBlock::find_error_page_path(int n){
 void ServerBlock::set_dafault_data()
 {
     Host = "127.0.0.1";   
-    Port = 8080;
+    Port.push_back(8080);
     Server_names = "test.com";
 }
