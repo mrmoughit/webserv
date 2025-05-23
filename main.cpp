@@ -334,7 +334,7 @@ int get_parts(char **av, std::vector <std::string>& parts)
         // std::cout << "servive: " << "i: " << i << "line: " << lines[i] << std::endl;
         if (!lines[i].empty() && check_empt(lines[i].c_str()))
         {
-            std::cout << "not empty" << std::endl;
+            // std::cout << "not empty" << std::endl;
             last_full_line = i;
             j  = 0;
             while (j < lines[i].length())

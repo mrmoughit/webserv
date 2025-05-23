@@ -1,1133 +1,622 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Gun Shooting</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		<style>
-			.txt {
-				transform: translate(-15px, -60px);
-				z-index: 999;
-				font-size: 1.4rem;
-				font-family: Arial, Helvetica, sans-serif;
-				font-weight: 700;
-				pointer-events: none;
-				color: #e64c78;
-				width: 20rem;
-				opacity: 0;
-				transition: 0.2s;
-			}
 
-			.txt.show {
-				opacity: 1;
-				transform: translate(-15px, -80px);
-			}
+<head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+  <meta
+    content="width=device-width,height=device-height,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0"
+    name="viewport">
+  <title>webserv correction</title>
+  <link rel="shortcut icon" href="../../assets/favicons/favicon_no-bg.ico" type="image/x-icon">
+  <link href="../../css/styles.css" media="all" rel="stylesheet" />
+  <link rel="manifest" href="../../manifest.json">
+  <script src="../../js/script.js"></script>
+</head>
 
-			body {
-				margin: 0;
-				background: #2a363b;
-				overflow: hidden;
-			}
+<body>
+	<div class="overlay" id="overlay"></div>
+	<div class="popup" id="popup">
+		<p><b>Attention:</b> This site will be removed from January 5th at the request of School 42. To continue accessing it, contact me at <a href="mailto:42-evals@gmx.ch">42-evals@gmx.ch</a></p>
+		<button onclick="closePopup()">Close this windows</button>
+	</div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../../js/service-worker.js')
+      .then(function(registration) {
+        console.log('Service Worker registered successfully:', registration);
+      })
+      .catch(function(error) {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
+  </script>
+  <span class="menu">
+    <a id="backToProject" href="../../">Go to homepage 🏠</a>
+  </span>
+  <div class="container-item scale-team-container">
+    <div class="row mt-4">
+      <div class="scale-section-infos col-sm-12 scale-div">
+        <h3 class="font-weight-bold text-uppercase text-center mt-4 pt-4">
+          <br><br>Scale for project
 
-			.container {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100vw;
-				height: 100vh;
-			}
+          <a href="https://projects.intra.42.fr/projects/webserv">webserv</a>
+        </h3>
+        <h5 class="text-muted text-center">You should evaluate 3 students in this team</h5>
 
-			/* The Player */
-			.player {
-				position: absolute;
-				top: 200px;
-				left: 200px;
-				transform: translateX(-50%) translateY(-50%);
-				width: 45px;
-				height: 55px;
-				background: white;
-				border-radius: 10px;
-				z-index: 5;
-				/* The Hat is good*/
-				/* Eyes */
-				/* The Mouth */
-				/* The Shirt (and tie) */
-				/* The Arms */
-				/* Legs */
-				/* Shadow */
-			}
-			.player .hat {
-				position: absolute;
-				top: 15%;
-				transform: translateY(-100%);
-				width: 100%;
-				height: 34%;
-				background: #d32c1b;
-				border-top-right-radius: 10px;
-				border-top-left-radius: 10px;
-			}
-			.player .hat::after {
-				content: '';
-				position: absolute;
-				top: 100%;
-				left: 100%;
-				width: 35%;
-				height: 2px;
-				background: #d32c1b;
-				transform: translateY(-100%);
-			}
-			.player .eye {
-				position: absolute;
-				width: 5px;
-				height: 5px;
-				background: black;
-				top: 25%;
-			}
-			.player .eye.right {
-				right: 10%;
-			}
-			.player .eye.left {
-				right: 50%;
-			}
-			.player .mouth {
-				position: absolute;
-				top: 40%;
-				width: 20%;
-				height: 2px;
-				background: black;
-				left: 65%;
-			}
-			.player .shirt {
-				position: absolute;
-				bottom: -1px;
-				width: 105%;
-				height: 50%;
-				left: 50%;
-				transform: translateX(-50%);
-				background: #cf2213;
-				border-radius: 10px;
-				border-top-right-radius: 0px;
-				border-top-left-radius: 0px;
-				overflow: hidden;
-				/* The Undershirt */
-			}
-			.player .shirt .tie {
-				background: #e31b15;
-				width: 10%;
-				height: 70%;
-				position: absolute;
-				top: 0;
-				left: 55%;
-				border-bottom-right-radius: 5px;
-				border-bottom-left-radius: 55px;
-			}
-			.player .shirt .under {
-				position: absolute;
-				left: 60%;
-				top: 0px;
-				width: 40%;
-				height: 99%;
-				transform: translateX(-50%);
-				background: #fff5f4;
-			}
-			.player .arm {
-				position: absolute;
-				width: 25%;
-				height: 40%;
-				background: white;
-				border-radius: 10px;
-				top: 60%;
-				transform-origin: 50% 5%;
-			}
-			.player .arm.right {
-				right: -10%;
-				transform: rotate(-1.5rad);
-				z-index: 0;
-			}
-			.player .arm.right .gun {
-				position: absolute;
-				top: 80%;
-				left: 100%;
-				width: 100%;
-				height: 150%;
-				background: black;
-				transform-origin: -100% 0%;
-			}
-			.player .arm.right .gun::after {
-				content: '';
-				position: absolute;
-				top: 0;
-				right: 0;
-				width: 250%;
-				height: 40%;
-				background: black;
-			}
-			.player .arm.right .gun .barrel {
-				position: absolute;
-				top: 100%;
-				left: 50%;
-				width: 1px;
-				height: 1px;
-				transform: translateX(-50%) translateY(-50%);
-			}
-			.player .arm.left {
-				left: -5%;
-			}
-			.player .arm .sleeve {
-				position: absolute;
-				top: 0;
-				left: 0;
-				border-radius: 10px;
-				background: #e31b15;
-				width: 100%;
-				height: 50%;
-				border-bottom-right-radius: 0px;
-				border-bottom-left-radius: 0px;
-			}
-			.player .leg {
-				position: absolute;
-				top: 80%;
-				width: 25%;
-				height: 45%;
-				background: white;
-				border-radius: 10px;
-				z-index: -1;
-				transform-origin: 50% 5%;
-				transform: translateX(-50%);
-			}
-			.player .leg.right {
-				right: -5%;
-			}
-			.player .leg.left {
-				left: 20%;
-			}
-			.player .leg .pant {
-				position: absolute;
-				width: 100%;
-				height: 80%;
-				top: 0;
-				left: 0;
-				background: #4093bd;
-			}
-			.player::after {
-				content: '';
-				position: absolute;
-				top: 115%;
-				left: 50%;
-				transform: translateX(-50%);
-				background: RGBA(0, 0, 0, 0.2);
-				z-index: -2;
-				width: 100%;
-				height: 10px;
-				border-radius: 50%;
-			}
+        <hr>
+        <div class="p-0 scale-introduction dancer from-down" id="introduction-25879">
+          <h3 class="font-weight-bold mb-1">Introduction</h3>
+          <p>
+            Please comply with the following rules:<br><br>- Remain polite, courteous, respectful and constructive
+            throughout the <br> evaluation process. The well-being of the community depends on it.<br><br>- Identify
+            with the student or group whose work is evaluated the possible <br> dysfunctions in their project. Take the
+            time to discuss and debate the <br> problems that may have been identified.<br><br>- You must consider that
+            there might be some differences in how your peers <br> might have understood the project's instructions and
+            the scope of its <br> functionalities. Always keep an open mind and grade them as honestly as <br> possible.
+            The pedagogy is useful only and only if the peer-evaluation is <br> done seriously.<br>
+          </p>
+        </div>
+        <div class="p-0 scale-guidelines dancer from-down" id="guidelines-25879">
+          <h3 class="font-weight-bold mb-1">Guidelines</h3>
+          <p>
+            - Only grade the work that was turned in the Git repository of the evaluated <br> student or group.<br><br>-
+            Double-check that the Git repository belongs to the student(s). Ensure that <br> the project is the one
+            expected. Also, check that 'git clone' is used in an <br> empty folder.<br><br>- Check carefully that no
+            malicious aliases was used to fool you and make you <br> evaluate something that is not the content of the
+            official repository.<br><br>- To avoid any surprises and if applicable, review together any scripts used
+            <br> to facilitate the grading (scripts for testing or automation).<br><br>- If you have not completed the
+            assignment you are going to evaluate, you have <br> to read the entire subject prior to starting the
+            evaluation process.<br><br>- Use the available flags to report an empty repository, a non-functioning <br>
+            program, a Norm error, cheating, and so forth. <br> In these cases, the evaluation process ends and the
+            final grade is 0, <br> or -42 in case of cheating. However, except for cheating, student are <br> strongly
+            encouraged to review together the work that was turned in, in order <br> to identify any mistakes that
+            shouldn't be repeated in the future.<br><br>- Remember that for the duration of the defence, no segfault, no
+            other <br> unexpected, premature, uncontrolled or unexpected termination of the <br> program, else the final
+            grade is 0. Use the appropriate flag. <br> You should never have to edit any file except the configuration
+            file if it <br> exists. If you want to edit a file, take the time to explicit the reasons <br> with the
+            evaluated student and make sure both of you are okay with this.<br><br>- You must also verify the absence of
+            memory leaks. Any memory allocated on <br> the heap must be properly freed before the end of execution. <br>
+            You are allowed to use any of the different tools available on the computer, <br> such as leaks, valgrind,
+            or e_fence. In case of memory leaks, tick the <br> appropriate flag.<br>
+          </p>
+        </div>
 
-			/* Bullets */
-			.bullet {
-				position: absolute;
-				width: 25px;
-				height: 15px;
-				background: yellow;
-				transform: translateX(-50%) translateY(-50%);
-				z-index: 10;
-			}
+        <hr>
+        <div class="dancer from-down" id="attachments-25879">
+          <h3 class="font-weight-bold mb-1">Attachments</h3>
+          <div class="project-attachments-list">
+          </div>
 
-			/* Bullet Flash */
-			.flash {
-				position: absolute;
-				width: 32px;
-				height: 32px;
-				border-radius: 50%;
-				background: white;
-				transform: translateX(-50%) translateY(-50%);
-			}
-
-			/* Smoke Clouds */
-			.cloud {
-				position: absolute;
-				background: Silver;
-				border-radius: 50%;
-				transform: translateX(-50%) translateY(-50%);
-			}
-
-			/* Enemies */
-			.enemy {
-				position: absolute;
-				transform: translateX(-50%) translateY(-50%);
-				/* Good ol' Jimmy */
-			}
-			.enemy.jimmy {
-				width: 35px;
-				height: 35px;
-				background: #fecea8;
-				border-radius: 10px;
-			}
-			.enemy.jimmy .eye {
-				width: 8px;
-				height: 8px;
-				border-radius: 50%;
-				background: black;
-				position: absolute;
-				top: 20%;
-			}
-			.enemy.jimmy .eye.right {
-				right: 10%;
-			}
-			.enemy.jimmy .eye.left {
-				right: 50%;
-			}
-			.enemy.jimmy .mouth {
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				width: 35%;
-				height: 10px;
-				background: black;
-			}
-			.enemy.jimmy .arm {
-				position: absolute;
-				width: 20%;
-				height: 60%;
-				border-radius: 10px;
-				background: #fecea8;
-				transform-origin: 50% 5%;
-				top: 5px;
-				transform: rotate(125deg);
-				z-index: -1;
-			}
-			.enemy.jimmy .arm.right {
-				right: 0;
-			}
-			.enemy.jimmy .arm.left {
-				left: 0;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container"></div>
-
-		<script>
-			document.body.addEventListener('click', () => {
-				const text = document.querySelector('.txt');
-				text.classList.add('show'); // Set opacity to 1 immediately
-				setTimeout(() => {
-					text.classList.remove('show'); // Reset opacity to 0 after 100ms
-				}, 500);
-			});
-
-			var SHOOT_KNOCKBACK = 5;
-			var SHOOT_KNOCKBACKRESET = 0.25;
-
-			var mouse = {
-				x: 0,
-				y: 0,
-			};
-
-			// The Player class
-			class Player {
-				constructor(options) {
-					// Store references
-					this.controls = options.controls;
-					this.createBullet = options.createBullet;
-					this.createSmoke = options.createSmoke;
-
-					// Creating the player element
-					this.createElement(options.parentContainer);
-
-					// Position/movement
-					this.x = window.innerWidth / 2;
-					this.y = window.innerHeight / 2;
-					this.xvel = 0;
-					this.yvel = 0;
-					this.friction = 0.8;
-					this.speed = 0.8;
-					this.scaleX = 1;
-					this.width = 40;
-					this.height = 40;
-
-					// Anim
-					this.anim = {
-						counter: 0,
-						inc: Math.PI / 10,
-						rightArm: {
-							rot: 0,
-							offsetX: 0,
-							offsetY: 0,
-						},
-						leftArm: {
-							rot: 0,
-						},
-						leftLeg: {
-							rot: 0,
-						},
-						rightLeg: {
-							rot: 0,
-						},
-						gun: {
-							rot: 0,
-						},
-						lift: 0,
-						knockback: 0,
-					};
-
-					// Shooting
-					this.shoot();
-
-					// Updating
-					options.startUpdating(this.aim.bind(this));
-					options.startUpdating(this.turn.bind(this));
-					options.startUpdating(this.move.bind(this));
-					options.startUpdating(this.animate.bind(this));
-					options.startUpdating(this.boundaries.bind(this));
-					options.startUpdating(this.updateStyles.bind(this));
-				}
-
-				// Creating / injecting the element
-				createElement(parentContainer) {
-					// The Markup
-					this.el = $(`
-          <div class="player">
-            <p class="txt">piw !</p>
-            <div class='hat'></div>
-            <div class='eye right'></div>
-            <div class='eye left'></div>
-            <div class='mouth'></div>
-            <div class='shirt'>
-              <div class='under'></div>
+          <div class="project-attachments-list">
+            <div class="project-attachment-item">
+              <h4 class="attachment-name">
+                <span class="icon-note-paper-2"></span>
+                <a target="_blank" href="https://github.com/rphlr/42-Subjects/">subject.pdf</a>
+              </h4>
             </div>
-            <div class='arm right'>
-              <div class='sleeve'></div>
-              <div class='gun'>
-                <div class='grey'></div>
-                <div class='barrel'></div>
-              </div>
+            <div class="project-attachment-item">
+              <h4 class="attachment-name">
+                <span class="icon-note-paper-2"></span>
+                <a target="_blank" href="https://github.com/rphlr/42-Subjects/">tester</a>
+              </h4>
             </div>
-            <div class='arm left'>
-              <div class='sleeve'></div>
+            <div class="project-attachment-item">
+              <h4 class="attachment-name">
+                <span class="icon-note-paper-2"></span>
+                <a target="_blank" href="https://github.com/rphlr/42-Subjects/">ubuntu_cgi_tester</a>
+              </h4>
             </div>
-            <div class='leg right'>
-              <div class='pant'></div>
+            <div class="project-attachment-item">
+              <h4 class="attachment-name">
+                <span class="icon-note-paper-2"></span>
+                <a target="_blank" href="https://github.com/rphlr/42-Subjects/">cgi_tester</a>
+              </h4>
             </div>
-            <div class='leg left'>
-              <div class='pant'></div>
+            <div class="project-attachment-item">
+              <h4 class="attachment-name">
+                <span class="icon-note-paper-2"></span>
+                <a target="_blank" href="https://github.com/rphlr/42-Subjects/">ubuntu_tester</a>
+              </h4>
             </div>
           </div>
-        `);
 
-					// Injection
-					parentContainer.append(this.el);
-
-					// Update dimensions
-					this.width = this.el.outerWidth();
-					this.height = this.el.outerHeight();
-				}
-
-				// Animate the player
-				animate() {
-					var isMoving =
-						this.controls.isDown('right') ||
-						this.controls.isDown('left') ||
-						this.controls.isDown('up') ||
-						this.controls.isDown('down')
-							? true
-							: false;
-
-					// Running animation
-					if (isMoving) {
-						// Arms
-						this.anim.leftArm.rot = Math.sin(this.anim.counter) / 2;
-
-						// Legs
-						this.anim.rightLeg.rot = Math.sin(this.anim.counter * 0.9) * 0.5;
-						this.anim.leftLeg.rot = Math.sin(-this.anim.counter * 0.9) * 0.5;
-
-						// Lift
-						this.anim.lift = Math.sin(this.anim.counter) * 5;
-
-						// Inc
-						this.anim.counter += this.anim.inc;
-					} else {
-						// Resetting to idle state
-						var leftArm = this.anim.leftArm.rot;
-						var rightLeg = this.anim.rightLeg.rot;
-						var leftLeg = this.anim.leftLeg.rot;
-						var lift = this.anim.lift;
-						var resetSpeed = 0.1;
-
-						// Arms
-						this.anim.leftArm.rot = leftArm - (leftArm - 0) * resetSpeed;
-
-						// Legs
-						this.anim.rightLeg.rot = rightLeg - (rightLeg - 0) * resetSpeed;
-						this.anim.leftLeg.rot = leftLeg - (leftLeg - 0) * resetSpeed;
-
-						// Lift
-						this.anim.lift = lift - (lift - 0) * resetSpeed;
-					}
-
-					// Shooting
-					var rightArmRot = this.anim.rightArm.rot;
-					this.anim.rightArm.offsetX =
-						Math.cos(rightArmRot - Math.PI / 2) * this.anim.knockback;
-					this.anim.rightArm.offsetY =
-						Math.sin(rightArmRot - Math.PI / 2) * this.anim.knockback;
-					this.anim.gun.rot = -this.anim.knockback * 0.1;
-
-					// Resetting the knockback
-					this.anim.knockback =
-						this.anim.knockback -
-						(this.anim.knockback - 0) * SHOOT_KNOCKBACKRESET;
-				}
-
-				// Aiming at the mouse
-				aim() {
-					var rightArm = $('.player .arm.right');
-					var armX = rightArm.offset().left;
-					var armY = rightArm.offset().top;
-					var angle = Math.atan2(mouse.y - armY, mouse.x - armX);
-					this.anim.rightArm.rot = (angle - Math.PI / 2) * this.scaleX;
-				}
-
-				// Facing the mouse
-				turn() {
-					if (mouse.x < this.x) {
-						this.scaleX = -1;
-					} else {
-						this.scaleX = 1;
-					}
-				}
-
-				// Movement
-				move() {
-					// Physics
-					this.x += this.xvel;
-					this.y += this.yvel;
-					this.xvel *= this.friction;
-					this.yvel *= this.friction;
-
-					// Keys
-					if (this.controls.isDown('right')) {
-						this.xvel += this.speed;
-					} else if (this.controls.isDown('left')) {
-						this.xvel -= this.speed;
-					}
-					if (this.controls.isDown('up')) {
-						this.yvel -= this.speed;
-					} else if (this.controls.isDown('down')) {
-						this.yvel += this.speed;
-					}
-				}
-
-				// Staying on screen
-				boundaries() {
-					if (this.x - this.width / 2 < 0) {
-						this.x = this.width / 2 + 1;
-						this.xvel = 0;
-					} else if (this.x + this.width / 2 > window.innerWidth) {
-						this.x = window.innerWidth - this.width / 2 - 1;
-						this.xvel = 0;
-					}
-					if (this.y - this.height / 2 < 0) {
-						this.y = this.height / 2 + 1;
-						this.yvel = 0;
-					} else if (this.y + this.height / 2 > window.innerHeight) {
-						this.y = window.innerHeight - this.height / 2 - 1;
-						this.yvel = 0;
-					}
-				}
-
-				// Listen for mousepresses and shoot
-				shoot() {
-					$(window).on(
-						'mousedown',
-						function () {
-							var barrel = $('.barrel');
-							var x = barrel.offset().left;
-							var y = barrel.offset().top;
-							var dir = this.anim.rightArm.rot * this.scaleX;
-
-							// Create the bullet
-							this.createBullet(x, y, dir);
-
-							// Knockback animations
-							this.anim.knockback = SHOOT_KNOCKBACK;
-
-							// Pushback the player
-							this.xvel += Math.cos(dir - Math.PI / 2) * 2.5;
-							this.yvel += Math.sin(dir - Math.PI / 2) * 2.5;
-
-							// Smoke
-							this.createSmoke(x, y, dir, 1);
-						}.bind(this)
-					);
-				}
-
-				// Updating the styles
-				updateStyles() {
-					var rightArm = $('.player .arm.right');
-					var leftArm = $('.player .arm.left');
-					var rightLeg = $('.leg.right');
-					var leftLeg = $('.leg.left');
-					var gun = $('.gun');
-
-					// Main el
-					this.el.css({
-						left: this.x,
-						top: this.y,
-						transform: `
-            translateX(-50%)
-            translateY(-${50 + this.anim.lift}%)
-            scaleX(${this.scaleX})
-          `,
-					});
-
-					// Arms
-					rightArm.css({
-						transform: `
-            translateX(${this.anim.rightArm.offsetX}px)
-            translateY(${this.anim.rightArm.offsetY}px)
-            rotate(${this.anim.rightArm.rot}rad)
-          `,
-					});
-					leftArm.css({
-						transform: `rotate(${this.anim.leftArm.rot}rad)`,
-					});
-
-					// Legs
-					rightLeg.css({
-						transform: `
-            translateX(-50%)
-            rotate(${this.anim.rightLeg.rot}rad)
-          `,
-					});
-					leftLeg.css({
-						transform: `
-            translateX(-50%)
-            rotate(${this.anim.leftLeg.rot}rad)
-          `,
-					});
-
-					// Gun
-					gun.css({
-						transform: `rotate(${this.anim.gun.rot}rad)`,
-					});
-				}
-			}
-
-			// The Bullet class
-			class Bullet {
-				constructor(options) {
-					// Create the element
-					this.createElement(options.parentContainer);
-					this.createFlash(options.parentContainer, options.x, options.y);
-
-					// Positioning / movement
-					this.x = options.x;
-					this.y = options.y;
-					this.speed = 25;
-					this.dir = options.dir;
-
-					// Flash
-					this.flashTimer = 0;
-				}
-
-				// Creating / injecting the Player element
-				createElement(parentContainer) {
-					// The markup
-					this.el = $('<div class="bullet"></div>');
-
-					// Injection
-					parentContainer.append(this.el);
-
-					// Dimensions
-					this.width = parseInt(this.el.css('width'));
-					this.height = parseInt(this.el.css('height'));
-				}
-
-				// Create the flash effect element
-				createFlash(parentContainer, x, y) {
-					// The markup
-					this.flashEl = $('<div class="flash"></div>');
-
-					// Positioning
-					this.flashEl.css({
-						left: x,
-						top: y,
-					});
-
-					// Injection
-					parentContainer.append(this.flashEl);
-				}
-
-				// Updating (executed automatically by the `BulletHandler`
-				// class.)
-				update() {
-					// Movement
-					this.x += Math.cos(this.dir + Math.PI / 2) * this.speed;
-					this.y += Math.sin(this.dir + Math.PI / 2) * this.speed;
-
-					// Going out of bounds
-					if (
-						this.x < 0 ||
-						this.y < 0 ||
-						this.x > window.innerWidth ||
-						this.y > window.innerHeight
-					) {
-						this.delete = true;
-					}
-
-					// Update styles
-					this.el.css({
-						left: this.x,
-						top: this.y,
-						transform: `
-            translateX(-50%)
-            translateY(-50%)
-            rotate(${this.dir + Math.PI / 2}rad)
-          `,
-					});
-
-					// Removing the flash
-					this.flashTimer++;
-					if (this.flashTimer > 1) {
-						this.flashEl.remove();
-					}
-				}
-			}
-
-			// The Bullet Handler class
-			class BulletHandler {
-				constructor(options) {
-					// Store options references
-					this.parentContainer = options.parentContainer;
-
-					// Store all bullets
-					this.bullets = [];
-
-					// Updating all bullets
-					options.startUpdating(this.updateBullets.bind(this));
-
-					// Binding public functions
-					this.createBullet = this.createBullet.bind(this);
-				}
-
-				// Updating all of the bullets
-				updateBullets() {
-					for (var i = 0; i < this.bullets.length; i++) {
-						this.bullets[i].update();
-
-						// Removing bullets
-						if (this.bullets[i].delete) {
-							this.bullets[i].el.remove();
-							this.bullets[i].flashEl.remove();
-							this.bullets.splice(i, 1);
-						}
-					}
-				}
-
-				// Create a new bullet
-				createBullet(x, y, dir) {
-					this.bullets.push(
-						new Bullet({
-							x: x,
-							y: y,
-							dir: dir,
-							parentContainer: this.parentContainer,
-						})
-					);
-				}
-			}
-
-			// The Controls class
-			class Controls {
-				constructor(options) {
-					this.keys = [
-						{
-							name: 'right',
-							keyCode: 68,
-						},
-						{
-							name: 'left',
-							keyCode: 65,
-						},
-						{
-							name: 'up',
-							keyCode: 87,
-						},
-						{
-							name: 'down',
-							keyCode: 83,
-						},
-					];
-
-					// Listening for keypresses
-					this.createListeners();
-
-					// Binding public functions
-					this.isDown = this.isDown.bind(this);
-				}
-
-				// Get a key object based on it's keycode
-				getKey(keyCode) {
-					for (var i = 0; i < this.keys.length; i++) {
-						if (this.keys[i].keyCode === keyCode) {
-							return this.keys[i];
-						}
-					}
-				}
-
-				// Check if a key is down
-				isDown(key) {
-					for (var i = 0; i < this.keys.length; i++) {
-						if (this.keys[i].name == key) {
-							return this.keys[i].isDown;
-						}
-					}
-				}
-
-				// Create the keydown event listener
-				createListeners() {
-					// Key presses
-					$(window).on(
-						'keydown',
-						function (e) {
-							var pressedKey = this.getKey(e.which);
-
-							if (pressedKey != null) {
-								pressedKey.isDown = true;
-							}
-						}.bind(this)
-					);
-
-					// Key released
-					$(window).on(
-						'keyup',
-						function (e) {
-							var pressedKey = this.getKey(e.which);
-
-							if (pressedKey != null) {
-								pressedKey.isDown = false;
-							}
-						}.bind(this)
-					);
-				}
-			}
-
-			// The Smoke class (🌲)
-			var SMOKE_COUNT = [2, 4];
-			var SMOKE_SPEED = [5, 10];
-			var SMOKE_SIZE = [5, 10];
-			var SMOKE_FRICTION = 0.85;
-			var SMOKE_FADESPEED = 0.035;
-			var SMOKE_SPREAD = 0.5;
-			class Smoke {
-				constructor(options) {
-					// Store the parentContainer reference
-					this.parentContainer = options.parentContainer;
-
-					// The clouds
-					this.clouds = [];
-
-					// Updating
-					options.startUpdating(this.update.bind(this));
-
-					// Binding public functions
-					this.create = this.create.bind(this);
-				}
-
-				// Create a cloud puff
-				create(x, y, dir, intensity) {
-					// Creating the individual clouds
-					var createCloud = function (x, y, dir, intensity) {
-						// The cloud element
-						var el = $('<div class="cloud"></div>');
-
-						// Positioning and sizing
-						var size = getRandom(SMOKE_SIZE[0], SMOKE_SIZE[1]) * intensity;
-						el.css({
-							left: x,
-							top: y,
-							width: size,
-							height: size,
-						});
-
-						// Spread
-						dir += getRandom(-SMOKE_SPREAD * 100, SMOKE_SPREAD * 100) / 100;
-
-						// Movement
-						var speed = getRandom(SMOKE_SPEED[0], SMOKE_SPEED[1]) * intensity;
-						var xvel = Math.cos(dir + Math.PI / 2) * speed;
-						var yvel = Math.sin(dir + Math.PI / 2) * speed;
-
-						// Return the cloud object
-						return {
-							el: el,
-							x: x,
-							y: y,
-							dir: dir,
-							xvel: xvel,
-							yvel: yvel,
-							opacity: 1,
-						};
-					};
-
-					// Generating the clouds
-					var count = getRandom(SMOKE_COUNT[0], SMOKE_COUNT[1]);
-					for (var i = 0; i < count; i++) {
-						var newCloud = createCloud(x, y, dir, intensity);
-
-						// Store the cloud object
-						this.clouds.push(newCloud);
-
-						// Inject the cloud element
-						this.parentContainer.append(newCloud.el);
-					}
-				}
-
-				// Updating the clouds
-				update() {
-					for (var i = 0; i < this.clouds.length; i++) {
-						var cloud = this.clouds[i];
-
-						// Movement
-						cloud.x += cloud.xvel;
-						cloud.y += cloud.yvel;
-						cloud.xvel *= SMOKE_FRICTION;
-						cloud.yvel *= SMOKE_FRICTION;
-
-						// Opacity
-						cloud.opacity -= SMOKE_FADESPEED;
-
-						// Updating styles
-						cloud.el.css({
-							left: cloud.x,
-							top: cloud.y,
-							opacity: cloud.opacity,
-						});
-
-						// Removing it
-						if (cloud.opacity <= 0) {
-							cloud.el.remove();
-							this.clouds.splice(i, 1);
-						}
-					}
-				}
-			}
-
-			// Enemies
-			class EnemyHandler {
-				constructor(options) {
-					// Storing references
-					this.parentContainer = options.parentContainer;
-
-					// All the enemies
-					this.enemies = [];
-
-					// Updating
-					options.startUpdating(this.updateEnemies.bind(this));
-
-					// Binding public functions
-					this.createEnemy = this.createEnemy.bind(this);
-				}
-
-				// Update all of the enemies n shit
-				updateEnemies() {
-					for (var i = 0; i < this.enemies.length; i++) {}
-				}
-
-				// Create a new enemy
-				createEnemy(x, y) {
-					var enemyIndex = Math.floor(getRandom(0, enemyTypes.length));
-					var enemyData = enemyTypes[enemyIndex];
-
-					// Create the new object
-					var newEnemy = {
-						x: x,
-						y: y,
-						el: $(enemyData.markup),
-						animate: enemyData.animate,
-						update: enemyData.update,
-					};
-
-					// Inject the element
-					this.parentContainer.append(newEnemy.el);
-
-					// Position the element
-					newEnemy.el.css({
-						left: x,
-						top: y,
-					});
-
-					// Store the enemy object
-					this.enemies.push(newEnemy);
-				}
-			}
-
-			// Rooms
-			class RoomHandler {
-				constructor(options) {
-					// Store references
-					this.parentContainer = options.parentContainer;
-					this.createEnemy = options.createEnemy;
-
-					// Load a room on init
-					this.newRoom();
-				}
-
-				// Unloading / loading a room
-				newRoom() {
-					var roomIndex = Math.floor(getRandom(0, rooms.length));
-					var roomData = rooms[roomIndex];
-
-					// Generate everything
-					for (var i = 0; i < roomData.length; i++) {
-						var item = roomData[i];
-
-						// Enemies
-						if (item.type === 'enemy') {
-							this.createEnemy(
-								(window.innerWidth * item.x) / 100,
-								(window.innerHeight * item.y) / 100
-							);
-						}
-					}
-				}
-			}
-
-			// The Game class
-			class Game {
-				constructor() {
-					// The container element
-					this.container = $('.container');
-
-					// Updating
-					this.updateQueue = [];
-					this.update();
-
-					// Enemies
-					this.enemyHandler = new EnemyHandler({
-						parentContainer: this.container,
-						startUpdating: this.startUpdating.bind(this),
-					});
-
-					// Rooms
-					this.roomHandler = new RoomHandler({
-						parentContainer: this.container,
-						startUpdating: this.startUpdating.bind(this),
-						createEnemy: this.enemyHandler.createEnemy,
-					});
-
-					// The controls
-					this.controls = new Controls();
-
-					// Smoke
-					this.smoke = new Smoke({
-						parentContainer: this.container,
-						startUpdating: this.startUpdating.bind(this),
-					});
-
-					// Bullets
-					this.bulletHandler = new BulletHandler({
-						parentContainer: this.container,
-						startUpdating: this.startUpdating.bind(this),
-					});
-
-					// The player
-					this.player = new Player({
-						parentContainer: this.container,
-						startUpdating: this.startUpdating.bind(this),
-						controls: this.controls,
-						createBullet: this.bulletHandler.createBullet,
-						createSmoke: this.smoke.create,
-					});
-				}
-
-				// Adding a function to the update queue.
-				startUpdating(func) {
-					this.updateQueue.push(func);
-				}
-
-				// Updating the queue
-				update() {
-					for (var i = 0; i < this.updateQueue.length; i++) {
-						this.updateQueue[i]();
-					}
-					window.requestAnimationFrame(this.update.bind(this));
-				}
-			}
-
-			// Tracking the mouse position
-			$(window).on('mousemove', function (e) {
-				mouse.x = e.pageX;
-				mouse.y = e.pageY;
-			});
-
-			// Get a random number
-			function getRandom(min, max) {
-				return Math.random() * (max - min) + min;
-			}
-
-			// ******************************** \\
-			// ***********The Rooms************ \\
-			// ******************************** \\
-
-			/*
-      
-      Info - The room data below holds information about
-            what items can spawn where.
-            
-            Positions are used as percentages to ensure
-            Everything fits on the screen.
-            
-            I would have used the typical tilemap row/column
-            array technique, but the rooms are so simple
-            I figured this alternative would be sufficient.
-            
-            This concept could be expanded to include items,
-            spawning odds, secrets, and basically any other
-            object-based mechanic you would implement into
-            the game.
-
-    */
-			var rooms = [];
-			rooms[0] = [
-				//I am not adding any of them now.
-			];
-
-			// ******************************** \\
-			// **********Enemy Types*********** \\
-			// ******************************** \\
-
-			/*
-      
-      Info - This array contains info on enemy markup,
-            AI, etc.,
-            
-            If you do not specify an update function
-            it will default to one defined in the 
-            `EnemyHandler` class.
-
-    */
-
-			var enemyTypes = [];
-			enemyTypes[0] = {
-				markup: `
-        <div class="enemy jimmy">
-          <div class='eye right'></div>
-          <div class='eye left'></div>
-          <div class='mouth'></div>
-          <div class='arm right'></div>
-          <div class='arm left'></div>
-          <div class='leg right'></div>
-          <div class='leg left'></div>
         </div>
-      `,
-				animate: function (counter) {},
-			};
 
-			// Start the game
-			new Game();
-		</script>
-	</body>
+      </div>
+      <form class="simple_form form-horizontal" novalidate="novalidate" id="edit_scale_team_5494562"
+        action="https://projects.intra.42.fr/projects/webserv/project_sessions/3318/evaluations/1647/scales/25879/scale_teams/5494562"
+        accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="✓"><input type="hidden"
+          name="_method" value="patch"><input type="hidden" name="authenticity_token"
+          value="Eb9lecFHrPZHFYq2n9rXsr8+FeMVPcdfjFzk89g0XrNDkqYVcQvmpm2GJX23YQkIP4Qq24r8PQtVvE0DVW2RdA==">
+        <div class="scale-section-answers col-sm-12 scale-div">
+          <section class="scale-section-item dancer from-down" id="section-72366">
+            <div class="section-header">
+              <h3 class="font-weight-bold mb-1">Mandatory Part</h3>
+              <p class="font-italic"></p>
+            </div>
+            <h4 class="scale-question-name">Check the code and ask questions</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <ul>
+              <li>Launch the installation of siege with homebrew.</li>
+              <li>Ask explanations about the basics of an HTTP server.</li>
+              <li>Ask what function the group used for I/O Multiplexing.</li>
+              <li>Ask for an explanation of how does select() (or equivalent) work.</li>
+              <li>Ask if they use only one select() (or equivalent) and how they've
+                managed the server to accept and the client to read/write.</li>
+              <li>The select() (or equivalent) should be in the main loop and should
+                check file descriptors for read and write AT THE SAME TIME. If not,
+                the grade is 0 and the evaluation process ends now.</li>
+              <li>There should be only one read or one write per client per select()
+                (or equivalent). Ask the group to show you the code from the select()
+                (or equivalent) to the read and write of a client.</li>
+              <li>Search for all read/recv/write/send on a socket and check that, if
+                an error is returned, the client is removed.</li>
+              <li>Search for all read/recv/write/send and check if the returned value
+                is correctly checked (checking only -1 or 0 values is not enough,
+                both should be checked).</li>
+              <li>If errno is checked after read/recv/write/send, the grade is 0 and
+                the evaluation process ends now.</li>
+              <li>Writing or reading ANY file descriptor without going through the
+                select() (or equivalent) is strictly FORBIDDEN.</li>
+              <li>The project must compile without any re-link issue. If not, use the
+                'Invalid compilation' flag.</li>
+              <li>If any point is unclear or is not correct, the evaluation stops.</li>
+            </ul>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][0][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245747"
+                    name="[scale_team][answers_attributes][0][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][0][value]"
+                  id="radio_[scale_team][answers_attributes][0]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][0]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][0][value]"
+                  id="radio_[scale_team][answers_attributes][0]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][0]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">Configuration</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <p>In the configuration file, check whether you can do the following and <br>
+              test the result:</p>
+
+            <ul>
+              <li>Search for the HTTP response status codes list on the internet.
+                During this evaluation, if any status codes is wrong, don't give any
+                related points.</li>
+              <li>Setup multiple servers with different ports.</li>
+              <li>Setup multiple servers with different hostnames (use something
+                like: curl --resolve example.com:80:127.0.0.1 <a href="http://example.com/">http://example.com/</a>).
+              </li>
+              <li>Setup default error page (try to change the error 404).</li>
+              <li>Limit the client body (use: curl -X POST -H "Content-Type: plain/text"
+                --data "BODY IS HERE write something shorter or longer than body limit").</li>
+              <li>Setup routes in a server to different directories.</li>
+              <li>Setup a default file to search for if you ask for a directory.</li>
+              <li>Setup a list of methods accepted for a certain route (e.g., try to
+                delete something with and without permission).</li>
+            </ul>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][1][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245748"
+                    name="[scale_team][answers_attributes][1][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][1][value]"
+                  id="radio_[scale_team][answers_attributes][1]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][1]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][1][value]"
+                  id="radio_[scale_team][answers_attributes][1]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][1]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">Basic checks</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <p>Using telnet, curl, prepared files, demonstrate that the following <br>
+              features work properly:</p>
+
+            <ul>
+              <li>GET, POST and DELETE requests should work.</li>
+              <li>UNKNOWN requests should not result in a crash.</li>
+              <li>For every test you should receive the appropriate status code.</li>
+              <li>Upload some file to the server and get it back.</li>
+            </ul>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][2][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245749"
+                    name="[scale_team][answers_attributes][2][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][2][value]"
+                  id="radio_[scale_team][answers_attributes][2]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][2]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][2][value]"
+                  id="radio_[scale_team][answers_attributes][2]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][2]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">Check CGI</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <p>Pay attention to the following:</p>
+
+            <ul>
+              <li>The server is working fine using a CGI.</li>
+              <li>The CGI should be run in the correct directory for relative path file access.</li>
+              <li>With the help of the students you should check that everything is working properly.
+                You have to test the CGI with the "GET" and "POST" methods.</li>
+              <li>You need to test with files containing errors to see if the error handling works properly.
+                You can use a script containing an infinite loop or an error; you are free to do whatever tests you want
+                within the limits of acceptability that remain at your discretion.
+                The group being evaluated should help you with this. </li>
+            </ul>
+
+            <p>The server should never crash and an error should be visible in case of a problem.</p>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][3][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245750"
+                    name="[scale_team][answers_attributes][3][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][3][value]"
+                  id="radio_[scale_team][answers_attributes][3]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][3]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][3][value]"
+                  id="radio_[scale_team][answers_attributes][3]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][3]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">Check with a browser</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <ul>
+              <li>Use the reference browser of the team. Open the network part of it,
+                and try to connect to the server using it.</li>
+              <li>Look at the request header and response header.</li>
+              <li>It should be compatible to serve a fully static website.</li>
+              <li>Try a wrong URL on the server.</li>
+              <li>Try to list a directory.</li>
+              <li>Try a redirected URL.</li>
+              <li>Try anything you want to.</li>
+            </ul>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][4][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245751"
+                    name="[scale_team][answers_attributes][4][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][4][value]"
+                  id="radio_[scale_team][answers_attributes][4]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][4]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][4][value]"
+                  id="radio_[scale_team][answers_attributes][4]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][4]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">Port issues</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <ul>
+              <li>In the configuration file setup multiple ports and use different
+                websites. Use the browser to ensure that the configuration works as
+                expected and shows the right website.</li>
+              <li>In the configuration, try to setup the same port multiple times. It
+                should not work.</li>
+              <li>Launch multiple servers at the same time with different configurations
+                but with common ports. Does it work? If it does, ask why the server
+                should work if one of the configurations isn't functional. Keep going.</li>
+            </ul>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][5][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245752"
+                    name="[scale_team][answers_attributes][5][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][5][value]"
+                  id="radio_[scale_team][answers_attributes][5]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][5]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][5][value]"
+                  id="radio_[scale_team][answers_attributes][5]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][5]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">Siege &amp; stress test</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <ul>
+              <li>Use Siege to run some stress tests.</li>
+              <li>Availability should be above 99.5% for a simple GET on an empty page
+                with a siege -b on that page.</li>
+              <li>Verify there is no memory leak (Monitor the process memory usage. It
+                should not go up indefinitely).</li>
+              <li>Check if there is no hanging connection.</li>
+              <li>You should be able to use siege indefinitely without having to restart
+                the server (take a look at siege -b).</li>
+            </ul>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][6][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245753"
+                    name="[scale_team][answers_attributes][6][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][6][value]"
+                  id="radio_[scale_team][answers_attributes][6]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][6]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][6][value]"
+                  id="radio_[scale_team][answers_attributes][6]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][6]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+          </section>
+          <section class="scale-section-item dancer from-down" id="section-72367">
+            <div class="section-header">
+              <hr>
+              <h3 class="font-weight-bold mb-1">Bonus part</h3>
+              <p class="font-italic">Evaluate the bonus part if, and only if, the mandatory part has been
+                entirely and perfectly done, and the error management handles unexpected
+                or bad usage. In case all the mandatory points were not passed during the
+                defense, bonus points must be totally ignored.
+              </p>
+            </div>
+            <h4 class="scale-question-name">Cookies and session</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <p>There is a working session and cookies system on the webserver.</p>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][7][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245754"
+                    name="[scale_team][answers_attributes][7][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][7][value]"
+                  id="radio_[scale_team][answers_attributes][7]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][7]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][7][value]"
+                  id="radio_[scale_team][answers_attributes][7]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][7]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+            <h4 class="scale-question-name">CGI</h4>
+            <p class="scale-section-guidelines">
+            </p>
+            <p>There is more than one CGI system.</p>
+
+            <p></p>
+            <div class="scale-question-answers">
+              <div class="form-group hidden scale_team_answer_id">
+                <div class="col-sm-10"><input class="form-control hidden" name="[scale_team][answers_attributes][8][id]"
+                    type="hidden" id="scale_team_answer_id"></div>
+              </div>
+              <div class="form-group hidden scale_team_answer_question_id">
+                <div class="col-sm-10"><input class="form-control hidden" value="245755"
+                    name="[scale_team][answers_attributes][8][question_id]" type="hidden"
+                    id="scale_team_answer_question_id"></div>
+              </div>
+              <div class="btn-group block">
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][8][value]"
+                  id="radio_[scale_team][answers_attributes][8]_true" type="radio" value="1">
+                <label class="btn btn-success checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][8]_true">
+                  <span class="icon-check"></span>
+                  Yes
+                </label>
+                <input autocomplete="off" class="checkbox-input" name="[scale_team][answers_attributes][8][value]"
+                  id="radio_[scale_team][answers_attributes][8]_false" type="radio" value="0" checked="checked">
+                <label class="btn btn-danger checkbox-label light-bg"
+                  for="radio_[scale_team][answers_attributes][8]_false">
+                  <span class="icon-times"></span>
+                  No
+                </label>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="col-sm-12 scale-div pb-4">
+          <div class="dancer from-down" id="ratings-25879">
+            <h3 class="font-weight-bold mb-1">Ratings</h3>
+            <p class="marked-title">Don’t forget to check the flag corresponding to the defense</p>
+            <div class="btn-group block flags-buttons" data-radio-item="flag-small">
+              <label class="btn btn-default btn-success label_flag_ok on-active positive" for="scale_team_flag_id_1"
+                name="scale_team[flag_id]">
+                <span class="iconf-check-4"></span>
+                Ok
+              </label>
+              <label class="btn btn-default btn-success label_flag_outstanding_project on-active positive"
+                for="scale_team_flag_id_9" name="scale_team[flag_id]">
+                <span class="iconf-star-1"></span>
+                Outstanding project
+              </label>
+            </div>
+            <div class="btn-group block flags-buttons" data-radio-item="flag-small">
+              <label class="btn btn-danger btn-default label_flag_empty_work negative on-active"
+                for="scale_team_flag_id_2" name="scale_team[flag_id]">
+                <span class="iconf-iconf-folder-1"></span>
+                Empty work
+              </label>
+              <label class="btn btn-danger btn-default label_flag_incomplete_work negative on-active"
+                for="scale_team_flag_id_3" name="scale_team[flag_id]">
+                <span class="iconf-file-attention"></span>
+                Incomplete work
+              </label>
+              <label class="btn btn-danger btn-default label_flag_invalid_compilation negative on-active"
+                for="scale_team_flag_id_5" name="scale_team[flag_id]">
+                <span class="iconf-skull-2"></span>
+                Invalid compilation
+              </label>
+              <label class="btn btn-danger btn-default label_flag_cheat negative on-active" for="scale_team_flag_id_7"
+                name="scale_team[flag_id]">
+                <span class="iconf-layers"></span>
+                Cheat
+              </label>
+              <label class="btn btn-danger btn-default label_flag_crash negative on-active" for="scale_team_flag_id_8"
+                name="scale_team[flag_id]">
+                <span class="iconf-bomb"></span>
+                Crash
+              </label>
+              <label class="btn btn-danger btn-default label_flag_incomplete_group negative on-active"
+                for="scale_team_flag_id_10" name="scale_team[flag_id]">
+                <span class="iconf-user-delete-2"></span>
+                Incomplete group
+              </label>
+              <label class="btn btn-danger btn-default label_flag_concerning_situation negative on-active"
+                for="scale_team_flag_id_11" name="scale_team[flag_id]">
+                <span class="iconf-alert-2"></span>
+                Concerning situation
+              </label>
+              <label class="btn btn-danger btn-default label_flag_leaks negative on-active" for="scale_team_flag_id_12"
+                name="scale_team[flag_id]">
+                <span class="iconf-blood"></span>
+                Leaks
+              </label>
+              <label class="btn btn-danger btn-default label_flag_forbidden_function negative on-active"
+                for="scale_team_flag_id_13" name="scale_team[flag_id]">
+                <span class="iconf-delete-2"></span>
+                Forbidden function
+              </label>
+              <label class="btn btn-danger btn-default label_flag_can’t_support_/_explain_code negative on-active"
+                for="scale_team_flag_id_14" name="scale_team[flag_id]">
+                <span class="iconf-bubble-attention-4"></span>
+                Can’t support / explain code
+              </label>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-sm-12 scale-div">
+          <h3 class="font-weight-bold mb-1">Conclusion</h3>
+          <br />
+        </div>
+        <div class="scale-final-submit"><a href="https://github.com/rphlr/42-Evals">
+            <input class="btn btn-primary btn-block font-weight-bold" type="button"
+              value="Give this repository a star. ⭐" /></a>
+        </div>
+      </form>
+      <script src="../../js/js"></script>
+      <script src="../../js/main.js"></script>
+</body>
+
 </html>

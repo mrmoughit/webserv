@@ -333,7 +333,7 @@ void Server::startServer() {
                     char buffer[16384] = {0};
                     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
                     // std::cout << "Bytes read: " << bytes_read << std::endl;
-                    // std::cout << "Buffer: " << buffer << std::endl;
+                    std::cout << "Buffer: " << buffer << std::endl;
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
                             if (clients[client_index].get_Alive() == 0) {
