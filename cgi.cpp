@@ -3,17 +3,6 @@
 
 
 
-std::vector<std::string> get_words(std::string& line)
-{
-    std::string tmp;
-	std::stringstream ss(line);
-	std::vector<std::string> words;
-	while(ss >> tmp)
-	{
-		words.push_back(tmp);
-	}
-    return words;
-}
 
 int check_status(std::string header)
 {
@@ -205,7 +194,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     
     char buffer[10000];
 	std::string content;
-    ssize_t bytes_read = 0;
+    // ssize_t bytes_read = 0;
     bool timeout_occurred = false;
     
     // Start the timer
@@ -267,7 +256,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     close(fd[0]);
     
     // Wait for child if it's still running
-    int status;
+    int status = 0;
     if (!timeout_occurred) {
         waitpid(pid, &status, 0);
     }
@@ -303,7 +292,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
 
 
 
-int cgi_handler(Client &client)
+int cgi_handler(Client &client , std::string body)
 {
 
     // envp for post 
@@ -353,7 +342,7 @@ int cgi_handler(Client &client)
 		}
 		else if (code == 2)
 			interpreter = "/usr/bin/python3";
-		int status = exec_script(full_path, envp, interpreter, client, "username=admin&password=password123");
+		int status = exec_script(full_path, envp, interpreter, client, body);
 		return status;
 	}
 	else
