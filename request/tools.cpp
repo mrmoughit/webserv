@@ -57,30 +57,37 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
         return "";
     }
 
+
     std::streampos fileSize = fileStream.tellg();
     fileStream.seekg(0, std::ios::beg);
     client.get_response().set_response_status(200);
     std::ostringstream response;
+
     response << "HTTP/1.1 ";
-    response <<  status ;
-    response << " OK\r\n";
+    
+    int redirection = client.get_request().redirection;
+
+    std::cout << status << std::endl;
+
+    if (redirection != -1 && status == 200){
+        if (client.get_request().redirection  == 301){
+            response <<  "301 Moved Permanently\r\n";
+        }
+        else if (client.get_request().redirection  == 302){
+            response <<  "302 Found\r\n";
+        }
+
+    }
+    else{
+        response <<  status ;
+        response << " OK\r\n";
+    }
     response << "Content-Type:" + getContentType(filePath)  + "\r\n";
     response << "Content-Length: " << fileSize << "\r\n";
     response << "Accept-Ranges: bytes\r\n";
     response << "Connection: close\r\n";
     response << "\r\n";
 
-
     return response.str();
 }
 
-
-
-
-
-// bool check_post_body_size(Client *clinet){
-//     if (clinet->server_client_obj.is_location_url != -1){
-//         if (clinet->get_request().get_content_length() > clinet->server_client_obj.get_routes()[clinet->server_client_obj.is_location_url].get)
-//     }
-//     return false;
-// }

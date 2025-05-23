@@ -2,6 +2,7 @@
 
 Request::Request()
 {
+    redirection = -1;
     index = false;
     is_string_req_send = false;
 }
@@ -234,12 +235,12 @@ void hanlde_post_request(Client &client)
         std::string extension = content_type.substr(pos + 1);
         trim_non_printable(extension);
         
-        
-        // std::string file_name = client.server_client_obj.get_server_root() + "/" + ft_generate_file_names(client, extension);
 
         std::string file_name = get_file_name(&client , ft_generate_file_names(client, extension));
-        if (file_name.empty())
+        if (file_name.empty()){
+            client.set_all_recv(true);
             return ; // must be test the cityoen error 
+        }
         client.get_request().file.open(file_name.c_str());
 
         if (!client.get_request().file.is_open())
@@ -284,4 +285,24 @@ void hanlde_post_request(Client &client)
             first = writed = 0;
         }
     }
+}
+
+
+
+
+void check_if_have_redirection(Client *client){
+    if (client->server_client_obj.is_location_url != -1){
+        std::map<int, std::string> map =  client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_redirections();
+
+        std::map<int, std::string>::iterator it = map.begin();
+        while(it != map.end()){
+            std::string new_url = it->second;
+            if (new_url[0] == '/')
+                new_url = client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_root() + "/" + new_url.substr(1);
+            client->get_request().set_path(new_url);
+            client->get_request().redirection = it->first;
+            ++it;
+        }
+    }
+    // exit(22);
 }

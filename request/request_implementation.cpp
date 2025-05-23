@@ -192,6 +192,8 @@ void parse_request(Client &client)
 
 
     pa = client.get_request().get_path();
+    check_if_have_redirection(&client);
+
 
     size_t pos = pa.find_last_of('.');
     if (pos != std::string::npos) {
@@ -376,6 +378,8 @@ void check_request(Client &client)
             client.get_response().set_response_index(true);
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
+
+
     }
     else if (method == "DELETE")
     {

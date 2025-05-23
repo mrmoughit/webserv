@@ -83,7 +83,6 @@ void chunked(Client &client)
 }
 
 
-
 void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
 {
     std::istringstream ss(tmp);
@@ -92,8 +91,8 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
     std::getline(ss, line);
     if (index != 0)
         std::getline(ss, line);
-    // std::cout << line << std::endl;
-    // return ;
+
+
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
     {
@@ -121,8 +120,11 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                 }
                 // std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
                 std::string filename = get_file_name(&clinet , line.substr(filename_pos, file_name_end - filename_pos));
-                if (filename.empty()) // // must be test the cityoen error 
+                if (filename.empty()) {
+                    // // must be test the cityoen error 
+                    clinet.set_all_recv(true);
                     return ;
+                }
                 filename  =  clinet.server_client_obj.get_server_root() + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);

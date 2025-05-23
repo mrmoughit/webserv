@@ -16,6 +16,8 @@ class Request
     public:
         std::ofstream file;
 
+        int redirection;
+        
         bool is_string_req_send;
         const std::string& get_method();
         const std::string& get_version();
