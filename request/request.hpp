@@ -37,13 +37,13 @@ class Request
         bool fill_headers_map(std::istringstream &obj , std::string &res , Client &client);
 
 
-        void print_headers(){
-            std::map<std::string , std::string >::iterator it = headers_map.begin();
-            while(it != headers_map.end()){
-                std::cout << it->first << " ---------------> " << it->second << std::endl;
-                ++it;
-            }
-        }
+        // void print_headers(){
+        //     std::map<std::string , std::string >::iterator it = headers_map.begin();
+        //     while(it != headers_map.end()){
+        //         std::cout << it->first << " ---------------> " << it->second << std::endl;
+        //         ++it;
+        //     }
+        // }
 
 
         bool get_parse_index();

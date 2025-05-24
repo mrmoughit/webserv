@@ -232,6 +232,7 @@ void hanlde_post_request(Client &client)
     static int first;
     static size_t writed;
 
+
     if (!first)
     {
         first = 10;
@@ -241,12 +242,16 @@ void hanlde_post_request(Client &client)
         trim_non_printable(extension);
         
 
-        std::string dirname = get_file_name(&client);
-        std::string file_name =  ft_generate_file_names(client, extension , dirname);
-        if (file_name.empty()){
+        
+        std::string dirname =   get_file_name(&client);
+        std::string file_name = ft_generate_file_names(extension , dirname);
+        if (dirname.empty()){
+            first = writed = 0;
             client.set_all_recv(true);
             return ;
         }
+
+
         client.get_request().file.open(file_name.c_str());
 
         if (!client.get_request().file.is_open())

@@ -217,9 +217,6 @@ void parse_request(Client &client)
     if (client.get_response().get_response_index())
         return;
 
-
-    std::cout << client.get_request().get_path() << std::endl;
-
     size_t pos = pa.find_last_of('.');
     if (pos != std::string::npos)
     {
@@ -399,7 +396,6 @@ void check_request(Client &client)
 
         if (client.get_all_recv() == true)
         {
-            client.get_response().set_response_index(true);
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
     }

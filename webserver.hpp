@@ -72,10 +72,9 @@ std::string removeslashes(const std::string& line);
 bool out_root_dir(std::string &pa , std::string &res , Client &clinet);
 bool is_upper(std::string line);
 char	**ft_split(char const *s, char c);
-void get_error_res(std::string &res , int status , Client &clinet);
 std::string fill_response(std::ifstream& fileStream,  std::string& filePath  , Client &client , int status );
 void parse_request(Client &object);
-// void _response(std::ifstream& fileStream , int status);
+
 void check_request( Client & client );
 void hanlde_post_request(Client &client);
 void response_to_get(Client &client);
@@ -84,7 +83,7 @@ void response_to_get(Client &client);
 
 
 void  trim(std::string& str);
-std::string ft_generate_file_names(Client &client, const std::string& extension , std::string dirname);
+std::string ft_generate_file_names(const std::string& extension , std::string dirname);
 void boundary(Client &clinet);
 void chunked(Client &client);
 void trim_non_printable(std::string &str);
@@ -117,7 +116,7 @@ int check_dup_serv(std::vector <ServerBlock>& vector_serv, ServerBlock& current_
 int set_default_page();
 std::string get_file_name(Client *clinet);
 void check_if_have_redirection(Client *client);
-// bool check_post_body_size(Client *clinet);
+
 
 
 

@@ -28,9 +28,9 @@ int hex_to_int(const std::string &hexStr)
     return result;
 }
 
-std::string ft_generate_file_names( Client &client ,const std::string& extension , std::string dirname)
+std::string ft_generate_file_names(const std::string& extension , std::string dirname)
 {
-    (void)client;
+    // (void)client;
     static int index;
     std::string name;
     while (1)
@@ -122,9 +122,7 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                 }
                 std::string dirname = get_file_name(&clinet);
                 std::string filename = dirname + "/" + line.substr(filename_pos, file_name_end - filename_pos);
-
-                std::cout << filename << std::endl;
-                if (filename.empty()) {
+                if (filename.empty()||  dirname.empty()) {
                     clinet.set_all_recv(true);
                     return ;
                 }
@@ -183,7 +181,7 @@ int check_if_have_new_boundary(std::string &buffer, const std::string &boundary,
     if (last_Boundary + 2 <= buffer.size() &&
         buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-'){
         client.set_all_recv(true);
-        std::cout << "my job done here " << std::endl;
+        // std::cout << "my job done here " << std::endl;
         // exit(15);
     }
 

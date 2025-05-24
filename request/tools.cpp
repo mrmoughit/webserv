@@ -67,8 +67,6 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
     
     int redirection = client.get_request().redirection;
 
-    std::cout << status << std::endl;
-
     if (redirection != -1 ){
         if (redirection  == 301){
             response <<  "301 Moved Permanently\r\n";
