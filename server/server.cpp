@@ -353,6 +353,8 @@ void Server::startServer() {
                     
                     // If we've received all data, switch to write mode
                     if (clients[client_index].get_all_recv()) {
+                        // off_t offset = lseek(client_fd, 0, SEEK_END); 
+                        // std::cout << "offffffffffffff==============> " << offset << std::endl;
                         pollfds[idx].events = POLLOUT;
                     }
                 }

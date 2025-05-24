@@ -10,11 +10,28 @@ std::string status_500 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\
 void set_response_error(Client *client, int status)
 {
     std::string error_path = client->server_client_obj.find_error_page_path(status);
-    
+    int red = client->get_request().redirection;
     if (error_path == "NULL")
     {
         std::string res = "HTTP/1.1 ";
-        res +=  status ;
+        if (red != -1)
+        {
+            if (red == 301)
+            {
+                res += "301 Moved Permanently\r\n";
+                res += "Location: ";
+                res += client->get_request().Location;
+                res += " \r\n";
+            }
+            else if (red == 302)
+            {
+                res += "302 Found\r\n";
+                res += "Location: ";
+                res += client->get_request().Location;
+                res += " \r\n";
+            }
+        }
+        res += status;
         res += " OK\r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
         if (client->get_Alive())
@@ -34,16 +51,17 @@ void set_response_error(Client *client, int status)
             res += status_405;
         if (status == 500)
             res += status_500;
-        
+
         client->get_response().set_response_status(status);
         client->get_response().set_response(res);
         client->get_response().set_response_index(true);
 
-        return ;
+        return;
     }
-    
-    std::string res = fill_response(client->get_response().get_fileStream(), error_path, *client , status );
-    if (res.empty()){
+
+    std::string res = fill_response(client->get_response().get_fileStream(), error_path, *client, status);
+    if (res.empty())
+    {
         res = "HTTP/1.1 500 OK\r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
         if (client->get_Alive())
@@ -56,14 +74,12 @@ void set_response_error(Client *client, int status)
     client->get_response().set_response_status(status);
     client->get_response().set_response(res);
     client->get_response().set_response_index(true);
-
 }
 
 void parse_request(Client &client)
 {
     client.get_request().set_parse_index(true);
     client.set_Alive(false);
-
 
     std::string &res = client.get_response().get_response();
 
@@ -97,7 +113,6 @@ void parse_request(Client &client)
 
     std::string method, path, version, error;
     Line >> method >> path >> version >> error;
-
 
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
     {
@@ -170,7 +185,6 @@ void parse_request(Client &client)
             pa = client.server_client_obj.get_server_root() + "/" + &tmp1[1];
     }
 
-
     if (pa.size() > 0)
         client.get_request().set_path(pa);
 
@@ -186,9 +200,10 @@ void parse_request(Client &client)
         size_t size;
         ss >> size;
         client.get_request().set_content_length(size);
-        if (ss.fail() || size == 0){
+        if (ss.fail() || size == 0)
+        {
             set_response_error(&client, 400);
-            return ;
+            return;
         }
         if (size > client.server_client_obj.get_client_body_size())
         {
@@ -197,45 +212,52 @@ void parse_request(Client &client)
         }
     }
 
-
     pa = client.get_request().get_path();
     check_if_have_redirection(&client);
+    if (client.get_response().get_response_index())
+        return;
 
+
+    std::cout << client.get_request().get_path() << std::endl;
 
     size_t pos = pa.find_last_of('.');
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
+    {
         std::string ex = pa.substr(pos);
-        if ( ex == ".php" || ex == ".py"){
-            if (client.server_client_obj.is_location_url > -1){
-                std::vector<std::string > vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
-                for (size_t i = 0 ; i < vec.size() ; i++){
-                    if (vec[i] == ex){
+        if (ex == ".php" || ex == ".py")
+        {
+            if (client.server_client_obj.is_location_url > -1)
+            {
+                std::vector<std::string> vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
+                for (size_t i = 0; i < vec.size(); i++)
+                {
+                    if (vec[i] == ex)
+                    {
 
-                        std::string res =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
+                        std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
                         res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
-
 
                         client.get_response().set_response_index(true);
                         client.get_response().set_response(res);
                         client.get_response().set_response_status(200);
-                        std::cout << "the value =============>  " << cgi_handler(client , new_request) << std::endl;
+                        std::cout << "the value =============>  " << cgi_handler(client, new_request) << std::endl;
                         // exit (88);
                     }
                 }
-                
             }
-            else{
+            else
+            {
+                std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
+                res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
 
-
-
-
-
-                std::cout << "the value =============> " << cgi_handler(client , new_request) << std::endl;
+                client.get_response().set_response_index(true);
+                client.get_response().set_response(res);
+                client.get_response().set_response_status(200);
+                std::cout << "the value =============> " << cgi_handler(client, new_request) << std::endl;
                 std::cout << "mcha l cgi " << std::endl;
             }
         }
     }
-
 }
 
 void handle_x_www_form_urlencoded(Client &client)
@@ -253,7 +275,7 @@ void handle_x_www_form_urlencoded(Client &client)
         if (pos == std::string::npos)
         {
             std::cout << "error" << std::endl;
-            exit(0);
+            exit(21);
         }
         key = line.substr(0, pos);
         value = line.substr(pos + 1);
@@ -306,46 +328,41 @@ void check_request(Client &client)
     client.server_client_obj.is_location_url = -1;
 
 
-
-
-    // std::cout << client.get_request().get_s_request() << std::endl;
-
-    
     if (!client.get_request().get_parse_index())
         parse_request(client);
 
-
-    // std::cout << client.get_request().get_map_values("Connection") << std::endl;
     if (client.get_response().get_response_index())
     {
         std::string method = client.get_request().get_method();
         client.set_all_recv(true);
-        if (method == "GET"){
+        if (method == "GET")
+        {
             std::cout << "\033[34m" << "GET request ====> " << method << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
-        else if (method == "POST"){
+        else if (method == "POST")
+        {
             std::cout << "\033[38;5;214m" << "POST request ====> " << method << " "
-                  << client.get_request().get_path() << " "
-                  << client.get_request().get_version() << " " << "\033[0m" << std::endl;
+                      << client.get_request().get_path() << " "
+                      << client.get_request().get_version() << " " << "\033[0m" << std::endl;
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
-        else if (method == "DELETE"){
+        else if (method == "DELETE")
+        {
             std::cout << "\033[1;31m" << "DELETE request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
-        else{
+        else
+        {
             std::cout << "\033[1;31m" << "UNKNOWN request ====> " << method << " " << client.get_request().get_path() << " " << client.get_request().get_version() << " " << "\033[0m" << std::endl;
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
         return;
     }
 
-
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
-
 
     if (method == "GET")
     {
@@ -361,32 +378,30 @@ void check_request(Client &client)
                   << client.get_request().get_path() << " "
                   << client.get_request().get_version() << " " << "\033[0m" << std::endl;
 
-        set_response_error(&client , 201);
+        set_response_error(&client, 201);
         client.get_response().set_response_index(false);
-        
+
         std::string check = transfer_encoding;
-        
+
         if (content_type.find("boundary=") != std::string::npos && check == "chunked")
             handle_boundary_chanked(client);
-        
+
         else if (content_type.find("boundary=") != std::string::npos)
             boundary(client);
-        
+
         else if (check == "chunked")
             chunked(client);
-        
-        else if (content_type == "application/x-www-form-urlencoded"){
+
+        else if (content_type == "application/x-www-form-urlencoded")
             handle_x_www_form_urlencoded(client);
-        }
         else
             hanlde_post_request(client);
-        
+
         if (client.get_all_recv() == true)
         {
             client.get_response().set_response_index(true);
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
-
     }
     else if (method == "DELETE")
     {
@@ -396,12 +411,14 @@ void check_request(Client &client)
         try
         {
             handle_delete_request(path);
-            set_response_error(&client , 204);
+            set_response_error(&client, 204);
         }
-        catch(const std::exception& e)
+        catch (const std::exception &e)
         {
-            set_response_error(&client , 404);
+            set_response_error(&client, 404);
         }
         std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
     }
+
+
 }

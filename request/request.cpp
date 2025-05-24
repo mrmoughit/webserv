@@ -241,10 +241,11 @@ void hanlde_post_request(Client &client)
         trim_non_printable(extension);
         
 
-        std::string file_name = get_file_name(&client , ft_generate_file_names(client, extension));
+        std::string dirname = get_file_name(&client);
+        std::string file_name =  ft_generate_file_names(client, extension , dirname);
         if (file_name.empty()){
             client.set_all_recv(true);
-            return ; // must be test the cityoen error 
+            return ;
         }
         client.get_request().file.open(file_name.c_str());
 
@@ -302,12 +303,11 @@ void check_if_have_redirection(Client *client){
         std::map<int, std::string>::iterator it = map.begin();
         while(it != map.end()){
             std::string new_url = it->second;
-            if (new_url[0] == '/')
-                new_url = client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_root() + "/" + new_url.substr(1);
-            client->get_request().set_path(new_url);
             client->get_request().redirection = it->first;
+            client->get_request().Location = it->second;
+            set_response_error(client ,it->first);
             ++it;
+
         }
     }
-    // exit(22);
 }

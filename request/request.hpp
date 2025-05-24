@@ -17,7 +17,10 @@ class Request
         std::ofstream file;
 
         int redirection;
-        
+        std::string Location;
+        // int is_error;
+
+
         bool is_string_req_send;
         const std::string& get_method();
         const std::string& get_version();

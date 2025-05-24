@@ -8,29 +8,6 @@ post x-www-form-urlencoded   incorect path file created                         
 
 
 
-
-
-
-   
-
-
-
-POST /chunked HTTP/1.1
-Host: localhost
-Transfer-Encoding: chunked
-
-5
-hello
-6
- world
-0
-
-
-
-GARBAGE / HTTP/1.1
-Host: localhost   >> 400 not 405
-
-
 response in cgi
 
 

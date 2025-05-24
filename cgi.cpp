@@ -1,5 +1,5 @@
 #include "./webserver.hpp"
-#define CGI_TIMEOUT 3
+#define CGI_TIMEOUT 5
 
 
 

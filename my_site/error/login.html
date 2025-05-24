@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="content">
-        <form action="script.py" method="POST" class="display">
+        <form action="error/script.py" method="POST" class="display">
             <h2>Login Form</h2>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br><br>
@@ -25,7 +25,7 @@
     let key = getCookie("session_id");
     
     if (key) {
-        const url = 'session.py';
+        const url = 'error/session.py';
 
         fetch(url, {
             method: 'POST',

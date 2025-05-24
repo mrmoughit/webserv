@@ -69,12 +69,19 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
 
     std::cout << status << std::endl;
 
-    if (redirection != -1 && status == 200){
-        if (client.get_request().redirection  == 301){
+    if (redirection != -1 ){
+        if (redirection  == 301){
             response <<  "301 Moved Permanently\r\n";
+            response <<  "Location: ";
+            response <<  client.get_request().Location;
+            response << " \r\n";
+
         }
-        else if (client.get_request().redirection  == 302){
+        else if (redirection  == 302){
             response <<  "302 Found\r\n";
+            response <<  "Location: ";
+            response <<  client.get_request().Location;
+            response << " \r\n";
         }
 
     }

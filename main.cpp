@@ -28,8 +28,9 @@ int hex_to_int(const std::string &hexStr)
     return result;
 }
 
-std::string ft_generate_file_names( Client &client ,const std::string& extension)
+std::string ft_generate_file_names( Client &client ,const std::string& extension , std::string dirname)
 {
+    (void)client;
     static int index;
     std::string name;
     while (1)
@@ -38,7 +39,8 @@ std::string ft_generate_file_names( Client &client ,const std::string& extension
 
         ss << "file" << index << "." << extension;
         name = ss.str();
-        if (access((client.server_client_obj.get_server_root() + "/" + name).c_str(), F_OK) != 0)
+        name = dirname + "/" + name;
+        if (access(name.c_str(), F_OK) != 0)
             return name;
         index++;
     }
@@ -118,14 +120,14 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                     std::cout << "error" << std::endl;
                     exit(55);
                 }
-                // std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
-                std::string filename = get_file_name(&clinet , line.substr(filename_pos, file_name_end - filename_pos));
+                std::string dirname = get_file_name(&clinet);
+                std::string filename = dirname + "/" + line.substr(filename_pos, file_name_end - filename_pos);
+
+                std::cout << filename << std::endl;
                 if (filename.empty()) {
-                    // // must be test the cityoen error 
                     clinet.set_all_recv(true);
                     return ;
                 }
-                filename  =  clinet.server_client_obj.get_server_root() + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);
                 std::getline(ss, line);

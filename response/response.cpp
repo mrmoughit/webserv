@@ -217,7 +217,7 @@ void response_to_get(Client &client)
 
 
 
-std::string get_file_name(Client *client , std::string file){
+std::string get_file_name(Client *client){
 
     if (client->server_client_obj.is_location_url != -1){
 
@@ -242,7 +242,7 @@ std::string get_file_name(Client *client , std::string file){
             return "";
         }
 
-        return dir + "/" + file;
+        return dir;
     }
     else{
 
@@ -264,7 +264,7 @@ std::string get_file_name(Client *client , std::string file){
             set_response_error(client , 502);
             return "";
         }
-        return dir + "/" + file;
+        return dir ;
         
     }
     return "";
