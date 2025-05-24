@@ -261,7 +261,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     if (!timeout_occurred) {
         waitpid(pid, &status, 0);
     }
-    std::cout << "++status: " << status << std::endl;
+
     if (timeout_occurred) {
         return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit" << std::endl, 3);
     } else if (WIFEXITED(status)) {

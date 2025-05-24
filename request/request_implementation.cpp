@@ -236,7 +236,8 @@ void parse_request(Client &client)
                         client.get_response().set_response_index(true);
                         client.get_response().set_response(res);
                         client.get_response().set_response_status(200);
-                        std::cout << "the value =============>  " << cgi_handler(client, new_request , path) << std::endl;
+                        cgi_handler(client, new_request , path);
+                        res += "\r\n\r\n";
                         // exit (88);
                     }
                 }

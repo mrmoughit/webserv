@@ -12,18 +12,13 @@ key = params.get('session_id', '')
 key_found = False
 username = 'Guest'
 
-# Check the session key in db_cgi.txt
+
 with open('db_cgi.txt', 'r') as file:
     for line in file:
         if f'key {key}' in line:
             key_found = True
-            username = line.split()[1]  # Extract username from the file
+            username = line.split()[1]
             break
-
-# Send the correct Content-Type header
-print("Content-Type: text/html\n")
-
-# Check if the key was found and create the appropriate response
 if key_found:
     print(f"""
     <html>
@@ -53,30 +48,4 @@ if key_found:
     </body>
     </html>
     """)
-else:
-    print(f"""
-    <html>
-    <head>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f9;
-                color: #333;
-                text-align: center;
-            }}
-            h1 {{
-                color: #FF0000;
-                font-size: 36px;
-            }}
-            p {{
-                font-size: 18px;
-                margin: 10px 0;
-            }}
-        </style>
-    </head>
-    <body>
-        <h1>Session Key Not Found</h1>
-        <p>The session key you provided was not found. Please log in again.</p>
-    </body>
-    </html>
-    """)
+
