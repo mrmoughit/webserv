@@ -1,5 +1,5 @@
 #include "./webserver.hpp"
-#define CGI_TIMEOUT 5
+#define CGI_TIMEOUT 3
 
 
 
@@ -291,47 +291,81 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     return 0;
 }
 
-
-
-int cgi_handler(Client &client , std::string body)
+std::string convert_to_up(const std::string &key)
 {
+    std::string result;
+    for (size_t i = 0; i < key.length(); ++i) {
+        if (key[i] == '-') {
+            result += '_';
+        } else {
+            result += std::toupper(key[i]);
+        }
+    }
+    return result;
+}
 
-    // envp for post 
-//   char *envp[] = {
-//     (char *)"REDIRECT_STATUS=200",             // Critical for php-cgi
-//     (char *)"GATEWAY_INTERFACE=CGI/1.1",
-//     (char *)"SERVER_PROTOCOL=HTTP/1.1",
-//     (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
-//     (char *)"REQUEST_METHOD=POST",
-//     (char *)"SCRIPT_FILENAME=script.php",      // Must be absolute path in real environment
-//     (char *)"SCRIPT_NAME=/script.php",
-//     (char *)"CONTENT_TYPE=application/x-www-form-urlencoded",
-//     (char *)"CONTENT_LENGTH=35",               // Must match exactly the length of POST data
-//     (char *)"QUERY_STRING=",
-//     NULL
-//    };
-    // envp for get 
-    char *envp[] = {
-        (char *)"GATEWAY_INTERFACE=CGI/1.1",
-        (char *)"SERVER_PROTOCOL=HTTP/1.1",
-        (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
-        (char *)"REQUEST_METHOD=GET",  // Changed to GET since we're not posting data
-        (char *)"SCRIPT_FILENAME=script.py",
-        (char *)"SCRIPT_NAME=/script.py",
-        (char *)"REDIRECT_STATUS=200",  // Important for PHP-CGI
-        (char *)"QUERY_STRING=",
-        (char *)"SERVER_NAME=localhost",
-        (char *)"SERVER_PORT=8080",
-        (char *)"REMOTE_ADDR=127.0.0.1",
-        (char *)"HTTP_HOST=localhost:8080",
-        NULL
-    };
-	std::string full_path =client.get_request().get_path();
+std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string &full_path, std::string &method , std::string &sn)
+{
+    std::vector<char*> env_vector;
+    std::map<std::string, std::string>::iterator it;
+    for (it  = map.begin(); it != map.end(); ++it)
+    {
+        // std::cout << it->first << " => " << it->second << std::endl;
+        std::string key = convert_to_up(it->first);
+        if (key == "CONTENT_TYPE" || key == "CONTENT_LENGTH")
+        {
+           std::string combined = key + "=" + it->second; 
+           char *var = new char[combined.size() + 1];
+           std::strcpy(var , combined.c_str());
+           env_vector.push_back(var);
+        }
+    }
+
+
+    const char *redirection = "REDIRECT_STATUS=200";
+    char *var2 = new char[std::strlen(redirection) + 1];
+    std::strcpy(var2, redirection);
+    env_vector.push_back(var2);
+    
+    const char *getway = "GATEWAY_INTERFACE=CGI/1.1";
+    char *var3 = new char[std::strlen(getway) + 1];
+    std::strcpy(var3, getway);
+    env_vector.push_back(var3);
+    
+    std::string request_method = "REQUEST_METHOD=" + method;
+    char *var4 = new char[ request_method.size() + 1];
+    std::strcpy(var4, request_method.c_str());
+    env_vector.push_back(var4);
+    
+    std::string script_filename = "SCRIPT_FILENAME=" + full_path;
+    char *var5 = new char[script_filename.size() + 1];
+    std::strcpy(var5, script_filename.c_str());
+    env_vector.push_back(var5);
+
+    std::string script_name = "SCRIPT_NAME=" + sn;
+    char *var6 = new char[script_name.size() + 1];
+    std::strcpy(var6, script_name.c_str());
+    env_vector.push_back(var6);
+
+    env_vector.push_back(NULL);
+
+    return env_vector;
+}
+
+int cgi_handler(Client &client , std::string body , std::string &sn)
+{
+    
+    std::map<std::string,std::string> map = client.get_request().get_headers_map();
+    
+	std::string full_path = client.get_request().get_path();
 	std::string method = client.get_request().get_method();
-	//check_methods(method, routes[i]);
-	//if method valid and not exist (error not allowed) 
-	//if method not valid (error not implemented)
-	//if its valid execute script
+
+    std::vector<char*> env_vec = get_env(map, full_path, method , sn);
+    char** env = &env_vec[0];
+    for (int i = 0; env[i] != NULL; ++i) {
+        std::cout << env[i] << std::endl;
+    }
+
 	int code = check_extension(full_path);
 	const char* interpreter;
 	if (code > 0)
@@ -343,11 +377,16 @@ int cgi_handler(Client &client , std::string body)
 		}
 		else if (code == 2)
 			interpreter = "/usr/bin/python3";
-		int status = exec_script(full_path, envp, interpreter, client, body);
+		int status = exec_script(full_path, env, interpreter, client, body);
+
+        for (size_t i = 0; i < env_vec.size() - 1; ++i)
+        {
+            delete[] env_vec[i];
+        }
+
 		return status;
 	}
 	else
 		std::cout << "serve it as regular file" << std::endl;
 	return 0;
 }
-

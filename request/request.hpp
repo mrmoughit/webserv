@@ -45,6 +45,9 @@ class Request
         //     }
         // }
 
+        std::map<std::string,std::string> get_headers_map(){
+            return headers_map;
+        }
 
         bool get_parse_index();
         void set_parse_index(bool index);

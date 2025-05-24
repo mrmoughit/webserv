@@ -113,7 +113,6 @@ void parse_request(Client &client)
 
     std::string method, path, version, error;
     Line >> method >> path >> version >> error;
-
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
     {
         set_response_error(&client, 400);
@@ -237,7 +236,7 @@ void parse_request(Client &client)
                         client.get_response().set_response_index(true);
                         client.get_response().set_response(res);
                         client.get_response().set_response_status(200);
-                        std::cout << "the value =============>  " << cgi_handler(client, new_request) << std::endl;
+                        std::cout << "the value =============>  " << cgi_handler(client, new_request , path) << std::endl;
                         // exit (88);
                     }
                 }
@@ -250,7 +249,7 @@ void parse_request(Client &client)
                 client.get_response().set_response_index(true);
                 client.get_response().set_response(res);
                 client.get_response().set_response_status(200);
-                std::cout << "the value =============> " << cgi_handler(client, new_request) << std::endl;
+                std::cout << "the value =============> " << cgi_handler(client, new_request , path) << std::endl;
                 std::cout << "mcha l cgi " << std::endl;
             }
         }
