@@ -85,6 +85,7 @@ int check_extension(std::string full_path)
 int exec_script(std::string full_path, char *envp[], const char* interpreter,  Client &client, const std::string& post_data)
 {
     (void)client;
+    printf("Executing script: %s\n", full_path.c_str());
 	char *argv[] = {(char *)interpreter, (char *) full_path.c_str(), NULL};
 
   int fd[2];
@@ -296,37 +297,37 @@ int cgi_handler(Client &client , std::string body)
 {
 
     // envp for post 
-  char *envp[] = {
-    (char *)"REDIRECT_STATUS=200",             // Critical for php-cgi
-    (char *)"GATEWAY_INTERFACE=CGI/1.1",
-    (char *)"SERVER_PROTOCOL=HTTP/1.1",
-    (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
-    (char *)"REQUEST_METHOD=POST",
-    (char *)"SCRIPT_FILENAME=script.php",      // Must be absolute path in real environment
-    (char *)"SCRIPT_NAME=/script.php",
-    (char *)"CONTENT_TYPE=application/x-www-form-urlencoded",
-    (char *)"CONTENT_LENGTH=35",               // Must match exactly the length of POST data
-    (char *)"QUERY_STRING=",
-    NULL
-   };
+//   char *envp[] = {
+//     (char *)"REDIRECT_STATUS=200",             // Critical for php-cgi
+//     (char *)"GATEWAY_INTERFACE=CGI/1.1",
+//     (char *)"SERVER_PROTOCOL=HTTP/1.1",
+//     (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
+//     (char *)"REQUEST_METHOD=POST",
+//     (char *)"SCRIPT_FILENAME=script.php",      // Must be absolute path in real environment
+//     (char *)"SCRIPT_NAME=/script.php",
+//     (char *)"CONTENT_TYPE=application/x-www-form-urlencoded",
+//     (char *)"CONTENT_LENGTH=35",               // Must match exactly the length of POST data
+//     (char *)"QUERY_STRING=",
+//     NULL
+//    };
     // envp for get 
-    // char *envp[] = {
-    //     (char *)"GATEWAY_INTERFACE=CGI/1.1",
-    //     (char *)"SERVER_PROTOCOL=HTTP/1.1",
-    //     (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
-    //     (char *)"REQUEST_METHOD=GET",  // Changed to GET since we're not posting data
-    //     (char *)"SCRIPT_FILENAME=script.py",
-    //     (char *)"SCRIPT_NAME=/script.py",
-    //     (char *)"REDIRECT_STATUS=200",  // Important for PHP-CGI
-    //     (char *)"QUERY_STRING=",
-    //     (char *)"SERVER_NAME=localhost",
-    //     (char *)"SERVER_PORT=8080",
-    //     (char *)"REMOTE_ADDR=127.0.0.1",
-    //     (char *)"HTTP_HOST=localhost:8080",
-    //     NULL
-    // };
-	std::string full_path = "script.php";
-	std::string method = "POST";
+    char *envp[] = {
+        (char *)"GATEWAY_INTERFACE=CGI/1.1",
+        (char *)"SERVER_PROTOCOL=HTTP/1.1",
+        (char *)"SERVER_SOFTWARE=CustomCppServer/1.0",
+        (char *)"REQUEST_METHOD=GET",  // Changed to GET since we're not posting data
+        (char *)"SCRIPT_FILENAME=script.py",
+        (char *)"SCRIPT_NAME=/script.py",
+        (char *)"REDIRECT_STATUS=200",  // Important for PHP-CGI
+        (char *)"QUERY_STRING=",
+        (char *)"SERVER_NAME=localhost",
+        (char *)"SERVER_PORT=8080",
+        (char *)"REMOTE_ADDR=127.0.0.1",
+        (char *)"HTTP_HOST=localhost:8080",
+        NULL
+    };
+	std::string full_path =client.get_request().get_path();
+	std::string method = client.get_request().get_method();
 	//check_methods(method, routes[i]);
 	//if method valid and not exist (error not allowed) 
 	//if method not valid (error not implemented)

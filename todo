@@ -1,7 +1,8 @@
-leak of fd when dirctories
-upload in the specifed dirctory
-the value of Connection (keep alive, close ) in PUT methode parssing error 
-505 when ( curl -X GET "http://localhost:3331" --http1.0 -H "Host:" -H " " )
+req without headers  =  bad req 400                                                   V
+set connection in response                                                            V
+post x-www-form-urlencoded   incorect path file created                               V
+
+ 
 
 
 
@@ -10,14 +11,31 @@ the value of Connection (keep alive, close ) in PUT methode parssing error
 
 
 
+   
 
 
 
-upload dirctories
-cokies test
+POST /chunked HTTP/1.1
+Host: localhost
+Transfer-Encoding: chunked
+
+5
+hello
+6
+ world
+0
 
 
 
+GARBAGE / HTTP/1.1
+Host: localhost   >> 400 not 405
 
-redirection 
-read all request buufer in error cases all methods
+
+response in cgi
+
+
+khalid 
+
+location /error{
+ 
+ cgi not closing connection

@@ -17,7 +17,10 @@ void set_response_error(Client *client, int status)
         res +=  status ;
         res += " OK\r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
-        res += "Connection: close\r\n";
+        if (client->get_Alive())
+            res += "Connection: keep-alive\r\n";
+        else
+            res += "Connection: close\r\n";
         res += "\r\n";
         if (status == 400)
             res += status_400;
@@ -43,7 +46,10 @@ void set_response_error(Client *client, int status)
     if (res.empty()){
         res = "HTTP/1.1 500 OK\r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
-        res += "Connection: close\r\n";
+        if (client->get_Alive())
+            res += "Connection: keep-alive\r\n";
+        else
+            res += "Connection: close\r\n";
         res += "\r\n";
         res += status_500;
     }
@@ -91,6 +97,7 @@ void parse_request(Client &client)
 
     std::string method, path, version, error;
     Line >> method >> path >> version >> error;
+
 
     if (error.size() > 0 || !method.size() || !path.size() || !version.size())
     {
@@ -368,8 +375,9 @@ void check_request(Client &client)
         else if (check == "chunked")
             chunked(client);
         
-        else if (check == "application/x-www-form-urlencoded")
+        else if (content_type == "application/x-www-form-urlencoded"){
             handle_x_www_form_urlencoded(client);
+        }
         else
             hanlde_post_request(client);
         
@@ -378,7 +386,6 @@ void check_request(Client &client)
             client.get_response().set_response_index(true);
             std::cout << "\033[32m" << "Responsed by ====> " << client.get_response().get_response_status() << "\033[0m" << std::endl;
         }
-
 
     }
     else if (method == "DELETE")

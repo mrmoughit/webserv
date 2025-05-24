@@ -19,7 +19,7 @@ ServerBlock::ServerBlock()
     // dupindex = 0;
     // Port = -1;
     client_body_size = 1048576;
-    server_root = "/html";
+    server_root = "./html";
     // std::cout << "ServerBlock Default constructor called" << std::endl;
 }
 ServerBlock::~ServerBlock()

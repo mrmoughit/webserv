@@ -145,6 +145,11 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client 
             client.set_Alive(false);
         headers_map[key] = value;
     }
+    if (headers_map.size() == 0){
+        set_response_error(&client , 400);
+        headers_map.clear();
+        return false;
+    }
     return true;
 }
 

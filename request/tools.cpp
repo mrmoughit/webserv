@@ -85,7 +85,10 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
     response << "Content-Type:" + getContentType(filePath)  + "\r\n";
     response << "Content-Length: " << fileSize << "\r\n";
     response << "Accept-Ranges: bytes\r\n";
-    response << "Connection: close\r\n";
+    if (client.get_Alive())
+        response << "Connection: keep-alive\r\n";
+    else
+        response << "Connection: close\r\n";
     response << "\r\n";
 
     return response.str();
