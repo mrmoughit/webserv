@@ -122,6 +122,23 @@
         return true;
     }
 
+    function showLoginForm(errorMessage = "Session validation failed. Please log in.") {
+        const loginForm = `
+            <div class="error">${errorMessage}</div>
+            <form action="error/script.py" method="POST" class="display" onsubmit="return validateForm(event)">
+                <h2>Login Form</h2>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <input type="submit" value="Login">
+            </form>
+        `;
+        document.getElementById('content').innerHTML = loginForm;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
 
         const form = document.querySelector('form');
@@ -129,7 +146,7 @@
             form.addEventListener('submit', validateForm);
         }
         
-        let key = getCookie("session_id");
+        let key = getCookie("sessionId");
         
         if (key) {
 
@@ -150,25 +167,17 @@
                 return response.text();
             })
             .then(data => {
-
-                document.getElementById('content').innerHTML = data;
+                // Check if response is empty or just whitespace
+                if (!data || data.trim() === '') {
+                    console.log('Empty response received from session validation');
+                    showLoginForm("No response from server. Please log in.");
+                } else {
+                    document.getElementById('content').innerHTML = data;
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
-                const loginForm = `
-                    <div class="error">Session validation failed. Please log in.</div>
-                    <form action="error/script.py" method="POST" class="display" onsubmit="return validateForm(event)">
-                        <h2>Login Form</h2>
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" name="username" required>
-                        
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" required>
-                        
-                        <input type="submit" value="Login">
-                    </form>
-                `;
-                document.getElementById('content').innerHTML = loginForm;
+                showLoginForm("Session validation failed. Please log in.");
             });
         }
     });

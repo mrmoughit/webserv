@@ -245,8 +245,8 @@ void parse_request(Client &client)
                     if (vec[i] == ex)
                     {
 
-                        std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
-                        
+                        std::string res = "HTTP/1.1 200 ok\r\nContent-Type: text/html\r\n";
+                        res += "Set-Cookie: sessionId=abc123xyz; Expires=Wed, 21 Oct 2025 07:28:00 GMT; Path=/;SameSite=Lax\r\n";
 
                         client.get_response().set_response_index(true);
                         client.get_response().set_response_status(200);
@@ -347,7 +347,7 @@ void check_request(Client &client)
 
 
 
-    std::cout << client.get_request().get_s_request() << std::endl;
+    // std::cout << client.get_request().get_s_request() << std::endl;
 
     if (!client.get_request().get_parse_index())
         parse_request(client);
