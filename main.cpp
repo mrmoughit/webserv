@@ -30,7 +30,6 @@ int hex_to_int(const std::string &hexStr)
 
 std::string ft_generate_file_names(const std::string& extension , std::string dirname)
 {
-    // (void)client;
     static int index;
     std::string name;
     while (1)

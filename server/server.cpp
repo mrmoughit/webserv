@@ -319,21 +319,16 @@ void Server::startServer() {
                     // Client socket - read data
                     int client_fd = pollfds[idx].fd;
                     
-                    // Find the client by fd
                     size_t client_index;
                     getClientIndexByFd(client_fd, client_index);
                     
                     if (client_index >= clients.size()) {
-                        // Client not found - close connection
                         closeClientConnection(idx);
                         continue;
                     }
-                    
-                    // Process client request
+
                     char buffer[16384] = {0};
                     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-                    // std::cout << "Bytes read: " << bytes_read << std::endl;
-                    // std::cout << "Buffer: " << buffer << std::endl;
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
                             if (clients[client_index].get_Alive() == 0) {
@@ -345,25 +340,19 @@ void Server::startServer() {
                         closeClientConnection(idx);
                         continue;
                     }
-                    
-                    // Process the request data
+
                     std::string req(buffer, bytes_read);
                     clients[client_index].get_request().set_s_request(req);
                     check_request(clients[client_index]);
                     
-                    // If we've received all data, switch to write mode
                     if (clients[client_index].get_all_recv()) {
-                        // off_t offset = lseek(client_fd, 0, SEEK_END); 
-                        // std::cout << "offffffffffffff==============> " << offset << std::endl;
                         pollfds[idx].events = POLLOUT;
                     }
                 }
             }
-            // Handle outgoing data
             else if (pollfds[idx].revents & POLLOUT) {
                 int client_fd = pollfds[idx].fd;
                 
-                // Find the client by fd
                 size_t client_index;
                 getClientIndexByFd(client_fd, client_index);
                 

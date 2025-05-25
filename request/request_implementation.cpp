@@ -1,7 +1,7 @@
 #include "../webserver.hpp"
 
-std::string status_400 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>404 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>404</h1><p>Oops! The page you are looking for could not be found.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
-std::string status_404 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>400 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>400</h1><p>Oops! Bad request.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
+std::string status_400 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>400 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>400</h1><p>Oops! The page you are looking for could not be found.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
+std::string status_404 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>404 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>404</h1><p>Oops! Bad request.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
 std::string status_403 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>403 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>403</h1><p>Oops! Forbiden.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
 std::string status_200 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>200 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>200</h1><p>Oops! Succes.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
 std::string status_405 = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>405 </title><style>body{font-family:\"Arial\",sans-serif;background-color:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}.error-container{text-align:center;max-width:600px;padding:40px;background-color:#ffffff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}h1{font-size:100px;margin:0;color:#e74c3c}p{font-size:18px;margin-top:20px}a{color:#3498db;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div class=\"error-container\"><h1>405</h1><p>Oops! Not allawed method.</p><p><a href=\"/\">Go back to homepage</a></p></div></body></html>";
@@ -11,6 +11,8 @@ void set_response_error(Client *client, int status)
 {
     std::string error_path = client->server_client_obj.find_error_page_path(status);
     int red = client->get_request().redirection;
+
+
     if (error_path == "NULL")
     {
         std::string res = "HTTP/1.1 ";
@@ -31,31 +33,44 @@ void set_response_error(Client *client, int status)
                 res += " \r\n";
             }
         }
-        res += status;
+        std::ostringstream oss;
+        std::ostringstream content_length;
+        oss << status;
+        std::string str = oss.str();
+
+
+        std::string string;
+        if (status == 400)
+            string = status_400;
+        if (status == 404)
+            string = status_404;
+        if (status == 403)
+            string = status_403;
+        if (status == 200)
+            string = status_200;
+        if (status == 405)
+            string = status_405;
+        if (status == 500)
+            string = status_500;
+
+        res += str;
+        content_length << string.size();
+        str = content_length.str();
+
         res += " OK\r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
+        res += "Content-Length: " + str + "\r\n";
         if (client->get_Alive())
             res += "Connection: keep-alive\r\n";
         else
             res += "Connection: close\r\n";
         res += "\r\n";
-        if (status == 400)
-            res += status_400;
-        if (status == 404)
-            res += status_404;
-        if (status == 403)
-            res += status_403;
-        if (status == 200)
-            res += status_200;
-        if (status == 405)
-            res += status_405;
-        if (status == 500)
-            res += status_500;
-
+        res += string;
+        
         client->get_response().set_response_status(status);
         client->get_response().set_response(res);
         client->get_response().set_response_index(true);
-
+        
         return;
     }
 
@@ -231,14 +246,20 @@ void parse_request(Client &client)
                     {
 
                         std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
-                        res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
+                        
 
                         client.get_response().set_response_index(true);
-                        client.get_response().set_response(res);
                         client.get_response().set_response_status(200);
+                        client.get_response().set_response(res);
                         cgi_handler(client, new_request , path);
-                        res += "\r\n\r\n";
-                        // exit (88);
+
+
+                        
+                        // std::cout << new_request << std::endl;
+                        // std::cout << "==========================" << std::endl;
+                        // std::cout << client.get_response().get_response() << std::endl;
+
+                        // exit (0);
                     }
                 }
             }
@@ -324,6 +345,9 @@ void check_request(Client &client)
 {
     client.server_client_obj.is_location_url = -1;
 
+
+
+    std::cout << client.get_request().get_s_request() << std::endl;
 
     if (!client.get_request().get_parse_index())
         parse_request(client);

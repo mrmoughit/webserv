@@ -53,7 +53,7 @@ std::string fill_response(std::ifstream& fileStream,  std::string& filePath , Cl
     fileStream.open(filePath.c_str(), std::ios::ate);
 
     if (!fileStream.is_open()) {
-        std::cout << "cat't open " << filePath << std::endl; 
+        std::cout << "cat't open " << filePath << std::endl;
         return "";
     }
 

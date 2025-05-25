@@ -1,5 +1,5 @@
 #include "./webserver.hpp"
-#define CGI_TIMEOUT 3
+#define CGI_TIMEOUT 5
 
 
 
@@ -84,7 +84,6 @@ int check_extension(std::string full_path)
 
 int exec_script(std::string full_path, char *envp[], const char* interpreter,  Client &client, const std::string& post_data)
 {
-    (void)client;
     printf("Executing script: %s\n", full_path.c_str());
 	char *argv[] = {(char *)interpreter, (char *) full_path.c_str(), NULL};
 
@@ -240,23 +239,21 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
             }
              else 
             {
-                    std::cerr << "Read error" << std::endl; //you should retrun -1 to serve error page
+                    std::cerr << "Read error" << std::endl; 
                     break;
             }
         }
         
-        // Check if process has ended naturally
         int status;
         pid_t result = waitpid(pid, &status, WNOHANG);
         if (result == pid) {
-            // Process has ended
+
             break;
         }
     }
     
     close(fd[0]);
-    
-    // Wait for child if it's still running
+
     int status = 0;
     if (!timeout_occurred) {
         waitpid(pid, &status, 0);
@@ -274,8 +271,6 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         return (std::cerr << "500 Internal Server Error: Script terminated by signal " << WTERMSIG(status) << std::endl, 1);
     }
     
-	std::cout << "####content###" << std::endl;
-    std::cout << content;
     if (check_extension(full_path) == 1)
     {
         status = check_content(content);
@@ -285,9 +280,17 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         if (status == 404)
             return (std::cerr << "404 Not Found: Requested file not found" << std::endl, 2);
     }
-    std::string str = client.get_response().get_response();
+
+    std::string &str = client.get_response().get_response();
+    
+    str += "Content-Length: " + std::to_string(content.length()) + "\r\n";
+    str += "Connection: close\r\n\r\n";
     str += content ;
+    
+    // std::cout << str  <<std::endl;
+    // exit (12);
     client.get_response().set_response(str);
+
     return 0;
 }
 
@@ -306,6 +309,10 @@ std::string convert_to_up(const std::string &key)
 
 std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string &full_path, std::string &method , std::string &sn)
 {
+
+
+
+
     std::vector<char*> env_vector;
     std::map<std::string, std::string>::iterator it;
     for (it  = map.begin(); it != map.end(); ++it)
@@ -353,8 +360,7 @@ std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string 
 }
 
 int cgi_handler(Client &client , std::string body , std::string &sn)
-{
-    
+{   
     std::map<std::string,std::string> map = client.get_request().get_headers_map();
     
 	std::string full_path = client.get_request().get_path();
@@ -362,9 +368,7 @@ int cgi_handler(Client &client , std::string body , std::string &sn)
 
     std::vector<char*> env_vec = get_env(map, full_path, method , sn);
     char** env = &env_vec[0];
-    for (int i = 0; env[i] != NULL; ++i) {
-        std::cout << env[i] << std::endl;
-    }
+
 
 	int code = check_extension(full_path);
 	const char* interpreter;

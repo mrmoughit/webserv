@@ -80,6 +80,8 @@ void response_to_get(Client &client)
     struct stat path_stat;
 
 
+
+    
     if (stat(client.get_request().get_path().c_str(), &path_stat) == -1)
     {
         set_response_error(&client , 404);
@@ -88,7 +90,7 @@ void response_to_get(Client &client)
     
     else if (S_ISDIR(path_stat.st_mode))
     {
-        if (access(pat.c_str(), R_OK | W_OK | X_OK) == -1)
+        if (access(pat.c_str(), R_OK ) == -1)
         {
             set_response_error(&client , 403);
             return;
@@ -103,10 +105,6 @@ void response_to_get(Client &client)
         int flag = 0;
         struct stat default_file;
         std::string str ;
-        
-        
-
-
 
         if (!client.server_client_obj.get_index().size() && client.server_client_obj.is_location_url == -1){            // i don't have a indexes and the url is not location 
             str =  client.get_request().get_path() + "/" + "index.html";
@@ -201,8 +199,21 @@ void response_to_get(Client &client)
         closedir(dir);
     }
 
+
     else if (S_ISREG(path_stat.st_mode))
     {
+        struct stat fileStat;
+
+        if (stat(pat.c_str(), &fileStat) < 0){
+            set_response_error(&client ,404);
+            return ;
+        }
+        
+        if (!(fileStat.st_mode & S_IRUSR)){
+            set_response_error(&client ,403);
+            return ;
+        }
+                
         res = fill_response(client.get_response().get_fileStream(), pat, client , 200);
         client.get_response().set_response(res);
     }
