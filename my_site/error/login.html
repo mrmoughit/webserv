@@ -2,185 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        
-        #content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .display {
-            display: block;
-        }
-        
-        h2 {
-            color: #4CAF50;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            box-sizing: border-box;
-        }
-        
-        input[type="submit"] {
-            width: 100%;
-            background-color: #4CAF50;
-            color: white;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-        
-        .loading {
-            text-align: center;
-            color: #666;
-        }
-        
-        .error {
-            color: #d32f2f;
-            text-align: center;
-            margin-top: 1rem;
-        }
-    </style>
 </head>
 <body>
-    <div id="content">
-        <form action="error/script.py" method="POST" class="display" onsubmit="return validateForm(event)">
-            <h2>Login Form</h2>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+    <div id="page">
+
+        <h2>Login</h2>
+        <form action="error/script.py" method="POST">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required><br><br>
             
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required><br><br>
             
-            <input type="submit" value="Login">
+            <button type="submit">Login</button>
         </form>
     </div>
-
-<script>
-    function getCookie(cname) {
-        let name = cname + "=";
-        let decodedCookie = decodeURIComponent(document.cookie);
-        let ca = decodedCookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-    
-    // Prevent form submission if fields are empty
-    function validateForm(event) {
-        const username = document.getElementById('username');
-        const password = document.getElementById('password');
         
-        if (!username.value.trim() || !password.value.trim()) {
-            event.preventDefault();
-            alert('Please fill in both username and password');
-            return false;
-        }
-        return true;
-    }
+    <div id="session-response" style="margin-top: 20px; color: red;"></div>
 
-    function showLoginForm(errorMessage = "Session validation failed. Please log in.") {
-        const loginForm = `
-            <div class="error">${errorMessage}</div>
-            <form action="error/script.py" method="POST" class="display" onsubmit="return validateForm(event)">
-                <h2>Login Form</h2>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                
-                <input type="submit" value="Login">
-            </form>
-        `;
-        document.getElementById('content').innerHTML = loginForm;
-    }
+    <script>
+        const cookies = document.cookie;
 
-    document.addEventListener('DOMContentLoaded', function() {
-
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', validateForm);
-        }
-        
-        let key = getCookie("sessionId");
-        
-        if (key) {
-
-            document.getElementById('content').innerHTML = '<div class="loading">Checking session...</div>';
-            
-            const url = 'error/session.py';
-            fetch(url, {
+        if (cookies) {
+            fetch('error/session.py', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: `session_id=${encodeURIComponent(key)}`
+                body: 'cookies=' + encodeURIComponent(cookies)
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(data => {
-                // Check if response is empty or just whitespace
-                if (!data || data.trim() === '') {
-                    console.log('Empty response received from session validation');
-                    showLoginForm("No response from server. Please log in.");
+            .then(async response => {
+                const contentLength = response.headers.get('Content-Length');
+                const responseBox = document.getElementById('session-response');
+                const page = document.getElementById('page');
+
+                if (contentLength === "0") {
+                    responseBox.textContent = "wrong key pleaz login";
                 } else {
-                    document.getElementById('content').innerHTML = data;
+                    const htmlContent = await response.text();
+                    page.style.color = "black";
+                    page.innerHTML = htmlContent;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showLoginForm("Session validation failed. Please log in.");
             });
         }
-    });
-</script>
+    </script>
 </body>
 </html>

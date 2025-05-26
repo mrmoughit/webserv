@@ -245,8 +245,6 @@ void parse_request(Client &client)
                     if (vec[i] == ex)
                     {
 
-                        std::string res = "HTTP/1.1 200 ok\r\nContent-Type: text/html\r\n";
-                        res += "Set-Cookie: sessionId=abc123xyz; Expires=Wed, 21 Oct 2025 07:28:00 GMT; Path=/;SameSite=Lax\r\n";
 
                         client.get_response().set_response_index(true);
                         client.get_response().set_response_status(200);
@@ -254,25 +252,24 @@ void parse_request(Client &client)
                         cgi_handler(client, new_request , path);
 
 
-                        
                         // std::cout << new_request << std::endl;
-                        // std::cout << "==========================" << std::endl;
-                        // std::cout << client.get_response().get_response() << std::endl;
+                    //    if ( client.get_request().get_path() == "./my_site/error/session.py") 
+                    //         set_response_error(&client , 400);
 
-                        // exit (0);
+                        std::cout << client.get_response().get_response()<< std::endl;;
                     }
                 }
             }
             else
             {
-                std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
-                res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
+                // std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n";
+                // res += "Set-Cookie: session_id=xyz12345; path=/; Secure; SameSite=Lax\r\n\r\n";
 
-                client.get_response().set_response_index(true);
-                client.get_response().set_response(res);
-                client.get_response().set_response_status(200);
-                std::cout << "the value =============> " << cgi_handler(client, new_request , path) << std::endl;
-                std::cout << "mcha l cgi " << std::endl;
+                // client.get_response().set_response_index(true);
+                // client.get_response().set_response(res);
+                // client.get_response().set_response_status(200);
+                // std::cout << "the value =============> " << cgi_handler(client, new_request , path) << std::endl;
+                // std::cout << "mcha l cgi " << std::endl;
             }
         }
     }
@@ -348,7 +345,11 @@ void check_request(Client &client)
 
 
     // std::cout << client.get_request().get_s_request() << std::endl;
+    // exit (9);
+    // return;
 
+
+    
     if (!client.get_request().get_parse_index())
         parse_request(client);
 

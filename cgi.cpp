@@ -283,12 +283,11 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
 
     std::string &str = client.get_response().get_response();
     
-    str += "Content-Length: " + std::to_string(content.length()) + "\r\n";
-    str += "Connection: close\r\n\r\n";
-    str += content ;
-    
-    // std::cout << str  <<std::endl;
-    // exit (12);
+    // str = "HTTP/1.1 200 ok\r\n";
+    // str += "Content-Length: " + std::to_string(content.length()) + "\r\n";
+    // str += "Connection: close\r\n";
+    str = content ;
+
     client.get_response().set_response(str);
 
     return 0;
