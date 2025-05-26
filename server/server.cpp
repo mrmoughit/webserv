@@ -343,6 +343,7 @@ void Server::startServer() {
 
                     std::string req(buffer, bytes_read);
                     clients[client_index].get_request().set_s_request(req);
+                    // std::cout << req << std::endl; 
                     check_request(clients[client_index]);
                     
                     if (clients[client_index].get_all_recv()) {

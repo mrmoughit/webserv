@@ -256,7 +256,7 @@ void parse_request(Client &client)
                     //    if ( client.get_request().get_path() == "./my_site/error/session.py") 
                     //         set_response_error(&client , 400);
 
-                        std::cout << client.get_response().get_response()<< std::endl;;
+                        std::cout << new_request << std::endl;;
                     }
                 }
             }
@@ -342,13 +342,7 @@ void check_request(Client &client)
 {
     client.server_client_obj.is_location_url = -1;
 
-
-
     // std::cout << client.get_request().get_s_request() << std::endl;
-    // exit (9);
-    // return;
-
-
     
     if (!client.get_request().get_parse_index())
         parse_request(client);
