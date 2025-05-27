@@ -2,6 +2,7 @@
 
 Request::Request()
 {
+    redirection = -1;
     index = false;
     is_string_req_send = false;
 }
@@ -110,7 +111,7 @@ std::string removeslashes(const std::string &line)
 bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client &client)
 {
     (void)res;
-    client.set_Alive(false);
+
     std::string error_path;
     std::string line, key, value;
     while (std::getline(ob, line))
@@ -128,38 +129,20 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client 
             key = line.substr(pos + 1);
         if (key.empty())
         {
-            error_path = client.server_client_obj.find_error_page_path(400);
-            if (error_path == "NULL")
-            {
-                std::cout << "you don't have a path of this code 222 " << std::endl;
-                exit(33);
-            }
-            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
-            client.get_response().set_response_status(400);
-            client.get_response().set_response(res);
-            client.get_response().set_response_index(true);
+            set_response_error(&client , 400);
             headers_map.clear();
             return false;
         }
         if (key[0] == 32)
         {
-            error_path = client.server_client_obj.find_error_page_path(400);
-            if (error_path == "NULL")
-            {
-                std::cout << "you don't have a path of this code 222 " << std::endl;
-                exit(33);
-            }
-            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
-            client.get_response().set_response_status(400);
-            client.get_response().set_response(res);
-            client.get_response().set_response_index(true);
+            set_response_error(&client , 400);
             headers_map.clear();
             return false;
         }
         trim_non_printable(value);
         trim(value);
-        if (key == "Connection" && value == "keep-alive")
-            client.set_Alive(true);
+        if (key == "Connection" && value == "close")
+            client.set_Alive(false);
         headers_map[key] = value;
     }
     return true;
@@ -192,16 +175,7 @@ bool out_root_dir(std::string &pa, std::string &res, Client &client)
             entry++;
         if (sorty > entry)
         {
-            error_path = client.server_client_obj.find_error_page_path(400);
-            if (error_path == "NULL")
-            {
-                std::cout << "you don't have a path of this code 222 " << std::endl;
-                exit(33);
-            }
-            std::string res = fill_response(client.get_response().get_fileStream(), error_path, client);
-            client.get_response().set_response_status(400);
-            client.get_response().set_response(res);
-            client.get_response().set_response_index(true);
+            set_response_error(&client , 400);
             return false;
         }
     }
@@ -260,10 +234,15 @@ void hanlde_post_request(Client &client)
         size_t pos = content_type.find("/");
         std::string extension = content_type.substr(pos + 1);
         trim_non_printable(extension);
+        
 
-        std::string file_name = client.server_client_obj.get_server_root() + "/" + ft_generate_file_names(client, extension);
-
+        std::string file_name = get_file_name(&client , ft_generate_file_names(client, extension));
+        if (file_name.empty()){
+            client.set_all_recv(true);
+            return ; // must be test the cityoen error 
+        }
         client.get_request().file.open(file_name.c_str());
+
         if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: Could not open file " << file_name << std::endl;
@@ -288,7 +267,8 @@ void hanlde_post_request(Client &client)
         if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: File is not open" << std::endl;
-            exit(0);
+            std::cout<<  "exit 33" << std::endl;
+            exit(33);
             return;
         }
         client.get_request().file << client.get_request().get_s_request() << std::flush;
@@ -305,4 +285,24 @@ void hanlde_post_request(Client &client)
             first = writed = 0;
         }
     }
+}
+
+
+
+
+void check_if_have_redirection(Client *client){
+    if (client->server_client_obj.is_location_url != -1){
+        std::map<int, std::string> map =  client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_redirections();
+
+        std::map<int, std::string>::iterator it = map.begin();
+        while(it != map.end()){
+            std::string new_url = it->second;
+            if (new_url[0] == '/')
+                new_url = client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_root() + "/" + new_url.substr(1);
+            client->get_request().set_path(new_url);
+            client->get_request().redirection = it->first;
+            ++it;
+        }
+    }
+    // exit(22);
 }

@@ -180,6 +180,8 @@ std::string get_root(std::vector <std::string> words,bool& status)
 		return (status = false, std::cout << "Error root path not found" << std::endl, root);
 	if (words.size() > 2)
 		return (status = false, std::cout << "Error too many root's path" << std::endl, root);
+	if (words[1].find('{') != std::string::npos || words[1].find('}') != std::string::npos)
+		return (status = false, std::cout << "Error unwanted braces" << std::endl, root);
 	if (check_path(words[1]) == false)
 		return (status = false, std::cout << "Error root path not exist" << std::endl, root);
 	if (check_type(words[1]) != 0)
@@ -240,6 +242,8 @@ std::string pars_host(std::vector<std::string> words, bool& status)
 	std::string host;
 	if (words.size() > 2 || words.size() == 1)
 		return (status = false, std::cerr << "Error Invalid structre"<<  std::endl, host);
+	if (words[1].find('{') != std::string::npos || words[1].find('}') != std::string::npos)
+		return (status = false, std::cout << "Error unwanted braces" << std::endl, host);
 	std::string address = words[1];
 	size_t i = 0;
 	while(address[i])
@@ -431,7 +435,7 @@ std::map <int, std::string> pars_error_pages(std::vector <std::string> words, bo
         }
 		std::stringstream ss(words[i]);
 		ss >> code;
-		if (code != 200 && code != 400 && code != 405 && code != 403 && code != 401 && code != 404)
+		if (code != 415 && code != 201 && code != 505 && code != 413 && code != 502 && code != 200 && code != 400 && code != 405 && code != 403 && code != 401 && code != 404)
 			return (status = false, std:: cout << "Error invalid code" << std::endl , pages);
 		pages[code] = words[last];
 		i++;
@@ -448,6 +452,19 @@ bool check_status(ServerBlock& server)
 	std::vector <int> port = server.get_port();
 	if (port.empty())
 		return (std::cerr << "Error listen directive not found" << std::endl, false);
+	std::vector<RouteBlock> routes = server.get_routes();
+	size_t i = 0;
+	std::string uri;
+	while (i < routes.size())
+	{
+		uri = routes[i].get_uri();
+		if (uri == "/")
+		{
+			server.update_server_info(routes[i]);
+			break;
+		}
+		i++;
+	}
 	return true;
 }
 

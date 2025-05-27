@@ -52,4 +52,6 @@ class ServerBlock{
         std::string find_error_page_path(int n);
         std::string  is_location_path(std::string path);
         void set_dafault_data(void);
+        void update_server_info(RouteBlock &route);
+
 };

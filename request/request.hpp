@@ -16,6 +16,8 @@ class Request
     public:
         std::ofstream file;
 
+        int redirection;
+        
         bool is_string_req_send;
         const std::string& get_method();
         const std::string& get_version();
@@ -40,6 +42,9 @@ class Request
             }
         }
 
+        std::map<std::string,std::string> get_headers_map(){
+            return headers_map;
+        }
 
         bool get_parse_index();
         void set_parse_index(bool index);

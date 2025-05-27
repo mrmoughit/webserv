@@ -83,7 +83,6 @@ void chunked(Client &client)
 }
 
 
-
 void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
 {
     std::istringstream ss(tmp);
@@ -92,8 +91,8 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
     std::getline(ss, line);
     if (index != 0)
         std::getline(ss, line);
-    std::cout << line << std::endl;
-    // return ;
+
+
     std::string key;
     if (line.find("Content-Disposition:") != std::string::npos)
     {
@@ -119,7 +118,13 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                     std::cout << "error" << std::endl;
                     exit(55);
                 }
-                std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
+                // std::string filename = line.substr(filename_pos, file_name_end - filename_pos);
+                std::string filename = get_file_name(&clinet , line.substr(filename_pos, file_name_end - filename_pos));
+                if (filename.empty()) {
+                    // // must be test the cityoen error 
+                    clinet.set_all_recv(true);
+                    return ;
+                }
                 filename  =  clinet.server_client_obj.get_server_root() + "/" + filename;
                 file.open(filename.c_str());
                 std::getline(ss, line);
@@ -131,9 +136,13 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                     while (ss.get(c))
                         line += c;
                     if (line.empty())
-                        break;
+                        break ;
                     file << line << std::flush;
                 }
+            }
+            else{
+                set_response_error(&clinet ,  415);
+                return ;
             }
             std::getline(ss, line);
             while (1)
@@ -151,7 +160,7 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
         }
         else
         {
-            std::cerr << "Invalid boundary format 3" << std::endl;
+            std::cerr << "Invalid boundary format " << std::endl;
             return;
         }
     }
@@ -220,6 +229,10 @@ void boundary(Client &client)
         int index = check_if_have_new_boundary(buffer, boundary, client, size);
         if (index == -1){
             break;
+        }
+        if (index == 0){
+            /////////////////////////////////////////
+            buffer = buffer.substr(boundary.size());
         }
         else
         {
@@ -310,7 +323,6 @@ int get_parts(char **av, std::vector <std::string>& parts)
     std::vector<std::string> lines;
     while(std::getline(infile, line, '\n'))
         lines.push_back(line);
-    std::cout << "size : " << lines.size() << std::endl;
     if (lines.empty())
         return (std::cerr << "Error empty file!" << std::endl, 1);
     size_t i = 0;
@@ -321,16 +333,14 @@ int get_parts(char **av, std::vector <std::string>& parts)
         // std::cout << "servive: " << "i: " << i << "line: " << lines[i] << std::endl;
         if (!lines[i].empty() && check_empt(lines[i].c_str()))
         {
-            std::cout << "not empty" << std::endl;
+            // std::cout << "not empty" << std::endl;
             last_full_line = i;
             j  = 0;
             while (j < lines[i].length())
             {
                 if (lines[i][j] == '#')
                 {
-                    std::cout << "line: " << lines[i] << std::endl;
                     lines[i] = lines[i].substr(0, j);
-                    std::cout << "line after substr: " << lines[i] << std::endl;
                     break;
                 }
                 j++;
@@ -365,109 +375,6 @@ int get_parts(char **av, std::vector <std::string>& parts)
 
 
 
-// int get_parts(char **av, std::vector <std::string>& parts)
-// {
-//     std::ifstream infile(av[1]);
-//     if (!infile.is_open())
-//     {
-//         std::cerr << "Error opening file!" << std::endl;
-//         return 1;
-//     }
-//     std::string line;
-//     std::vector<std::string> lines;
-//     while(std::getline(infile, line, '\n'))
-//         lines.push_back(line);
-//     size_t x = lines.size() - 1;
-//     while (x > 0)
-//     {
-//         if (!lines[x].empty())
-//             break;
-//         x--;
-//     }
-//     std::string newlastline = trimstr(lines[x]);
-//     if (newlastline.find(';') != std::string::npos)
-//         return (std::cout << "Error ';' at the end of file!" << std::endl, 1);
-//     infile.clear();
-//     infile.seekg(0, std::ios::beg);
-
-//     std::string part;
-//     while(std::getline(infile, part, ';'))
-//         parts.push_back(part);
-//     if (parts.empty())
-//         std::cerr << "Error empty file!" << std::endl;
-//     for (size_t y = 0; y < parts.size(); y++)
-//     {
-//         if (parts[y].empty() || !check_empt(parts[y].c_str()))
-//             return (std::cout << "Error Double ';' in configuration file" << std::endl, 1);
-//     }
-//     size_t i = 0;
-//     while (parts.size() > i)
-//     {
-//         std::replace(parts[i].begin() , parts[i].end() , '\n' , ' ');
-//         i++;
-//     }
-//     infile.close();
-//     return 0;
-// }
-
-
-// void print_content(Confile Configuration)
-// {
-//     std::vector <ServerBlock> servers = Configuration.get_server();
-//     std::cout << "##### server 1 #####" << std::endl;
-//     std::vector <int> port = servers[0].get_port();
-//     for (size_t z = 0; z < port.size() ; z++)
-//     {
-//         std::cout << "port: " << port[z] << std::endl;        
-//     }
-//     std::cout << "host: " << servers[0].get_host() << std::endl;
-//     std::cout << "server root: " << servers[0].get_server_root() << std::endl;
-//     std::vector<std::string> indx = servers[0].get_index();
-//     std::cout << "index size: " << indx.size() << std::endl;
-//     for (size_t x = 0; x < indx.size() ; x++)
-//     {
-//         std::cout << "index " << x << ": "<< indx[x] << std::endl;
-//     } 
-//     std::cout << "clientbodymax: " << servers[0].get_client_body_size() << std::endl;
-//     std::map <int, std::string> error_pages = servers[0].get_error_pages();
-//     for (std::map<int, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it) {
-//         std::cout << "Error code: " << it->first << " => Page: " << it->second << std::endl;
-//     }
-//     //location block
-//     std::vector<RouteBlock>        routes = servers[0].get_routes();
-//     std::cout << "size of routes: "  << routes.size() << std::endl;
-//     std::cout << "***route 1 of server 1: " << std::endl;
-//     std::cout << "uri: " << routes[0].get_uri() << std::endl; 
-//     std::cout << "uplooaaaaaaaaaaaaaad: " << routes[0].get_client_body_temp_path() << std::endl; 
-//     std::cout << "location's root: " << routes[0].get_root() << std::endl;
-//     std::vector<std::string> methods = routes[0].get_methods();
-//     for (size_t i = 0; i < methods.size(); ++i) {
-//         std::cout << "Method: " << methods[i] << std::endl;
-//     }
-//     std::cout << "autoindex: " << routes[0].get_autoindex() << std::endl; 
-//     std::map<int , std::string> redirection = routes[0].get_redirections();
-//     if (redirection.empty())
-//     std::cout << "there is no redirection" << std::endl;
-//     for (std::map<int, std::string>::iterator it2 = redirection.begin(); it2 != redirection.end(); ++it2) {
-//         std::cout << "status code: " << it2->first << " => target URL: " << it2->second << std::endl;
-//     }
-//     std::cout << "***route 2 of server 1: " << std::endl;
-//     std::cout << "uri: " << routes[1].get_uri() << std::endl; 
-//     std::cout << "location's root: " << routes[1].get_root() << std::endl;
-//     std::vector<std::string> methods2 = routes[1].get_methods();
-//     for (size_t i = 0; i < methods2.size(); ++i) {
-//         std::cout << "Method: " << methods2[i] << std::endl;
-//     }
-//     std::cout << "autoindex: " << routes[1].get_autoindex() << std::endl; 
-//     std::map<int , std::string> redirection2 = routes[1].get_redirections();
-//     if (redirection.empty())
-//     std::cout << "there is no redirection" << std::endl;
-//     for (std::map<int, std::string>::iterator it3 = redirection2.begin(); it3 != redirection2.end(); ++it3) {
-//         std::cout << "status code: " << it3->first << " => target URL: " << it3->second << std::endl;
-//     }
-// }
-
-
 
 int main(int ac, char **av)
 {
@@ -480,30 +387,25 @@ int main(int ac, char **av)
         std::vector <std::string> parts;
         if (get_parts(av, parts))
              return 1;
-    size_t i = 0;
-    while (i < parts.size())
-    {
-        std::cout << "part: " << i << " : " << parts[i] << std::endl;
-        i++;
-    }
         Confile conf;
+
         conf.set_server(parts);
         if (conf.status == false)
-        return (1);
-        if(conf.status == false)
+            return (1);
+        if (conf.status == false)
             return (std::cout << "Fixe config file and try again!" << std::endl, 1);
-         S1.number_of_servers = conf.number_of_server;
-         
-        //  print_content(conf);
-
-         exit(0);
-         std::vector <ServerBlock> servers = conf.get_server();
-       
+        S1.number_of_servers = conf.number_of_server;
+        std::vector <ServerBlock> servers = conf.get_server();
+        std::vector <RouteBlock> routes = servers[0].get_routes();
+        std::cout << "+++uri: " << routes[0].get_uri() << std::endl;
+        std::cout << "+++root: " << routes[0].get_root() << std::endl;
+        std::cout << "+++uri: " << routes[1].get_uri() << std::endl;
+        std::cout << "+++root: " << routes[1].get_root() << std::endl;
         S1.server_block_obj = servers;
-        // for (size_t i = 0; i < conf.number_of_server ; i++)
-        // {
-        //     S1.addServerConfig(servers[i].get_host(), servers[i].get_port(), servers[i].get_server_names());
-        // }
+        for (size_t i = 0; i < conf.number_of_server ; i++)
+        {
+            S1.addServerConfig(i, servers[i].get_host(), servers[i].get_port(), servers[i].get_server_names());
+        }
     }
     else
     {
@@ -516,15 +418,9 @@ int main(int ac, char **av)
             return 1;
         S1.number_of_servers = 1;
         S1.server_block_obj = servers;
-        exit(0);
-        // S1.addServerConfig(servers[0].get_host(), servers[0].get_port(), servers[0].get_server_names());
+        S1.addServerConfig(0, servers[0].get_host(), servers[0].get_port(), servers[0].get_server_names());
         // std::cout << "Usage: ./webserv <config_file>" << std::endl;
     }
     S1.startServer();
    
-}
-
-
-
-//////////
-
+} 

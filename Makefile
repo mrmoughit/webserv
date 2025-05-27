@@ -11,13 +11,14 @@ SRC = request/request.cpp \
 	  parsing/parsing.cpp\
 	  parsing/pars_route.cpp\
 	  parsing/check_tools.cpp\
-	  main.cpp 
+	  main.cpp \
+	  cgi.cpp
 
 
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv
 HEDER = request/request.hpp parsing/Confile.hpp  parsing/ServerBlock.hpp parsing/RouteBlock.hpp
-CFLAGS =  -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
+CFLAGS =  -Wall -Wextra -Werror -std=c++98 #-g -fsanitize=address
 
 all : $(NAME)
 
@@ -25,7 +26,7 @@ all : $(NAME)
 	c++ ${CFLAGS} -c $< -o $@ && rm -rf html && mkdir html
 
 $(NAME) : $(OBJ) ${HEDER}
-	 c++ ${CFLAGS} $(OBJ) -o $@
+	c++ ${CFLAGS} $(OBJ) -o $@
 
 clean :
 	rm -rf $(OBJ)

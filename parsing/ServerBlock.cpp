@@ -19,7 +19,7 @@ ServerBlock::ServerBlock()
     // dupindex = 0;
     // Port = -1;
     client_body_size = 1048576;
-    server_root = "/html";
+    server_root = "./html";
     // std::cout << "ServerBlock Default constructor called" << std::endl;
 }
 ServerBlock::~ServerBlock()
@@ -218,4 +218,10 @@ void ServerBlock::set_dafault_data()
     Host = "127.0.0.1";   
     Port.push_back(8080);
     Server_names = "test.com";
+}
+
+void ServerBlock::update_server_info(RouteBlock &route)
+{
+    server_root = route.get_root();
+    index = route.get_index();
 }

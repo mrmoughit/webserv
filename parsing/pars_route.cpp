@@ -6,7 +6,7 @@
 /*   By: kid-ouis <kid-ouis@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 12:01:28 by kid-ouis          #+#    #+#             */
-/*   Updated: 2025/05/18 14:52:36 by kid-ouis         ###   ########.fr       */
+/*   Updated: 2025/05/25 18:33:43 by kid-ouis         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,18 +23,23 @@ int check_first_line(RouteBlock& route, std::vector <std::string>& lines, size_t
 		return (std::cout << "end of locationblock" << std::endl, 1);
 	if (words.size() < 4)
 			return (status = false, std::cout << "invalid location structre" << std::endl, 1);
+	URI = words[1];
 	last_char = words[1].length() - 1;
 	if (words[1][last_char] == '{')
 	{
 		URI = words[1].substr(0, last_char);
-		if (URI.find('{') != std::string::npos || URI.find('}') != std::string::npos)
-			return (status = false, std::cout << "Error unwanted braces 111" << std::endl, 1);
-		route.set_URI(URI);
 		s = 2;
 	}
 	else if (words[2] != "{")
-			return (status = false, std::cout << "invalid location structre" << std::endl, 1);
-		std::string rest;
+		return (status = false, std::cout << "invalid location structre" << std::endl, 1);
+	std::cout << "+++++uri: " << URI << std::endl;
+	if (URI.find('{') != std::string::npos || URI.find('}') != std::string::npos)
+		return (status = false, std::cout << "Error unwanted braces" << std::endl, 1);
+	if (URI[0] != '/')
+		return (status = false, std::cout << "Error invalid uri" << std::endl, 1);	
+	route.set_URI(URI);
+
+	std::string rest;
 	while (s < words.size())
 	{
 		rest += " ";
@@ -67,6 +72,8 @@ std::vector  <std::string> pars_methods(std::vector <std::string> words, bool& c
 	{
 		if (!isinvec(methods, words[i]))
 		{
+			if (words[i].find('{') != std::string::npos || words[i].find('}') != std::string::npos)
+				return (check = false, std::cout << "Error unwanted braces" << std::endl, methods);
 			if (words[i] != "GET" && words[i] != "POST" && words[i] != "DELETE")
 				return (check = false, std::cout << "ERROR unwanted method" << std::endl, methods);
 			methods.push_back(words[i]);
@@ -100,7 +107,7 @@ std::vector <std::string> pars_cgi_ext(std::vector <std::string> words, bool& ch
 		if (words[i][0] != '.')
 			return (check = false , std::cout << "Error Invalid extension" << std::endl, extension);
 		if (words[i].find('{') != std::string::npos || words[i].find('}') != std::string::npos)
-			return (check = false, std::cout << "Error unwanted braces 2222" << std::endl, extension);
+			return (check = false, std::cout << "Error unwanted brace" << std::endl, extension);
 		extension.push_back(words[i]);
 		i++;
 	}
@@ -133,7 +140,11 @@ std::map <int, std::string> get_redirection(std::vector<std::string> words, bool
     int code;
     std::map <int, std::string> redirection;
     if(words.size() != 3)
+	{
         return (status = false, std::cout << "Error invalid number of arguments in return directive" << std::endl, redirection);
+	}
+	if (words[2].find('{') != std::string::npos || words[2].find('}') != std::string::npos)
+		return (status = false, std::cout << "Error unwanted braces" << std::endl, redirection);
     while(j < words[i].size())
     {
         if (!isdigit(words[i][j]))

@@ -52,20 +52,15 @@ std::string check_auto_index(Client &client , int *index){
 
     int i = 0;
     *index = 2;
+
     while(i < (int)client.server_client_obj.get_routes().size()){
         if (client.get_request().get_path() == (client.server_client_obj.get_routes()[i].get_root() + client.server_client_obj.get_routes()[i].get_uri()))
         {
-
-        if (!client.server_client_obj.get_routes()[i].get_autoindex()){
-                *index=1;
-            std::string path = client.server_client_obj.find_error_page_path(403);
-            if(path == "NULL"){
-                std::cout << "mochkil dyal path not exist"<< std::endl;
-                exit (33);
+            if (!client.server_client_obj.get_routes()[i].get_autoindex()){
+                *index = 1;
+                set_response_error(&client , 403);
+                return  "done";
             }
-            client.get_response().set_response_status(403);
-            return  fill_response(client.get_response().get_fileStream(), path, client);
-        }
         }
         i++;
     }
@@ -81,60 +76,41 @@ void response_to_get(Client &client)
     std::string pat =  client.get_request().get_path();
 
 
-
     client.get_request().set_path(pat);
-
     struct stat path_stat;
+
 
     if (stat(client.get_request().get_path().c_str(), &path_stat) == -1)
     {
-        std::string path = client.server_client_obj.find_error_page_path(404);
-        if(path == "NULL"){
-            std::cout << "you don't have a path of this code "<< std::endl;
-            exit (33);
-        }
-        res = fill_response(client.get_response().get_fileStream(), path, client);
-        client.get_response().set_response_status(404);
-        client.get_response().set_response(res);
-
+        set_response_error(&client , 404);
         return;
     }
-
+    
     else if (S_ISDIR(path_stat.st_mode))
     {
         if (access(pat.c_str(), R_OK | W_OK | X_OK) == -1)
         {
-            std::string path = client.server_client_obj.find_error_page_path(403);
-            if(path == "NULL"){
-            std::cout << "you don't have a path of this code "<< std::endl;
-            exit (33);
-        }
-            res = fill_response(client.get_response().get_fileStream(), path, client);
-            client.get_response().set_response_status(403);
-            client.get_response().set_response(res);
+            set_response_error(&client , 403);
             return;
         }
         DIR *dir = opendir(pat.c_str());
-
+        
         if (dir == NULL)
         {
-            std::string path = client.server_client_obj.find_error_page_path(404);
-            if(path == "NULL"){
-                std::cout << "mochkil dyal path not exist"<< std::endl;
-                exit (33);
-            }
-            res = fill_response(client.get_response().get_fileStream(), path, client);
-            client.get_response().set_response_status(404);
-            client.get_response().set_response(res);
+            set_response_error(&client , 404);
             return;
         }
         int flag = 0;
         struct stat default_file;
         std::string str ;
+        
+        
 
 
-        if (!client.server_client_obj.get_index().size() && client.server_client_obj.is_location_url == -1)               // i don't have a indexes and the url is not location 
+
+        if (!client.server_client_obj.get_index().size() && client.server_client_obj.is_location_url == -1){            // i don't have a indexes and the url is not location 
             str =  client.get_request().get_path() + "/" + "index.html";
+        }
         
         else if (client.server_client_obj.is_location_url  > -1){                          //  if i have locaion 
             if (client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index().size() == 0)
@@ -155,42 +131,33 @@ void response_to_get(Client &client)
                     break ;
             }
         }
-
-
-        std::cout << "str ..............." << str << std::endl;
+        
+        std::cout << str << std::endl;
+        
+        
         if (stat(str.c_str(), &default_file) == -1)
         {
             flag = 0;
-            std::string test = check_auto_index(client , &flag);
-            client.get_response().set_response(test);
+            check_auto_index(client , &flag);
             if (flag == 1)
-                return;
+            return;
         }
-
+        
         if (flag == 2 && client.server_client_obj.is_location_url == -1){
-            std::string path = client.server_client_obj.find_error_page_path(403);
-            if(path == "NULL"){
-                std::cout << "mochkil dyal path not exist"<< std::endl;
-                exit (33);
+            set_response_error(&client , 403);
+            return ;
+        }
+        else if (client.server_client_obj.is_location_url  > -1 && !client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_autoindex()){
+            if (flag == 2){
+                set_response_error(&client , 404);
+                return ;
             }
-            client.get_response().set_response_status(403);
-            std::string res = fill_response(client.get_response().get_fileStream(), path, client);
+            res = fill_response(client.get_response().get_fileStream(), str, client , 200);
             client.get_response().set_response(res);
             return ;
         }
-        else{
-            if (flag == 2){
-                std::string path = client.server_client_obj.find_error_page_path(404);
-                if(path == "NULL"){
-                    std::cout << "mochkil dyal path not exist"<< std::endl;
-                 exit (33);
-                }
-                client.get_response().set_response_status(404);
-                std::string res = fill_response(client.get_response().get_fileStream(), path, client);
-                client.get_response().set_response(res);
-                return ;
-            }
-            res = fill_response(client.get_response().get_fileStream(), str, client);
+        else if (flag == 0){
+            res = fill_response(client.get_response().get_fileStream(), str, client , 200);
             client.get_response().set_response(res);
             return ;
         }
@@ -236,18 +203,69 @@ void response_to_get(Client &client)
 
     else if (S_ISREG(path_stat.st_mode))
     {
-        res = fill_response(client.get_response().get_fileStream(), pat, client);
+        res = fill_response(client.get_response().get_fileStream(), pat, client , 200);
         client.get_response().set_response(res);
     }
     else
     {
-        client.get_response().set_response_status(404);
-        std::string path = client.server_client_obj.find_error_page_path(404);
-        if(path == "NULL"){
-            std::cout << "you don't have a path of this code "<< std::endl;
-            exit (33);
-        }
-        res = fill_response(client.get_response().get_fileStream(), path, client);
+        set_response_error(&client , 404);
+        return ;
     }
     client.get_response().set_response(res);
+}
+
+
+
+
+std::string get_file_name(Client *client , std::string file){
+
+    if (client->server_client_obj.is_location_url != -1){
+
+        std::string dir = client->server_client_obj.get_routes()[client->server_client_obj.is_location_url].get_client_body_temp_path();
+
+        struct stat statbuf;
+
+        std::cout << dir << std::endl;
+
+        if (stat(dir.c_str(), &statbuf) == -1) { // if not exist path 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if (!S_ISDIR(statbuf.st_mode)) { // not a dir 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if ((statbuf.st_mode & S_IWUSR) == 0) {  // for permession 
+            set_response_error(client , 502);
+            return "";
+        }
+
+        return dir + "/" + file;
+    }
+    else{
+
+        std::string dir = "./upload";
+
+        struct stat statbuf;
+
+        if (stat(dir.c_str(), &statbuf) == -1) { // if not exist path 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if (!S_ISDIR(statbuf.st_mode)) { // not a dir 
+            set_response_error(client , 502);
+            return "";
+        }
+        
+        if ((statbuf.st_mode & S_IWUSR) == 0) {  // for permession 
+            set_response_error(client , 502);
+            return "";
+        }
+        return dir + "/" + file;
+        
+    }
+    return "";
 }

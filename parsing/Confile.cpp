@@ -122,7 +122,7 @@ void Confile::set_server(std::vector<std::string> parts)
     }
     while( i < parts.size())
     {
-         std::vector<std::string> words = get_words(parts[i]);
+        std::vector<std::string> words = get_words(parts[i]);
         if (words.empty())
         {
             std::cerr << "end of confile"<< std::endl;
@@ -147,9 +147,9 @@ void Confile::set_server(std::vector<std::string> parts)
         }
     }
     if (status == true)
-        std::cout << "confile created successfully" << std::endl;
+    std::cout << "confile created successfully" << std::endl;
     std::cout << "number of server is " << number_of_server << std::endl;
-
+    
 }
 
 std::vector <ServerBlock>& Confile::get_server()
