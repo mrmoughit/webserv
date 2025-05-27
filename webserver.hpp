@@ -123,4 +123,4 @@ void check_if_have_redirection(Client *client);
 
 //cgi 
 
-int cgi_handler(Client &client , std::string body , std::string &sn);
+int cgi_handler(Client &clinet , std::string body);
