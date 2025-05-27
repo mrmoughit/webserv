@@ -71,7 +71,7 @@ std::string check_auto_index(Client &client , int *index){
 
 void response_to_get(Client &client)
 {
-    std::cout << "\033[34m" << "GET request ====> " << client.get_request().get_method() << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
+    // std::cout << "\033[34m" << "GET request ====> " << client.get_request().get_method() << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
     std::string res = client.get_response().get_response();
     std::string pat =  client.get_request().get_path();
 
