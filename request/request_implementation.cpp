@@ -33,8 +33,8 @@ void set_response_error(Client *client, int status)
                 res += " \r\n";
             }
         }
-        std::ostringstream oss;
         std::ostringstream content_length;
+        std::ostringstream oss;
         oss << status;
         std::string str = oss.str();
 

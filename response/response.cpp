@@ -71,7 +71,6 @@ std::string check_auto_index(Client &client , int *index){
 
 void response_to_get(Client &client)
 {
-    // std::cout << "\033[34m" << "GET request ====> " << client.get_request().get_method() << " " << client.get_request().get_path() << " " << "\033[0m" << std::endl;
     std::string res = client.get_response().get_response();
     std::string pat =  client.get_request().get_path();
 
@@ -165,40 +164,55 @@ void response_to_get(Client &client)
         }
 
         struct dirent *entry;
+        std::string found_files;
         client.get_response().set_response_status(200);
-        res = "HTTP/1.1 200 OK\r\n";
-        res += "Content-Type: text/html; charset=UTF-8\r\n";
-        res += "Connection: close\r\n";
-        res += "\r\n";
+        
+        found_files = "<html>\n<head>\n<title>Found Files</title>\n";
+        found_files += "<style>\n";
+        found_files += "  body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }\n";
+        found_files += "  h1 { color: #4CAF50; }\n";
+        found_files += "  ul { list-style-type: none; padding: 0; }\n";
+        found_files += "  li { background-color: #fff; border: 1px solid #ddd; margin: 5px 0; padding: 10px; border-radius: 5px; }\n";
+        found_files += "  a { text-decoration: none; color: #007BFF; font-size: 18px; }\n";
+        found_files += "  a:hover { color: #0056b3; }\n";
+        found_files += "  .container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }\n";
+        found_files += "</style>\n";
+        found_files += "</head>\n<body>\n";
+        found_files += "<div class='container'>\n";
+        found_files += "<h1>Found Files in Directory</h1>\n<ul>\n";
+        
 
-        res += "<html>\n<head>\n<title>Found Files</title>\n";
-        res += "<style>\n";
-        res += "  body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }\n";
-        res += "  h1 { color: #4CAF50; }\n";
-        res += "  ul { list-style-type: none; padding: 0; }\n";
-        res += "  li { background-color: #fff; border: 1px solid #ddd; margin: 5px 0; padding: 10px; border-radius: 5px; }\n";
-        res += "  a { text-decoration: none; color: #007BFF; font-size: 18px; }\n";
-        res += "  a:hover { color: #0056b3; }\n";
-        res += "  .container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }\n";
-        res += "</style>\n";
-        res += "</head>\n<body>\n";
-        res += "<div class='container'>\n";
-        res += "<h1>Found Files in Directory</h1>\n<ul>\n";
-
-
-
+        
         while ((entry = readdir(dir)) != NULL)
         {
             std::string fileName = entry->d_name;
             if (client.server_client_obj.is_location_url > -1){
-                res += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_root().size() ) + "/" + fileName + "\">" + fileName + "</a></li>\n";
+                found_files += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_root().size() ) + "/" + fileName + "\">" + fileName + "</a></li>\n";
             }
             else{
-                res += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_server_root().size()) + "/" + fileName + "\">" + fileName + "</a></li>\n";
+                found_files += "<li><a href=\"" + client.get_request().get_path().substr(client.server_client_obj.get_server_root().size()) + "/" + fileName + "\">" + fileName + "</a></li>\n";
             }
         }
+        
+        std::ostringstream oss;
+        oss << found_files.size();
+        std::string content_length = oss.str();
 
-        res += "</ul>\n</div>\n</body>\n</html>\n";
+
+
+        found_files += "</ul>\n</div>\n</body>\n</html>\n";
+        res = "HTTP/1.1 200 OK\r\n";
+        res += "Content-Length: ";
+        res += content_length;
+        res += "\r\n";
+        res += "Content-Type: text/html; charset=UTF-8\r\n";
+        if (!client.get_Alive())
+            res += "Connection: close\r\n";
+        else
+            res += "Connection: keep-alive\r\n";
+        res += "\r\n";
+        res += found_files;
+
         client.get_response().set_response(res);
         closedir(dir);
     }
