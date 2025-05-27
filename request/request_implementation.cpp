@@ -237,6 +237,7 @@ void parse_request(Client &client)
         std::string ex = pa.substr(pos);
         if (ex == ".php" || ex == ".py")
         {
+            client.set_all_recv(true);
             if (client.server_client_obj.is_location_url > -1)
             {
                 std::vector<std::string> vec = client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_cgi_ext();
@@ -251,12 +252,6 @@ void parse_request(Client &client)
                         client.get_response().set_response(res);
                         cgi_handler(client, new_request , path);
 
-
-                        // std::cout << new_request << std::endl;
-                    //    if ( client.get_request().get_path() == "./my_site/error/session.py") 
-                    //         set_response_error(&client , 400);
-
-                        std::cout << new_request << std::endl;;
                     }
                 }
             }
@@ -275,28 +270,7 @@ void parse_request(Client &client)
     }
 }
 
-void handle_x_www_form_urlencoded(Client &client)
-{
-    std::string tmp = client.get_request().get_s_request();
-    std::istringstream ss(tmp);
-    std::string line;
-    std::string key;
-    std::string value;
 
-    client.set_all_recv(true);
-    while (std::getline(ss, line, '&'))
-    {
-        size_t pos = line.find("=");
-        if (pos == std::string::npos)
-        {
-            std::cout << "error" << std::endl;
-            exit(21);
-        }
-        key = line.substr(0, pos);
-        value = line.substr(pos + 1);
-        std::cout << key << " -----------> " << value << std::endl;
-    }
-}
 
 void handle_delete_request(std::string path)
 {

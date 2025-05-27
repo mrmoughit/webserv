@@ -112,7 +112,7 @@ int	check_empt(const char *line);
 int check_dup_serv(std::vector <ServerBlock>& vector_serv, ServerBlock& current_server);
 
 
-
+void handle_x_www_form_urlencoded(Client &client);
 int set_default_page();
 std::string get_file_name(Client *clinet);
 void check_if_have_redirection(Client *client);

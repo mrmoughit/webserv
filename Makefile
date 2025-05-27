@@ -12,13 +12,14 @@ SRC = request/request.cpp \
 	  parsing/pars_route.cpp\
 	  parsing/check_tools.cpp\
 	  main.cpp \
-	  cgi.cpp
+	  cgi.cpp \
+	  request/post_request.cpp
 
 
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv
 HEDER = request/request.hpp parsing/Confile.hpp  parsing/ServerBlock.hpp parsing/RouteBlock.hpp
-CFLAGS =  -Wall -Wextra -Werror #-std=c++98 #-g -fsanitize=address
+CFLAGS =  -Wall -Wextra -Werror 
 
 all : $(NAME)
 

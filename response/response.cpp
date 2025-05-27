@@ -100,6 +100,7 @@ void response_to_get(Client &client)
         if (dir == NULL)
         {
             set_response_error(&client , 404);
+            closedir(dir);
             return;
         }
         int flag = 0;
@@ -130,33 +131,36 @@ void response_to_get(Client &client)
             }
         }
         
-        std::cout << str << std::endl;
-        
-        
         if (stat(str.c_str(), &default_file) == -1)
         {
             flag = 0;
             check_auto_index(client , &flag);
-            if (flag == 1)
-            return;
+            if (flag == 1){
+                closedir(dir);
+                return;
+            }
         }
         
         if (flag == 2 && client.server_client_obj.is_location_url == -1){
             set_response_error(&client , 403);
+            closedir(dir);
             return ;
         }
         else if (client.server_client_obj.is_location_url  > -1 && !client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_autoindex()){
             if (flag == 2){
                 set_response_error(&client , 404);
+                closedir(dir);
                 return ;
             }
             res = fill_response(client.get_response().get_fileStream(), str, client , 200);
             client.get_response().set_response(res);
+            closedir(dir);
             return ;
         }
         else if (flag == 0){
             res = fill_response(client.get_response().get_fileStream(), str, client , 200);
             client.get_response().set_response(res);
+            closedir(dir);
             return ;
         }
 
