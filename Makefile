@@ -19,7 +19,7 @@ SRC = request/request.cpp \
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv
 HEDER = request/request.hpp parsing/Confile.hpp  parsing/ServerBlock.hpp parsing/RouteBlock.hpp
-CFLAGS =  -Wall -Wextra -Werror 
+CFLAGS =  -Wall -Wextra -Werror -fsanitize=address -fsanitize=leak -g
 
 all : $(NAME)
 

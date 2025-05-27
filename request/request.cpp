@@ -143,6 +143,8 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client 
         trim(value);
         if (key == "Connection" && value == "close")
             client.set_Alive(false);
+        else
+            client.set_Alive(true);
         headers_map[key] = value;
     }
     if (headers_map.size() == 0){
@@ -245,6 +247,7 @@ void hanlde_post_request(Client &client)
         
         std::string dirname =   get_file_name(&client);
         std::string file_name = ft_generate_file_names(extension , dirname);
+
         if (dirname.empty()){
             first = writed = 0;
             client.set_all_recv(true);

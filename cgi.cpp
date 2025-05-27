@@ -260,32 +260,28 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     }
 
     if (timeout_occurred) {
-        return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit" << std::endl, 3);
+        return (set_response_error(&client , 504), 3);
     } else if (WIFEXITED(status)) {
         if (WEXITSTATUS(status) == 1) {
-            return (std::cerr << "500 Internal Server Error: Script execution failed" << std::endl, 1);
+            return (set_response_error(&client , 500) , 1);
         } else if (WEXITSTATUS(status) == 2) {
-            return (std::cerr << "404 Not Found: Requested file not found" << std::endl, 2);
+            return (set_response_error(&client , 404), 1);
         }
     } else if (WIFSIGNALED(status)) {
-        return (std::cerr << "500 Internal Server Error: Script terminated by signal " << WTERMSIG(status) << std::endl, 1);
+        return (set_response_error(&client , 500), 1);
     }
     
     if (check_extension(full_path) == 1)
     {
         status = check_content(content);
-        std::cout << "->Status: " << status << std::endl;
         if (status == 500)
-        return (std::cerr << "500 Internal Server Error: Script terminated by signal " << std::endl, 1);
+        return (set_response_error(&client , 500), 1);
         if (status == 404)
-            return (std::cerr << "404 Not Found: Requested file not found" << std::endl, 2);
+            return (set_response_error(&client , 404) , 1);
     }
 
     std::string &str = client.get_response().get_response();
     
-    // str = "HTTP/1.1 200 ok\r\n";
-    // str += "Content-Length: " + std::to_string(content.length()) + "\r\n";
-    // str += "Connection: close\r\n";
     str = content ;
 
     client.get_response().set_response(str);
@@ -316,7 +312,6 @@ std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string 
     std::map<std::string, std::string>::iterator it;
     for (it  = map.begin(); it != map.end(); ++it)
     {
-        // std::cout << it->first << " => " << it->second << std::endl;
         std::string key = convert_to_up(it->first);
         if (key == "CONTENT_TYPE" || key == "CONTENT_LENGTH")
         {
