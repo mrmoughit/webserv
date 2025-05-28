@@ -1,2 +1,5 @@
 #!/usr/bin/env python3
-print("wooooooooooooooooork")
+
+import sys
+block = "hello world\n" * 1000000  # ~12 MB
+sys.stdout.write(block)

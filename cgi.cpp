@@ -84,6 +84,7 @@ int check_extension(std::string full_path)
 
 int exec_script(std::string full_path, char *envp[], const char* interpreter,  Client &client, const std::string& post_data)
 {
+    (void)client;
     printf("Executing script: %s\n", full_path.c_str());
 	char *argv[] = {(char *)interpreter, (char *) full_path.c_str(), NULL};
 
@@ -105,12 +106,6 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
             return -1;
         }
     }
-
-
-
-    // Set pipe to non-blocking mode
-    int flags = fcntl(fd[0], F_GETFL, 0);
-    fcntl(fd[0], F_SETFL, flags | O_NONBLOCK);
     
     pid_t pid;
     if ((pid = fork()) == -1) {
@@ -147,6 +142,10 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         }
         
         close(fd[1]);
+        
+        // SET TIMEOUT IN CHILD PROCESS
+        alarm(CGI_TIMEOUT);
+        
         execve(argv[0], argv, envp);
         // If execve returns, it failed
         std::cerr << "execve failed: " << strerror(errno) << std::endl;
@@ -159,8 +158,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         // Send POST data to child process if needed
     if (has_post_data) {
         close(input_fd[0]);  // Close read end of input pipe
-        
-        // Write POST data to child's stdin
+
         ssize_t written = 0;
         size_t total_written = 0;
         size_t data_size = post_data.size();
@@ -174,118 +172,71 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
                 // No data written, try again
                 continue;
             } else {
-                // Error occurred
                 std::cerr << "Failed to write POST data" << std::endl;
                 write_error = true;
                 break;
             }
         }
-        
-        // Close the pipe to signal EOF to the child process
         close(input_fd[1]);
     }
 
 
 
-
-	struct pollfd pfd;
-    pfd.fd = fd[0];
-    pfd.events = POLLIN;
     
     char buffer[10000];
 	std::string content;
-    // ssize_t bytes_read = 0;
-    bool timeout_occurred = false;
     
-    // Start the timer
-    time_t start_time = time(NULL);
-    
-    // Read with timeout handling and output buffer management
-    while (true) 
+// Simplified reading without poll
+    while (true)
     {
-        // Check if we've exceeded our timeout
-        if (time(NULL) - start_time > CGI_TIMEOUT) {
-            std::cerr << "CGI script execution timed out after " << CGI_TIMEOUT << " seconds" << std::endl;
-            kill(pid, SIGTERM);  // Try to terminate gracefully first
-            usleep(100000);      // Wait a bit
-            
-            // Check if process ended
-            int status;
-            if (waitpid(pid, &status, WNOHANG) == 0) {
-                // Process still running, force kill
-                kill(pid, SIGKILL);
-            }
-            
-            timeout_occurred = true;
+        ssize_t n = read(fd[0], buffer, sizeof(buffer));
+        if (n > 0) {
+            content.append(buffer, n);
+        } else if (n == 0) {
+            // EOF - child process ended
             break;
-        }
-        
-        // Poll with a short timeout to keep checking our execution time
-        int poll_result = poll(&pfd, 1, 100);  // 100ms timeout for poll
-        
-        if (poll_result == -1) {
-            // Poll error
-            std::cerr << "Poll error" << std::endl;
-            break;
-        } else if (poll_result > 0) {
-            // Data available to read
-            ssize_t n = read(fd[0], buffer, sizeof(buffer));
-            if (n > 0) {
-                // Data read successfully
-                content.append(buffer, n);
-            } else if (n == 0) {
-                // End of file
-                break;
-            }
-             else 
-            {
-                    std::cerr << "Read error" << std::endl; 
-                    break;
-            }
-        }
-        
-        int status;
-        pid_t result = waitpid(pid, &status, WNOHANG);
-        if (result == pid) {
-
+        } else {
+            // Error
+            std::cerr << "Read error" << std::endl;
             break;
         }
     }
     
     close(fd[0]);
-
+    
+    // Wait for child if it's still running
     int status = 0;
-    if (!timeout_occurred) {
-        waitpid(pid, &status, 0);
-    }
-
-    if (timeout_occurred) {
-        return (set_response_error(&client , 504), 3);
+    waitpid(pid, &status, 0);
+    
+    std::cout << "++status: " << status << std::endl;
+    
+    // CHECK IF CHILD WAS KILLED BY ALARM SIGNAL
+    if (WIFSIGNALED(status) && WTERMSIG(status) == SIGALRM) {
+        return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit" << std::endl, 3);
     } else if (WIFEXITED(status)) {
         if (WEXITSTATUS(status) == 1) {
-            return (set_response_error(&client , 500) , 1);
+            return (std::cerr << "500 Internal Server Error: Script execution failed" << std::endl, 1);
         } else if (WEXITSTATUS(status) == 2) {
-            return (set_response_error(&client , 404), 1);
+            return (std::cerr << "404 Not Found: Requested file not found" << std::endl, 2);
         }
     } else if (WIFSIGNALED(status)) {
-        return (set_response_error(&client , 500), 1);
+        return (std::cerr << "500 Internal Server Error: Script terminated by signal " << WTERMSIG(status) << std::endl, 1);
     }
     
+	std::cout << "####content###" << std::endl;
+    // std::cout << content;
     if (check_extension(full_path) == 1)
     {
         status = check_content(content);
+        std::cout << "->Status: " << status << std::endl;
         if (status == 500)
-        return (set_response_error(&client , 500), 1);
+        return (std::cerr << "500 Internal Server Error: Script terminated by signal " << std::endl, 1);
         if (status == 404)
-            return (set_response_error(&client , 404) , 1);
+            return (std::cerr << "404 Not Found: Requested file not found" << std::endl, 2);
     }
-
-    std::string &str = client.get_response().get_response();
-    
-    str = content ;
-
+    std::string str = client.get_response().get_response();
+    str += content ;
     client.get_response().set_response(str);
-
     return 0;
 }
 
@@ -302,16 +253,13 @@ std::string convert_to_up(const std::string &key)
     return result;
 }
 
-std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string &full_path, std::string &method , std::string &sn)
+std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string &full_path, std::string &method)
 {
-
-
-
-
     std::vector<char*> env_vector;
     std::map<std::string, std::string>::iterator it;
     for (it  = map.begin(); it != map.end(); ++it)
     {
+        // std::cout << it->first << " => " << it->second << std::endl;
         std::string key = convert_to_up(it->first);
         if (key == "CONTENT_TYPE" || key == "CONTENT_LENGTH")
         {
@@ -343,6 +291,7 @@ std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string 
     std::strcpy(var5, script_filename.c_str());
     env_vector.push_back(var5);
 
+    std::string sn = "/error/script.py";
     std::string script_name = "SCRIPT_NAME=" + sn;
     char *var6 = new char[script_name.size() + 1];
     std::strcpy(var6, script_name.c_str());
@@ -353,16 +302,19 @@ std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string 
     return env_vector;
 }
 
-int cgi_handler(Client &client , std::string body , std::string &sn)
-{   
+int cgi_handler(Client &client , std::string body)
+{
+    
     std::map<std::string,std::string> map = client.get_request().get_headers_map();
     
 	std::string full_path = client.get_request().get_path();
 	std::string method = client.get_request().get_method();
 
-    std::vector<char*> env_vec = get_env(map, full_path, method , sn);
+    std::vector<char*> env_vec = get_env(map, full_path, method);
     char** env = &env_vec[0];
-
+    for (int i = 0; env[i] != NULL; ++i) {
+        std::cout << env[i] << std::endl;
+    }
 
 	int code = check_extension(full_path);
 	const char* interpreter;

@@ -399,8 +399,8 @@ int main(int ac, char **av)
         std::vector <RouteBlock> routes = servers[0].get_routes();
         std::cout << "+++uri: " << routes[0].get_uri() << std::endl;
         std::cout << "+++root: " << routes[0].get_root() << std::endl;
-        std::cout << "+++uri: " << routes[1].get_uri() << std::endl;
-        std::cout << "+++root: " << routes[1].get_root() << std::endl;
+        // std::cout << "+++uri: " << routes[1].get_uri() << std::endl;
+        // std::cout << "+++root: " << routes[1].get_root() << std::endl;
         S1.server_block_obj = servers;
         for (size_t i = 0; i < conf.number_of_server ; i++)
         {
