@@ -1,5 +1,43 @@
 #include "../webserver.hpp"
 
+
+std::string chunked_for_cgi(Client *client)
+{
+    static std::string request;
+    request += client->get_request().get_s_request();
+    static std::string result;
+    std::string line;
+    
+    while (true)
+    {
+        size_t pos = request.find("\r\n");
+
+        if (pos == std::string::npos)
+            return "";
+
+        line = request.substr(0, pos + 2);
+        size_t size = hex_to_int(line);
+        if (size == 0)
+        {
+            client->set_all_recv(true);
+            client->get_request().set_s_request(result);
+            std::string new_result = result;
+            request = result = "";
+            return new_result;
+        }
+        std::string tmp = request.substr(pos + 2);
+        if (tmp.size() < size)
+        {
+            return "";
+        }
+        request = request.substr(pos + 2);
+        result += request.substr(0, size);
+        request = request.substr(size + 2);
+    }
+}
+
+
+
 void handle_x_www_form_urlencoded(Client &client)
 {
     std::string tmp = client.get_request().get_s_request();
@@ -64,6 +102,7 @@ void chunked(Client &client)
     request += client.get_request().get_s_request();
     static std::string result;
     std::string line;
+
     while (true)
     {
         size_t pos = request.find("\r\n");

@@ -123,3 +123,6 @@ void check_if_have_redirection(Client *client);
 //cgi 
 
 int cgi_handler(Client &client , std::string body , std::string &sn);
+std::string chunked_for_cgi(Client *client);
+bool check_if_have_cgi(Client &client);
+int hex_to_int(const std::string &hexStr);

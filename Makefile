@@ -19,15 +19,15 @@ SRC = request/request.cpp \
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv
 HEDER = request/request.hpp parsing/Confile.hpp  parsing/ServerBlock.hpp parsing/RouteBlock.hpp
-CFLAGS =  -Wall -Wextra -Werror -fsanitize=address -fsanitize=leak -g
+CFLAGS =  -Wall -Wextra -Werror #-fsanitize=address -fsanitize=leak -g
 
 all : $(NAME)
 
 %.o : %.cpp ${HEDER} Makefile
-	c++ ${CFLAGS} -c $< -o $@ && rm -rf html && mkdir html
+	g++ ${CFLAGS} -c $< -o $@ && rm -rf html && mkdir html
 
 $(NAME) : $(OBJ) ${HEDER}
-	c++ ${CFLAGS} $(OBJ) -o $@
+	g++ ${CFLAGS} $(OBJ) -o $@
 
 clean :
 	rm -rf $(OBJ)

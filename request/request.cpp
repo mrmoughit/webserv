@@ -173,7 +173,9 @@ bool out_root_dir(std::string &pa, std::string &res, Client &client)
     int entry = 0;
     int sorty = 0;
     (void)res;
+
     std::string error_path;
+
     for (int i = 0; str[i]; i++)
     {
         if (strcmp(str[i], "..") == 0)
@@ -186,6 +188,7 @@ bool out_root_dir(std::string &pa, std::string &res, Client &client)
             return false;
         }
     }
+
     std::vector<std::string> vec;
 
     for (int i = 0; str[i]; i++)
@@ -198,6 +201,7 @@ bool out_root_dir(std::string &pa, std::string &res, Client &client)
         }
     }
     pa = "/";
+
     std::ostringstream oss;
     for (size_t i = 0; i < vec.size(); ++i)
     {
