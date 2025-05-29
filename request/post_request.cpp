@@ -1,13 +1,12 @@
 #include "../webserver.hpp"
 
-
 std::string chunked_for_cgi(Client *client)
 {
     static std::string request;
     request += client->get_request().get_s_request();
     static std::string result;
     std::string line;
-    
+
     while (true)
     {
         size_t pos = request.find("\r\n");
@@ -36,8 +35,6 @@ std::string chunked_for_cgi(Client *client)
     }
 }
 
-
-
 // void handle_x_www_form_urlencoded(Client &client)
 // {
 //     std::string tmp = client.get_request().get_s_request();
@@ -60,7 +57,6 @@ std::string chunked_for_cgi(Client *client)
 //     }
 // }
 
-
 int hex_to_int(const std::string &hexStr)
 {
     int result = 0;
@@ -77,7 +73,7 @@ int hex_to_int(const std::string &hexStr)
     return result;
 }
 
-std::string ft_generate_file_names(const std::string& extension , std::string dirname)
+std::string ft_generate_file_names(const std::string &extension, std::string dirname)
 {
     static int index;
     std::string name;
@@ -95,7 +91,6 @@ std::string ft_generate_file_names(const std::string& extension , std::string di
     return NULL;
 }
 
-
 void chunked(Client &client)
 {
     static std::string request;
@@ -112,9 +107,8 @@ void chunked(Client &client)
         size_t size = hex_to_int(line);
 
         std::string tmp = request.substr(pos + 2);
-        if (tmp.size() < size + 2) 
+        if (tmp.size() < size + 2)
             return;
-
 
         if (size == 0)
         {
@@ -123,21 +117,16 @@ void chunked(Client &client)
             return;
         }
 
-
         request = request.substr(pos + 2);
-
 
         std::string chunk_data = request.substr(0, size);
 
-     
         client.get_request().set_s_request(chunk_data);
-        hanlde_post_request(client); 
+        hanlde_post_request(client);
 
         request = request.substr(size + 2);
     }
 }
-
-
 
 void trim_non_printable(std::string &str)
 {
@@ -151,204 +140,276 @@ void trim_non_printable(std::string &str)
     str = str.substr(start, end - start);
 }
 
-void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void create_file(std::string &buffer, Client &client, int flag)
 {
-    std::istringstream ss(tmp);
+    static std::ofstream file;
+    
+    if (flag == 2)
+    {
+        // Close file and return
+        if (file.is_open()) {
+            file.close();
+        }
+        return;
+    }
+    
+    if (flag == 1)
+    {
+        // Write raw binary data to already open file - NO line processing
+        if (file.is_open()) {
+            file.write(buffer.c_str(), buffer.size());
+            file.flush();
+        }
+        return;
+    }
+    
+    // flag == 0: Parse headers and create new file
+    std::istringstream ss(buffer);
     std::string line;
-    std::ofstream file;
     std::getline(ss, line);
-    if (index != 0)
-        std::getline(ss, line);
-
-
-    std::string key;
+    
     if (line.find("Content-Disposition:") != std::string::npos)
     {
-        size_t name_pos = line.find("name=\"");
-        if (name_pos != std::string::npos)
+        size_t filename_pos = line.find("filename=\"");
+        if (filename_pos != std::string::npos)
         {
-            size_t name_start = name_pos + 6;
-            size_t name_end = line.find("\"", name_start);
-            if (name_end != std::string::npos)
-                key = line.substr(name_start, name_end - name_start);
-            else
+            filename_pos += 10;
+            size_t file_name_end = line.find("\"", filename_pos);
+            if (file_name_end == std::string::npos)
             {
-                std::cerr << "Invalid boundary format 1" << std::endl;
+                set_response_error(&client, 400);
                 return;
             }
-            size_t filename_pos = line.find("filename=\"");
-            if (filename_pos != std::string::npos)
+            
+            std::string dirname = get_file_name(&client);
+            std::string filename = dirname + "/" + line.substr(filename_pos, file_name_end - filename_pos);
+            
+            if (filename.empty() || dirname.empty())
             {
-                filename_pos += 10;
-                size_t file_name_end = line.find("\"", filename_pos);
-                if (file_name_end == std::string::npos)
-                {
-                    std::cout << "error" << std::endl;
-                    set_response_error(&clinet , 400);
-                    return ;
-                }
-                std::string dirname = get_file_name(&clinet);
-                std::string filename = dirname + "/" + line.substr(filename_pos, file_name_end - filename_pos);
-                if (filename.empty()||  dirname.empty()) {
-                    clinet.set_all_recv(true);
-                    return ;
-                }
-                file.open(filename.c_str());
-                std::getline(ss, line);
-                std::getline(ss, line);
-                while (1)
-                {
-                    char c;
-                    line = "";
-                    while (ss.get(c))
-                        line += c;
-                    if (line.empty())
-                        break ;
-                    file << line << std::flush;
+                client.set_all_recv(true);
+                return;
+            }
+            
+            // Close previous file if open
+            if (file.is_open()) {
+                file.close();
+            }
+            
+            file.open(filename.c_str(), std::ios::out | std::ios::binary);
+            if (!file.is_open()) {
+                set_response_error(&client, 500);
+                return;
+            }
+            
+            // Skip Content-Type header and find empty line
+            while (std::getline(ss, line)) {
+                if (line.empty() || line == "\r") {
+                    break; // Found empty line, file content starts next
                 }
             }
-            else{
-                set_response_error(&clinet ,  415);
-                return ;
-            }
-            std::getline(ss, line);
-            while (1)
-            {
-                char c;
-                line = "";
-                while (ss.get(c))
-                {
-                    line += c;
+            
+            // Get remaining content after headers as raw binary data
+            std::string remaining_content;
+            std::string temp_line;
+            bool first_line = true;
+            while (std::getline(ss, temp_line)) {
+                if (!first_line) {
+                    remaining_content += "\n";
                 }
-                if (line.empty())
-                    break;
-                clinet.fill_map(key, line);
+                remaining_content += temp_line;
+                first_line = false;
+            }
+            
+            if (!remaining_content.empty()) {
+                file.write(remaining_content.c_str(), remaining_content.size());
+                file.flush();
             }
         }
-        else
-        {
-            std::cerr << "Invalid boundary format " << std::endl;
-            return;
-        }
+    }
+    else
+    {
+        set_response_error(&client, 415);
     }
 }
 
-
-
-int check_if_have_new_boundary(std::string &buffer, const std::string &boundary, Client &client, size_t size)
+int check_if_have_new_boundary(const std::string &buffer, const std::string &boundary, Client &client, size_t start_pos)
 {
     std::string boundaryWithPrefix = "--" + boundary;
-    if (size >= buffer.size()) {
+    
+    if (start_pos >= buffer.size())
+    {
         return -1;
     }
-
-    std::string tmp = buffer.substr(size);
-    size_t pos = tmp.find(boundaryWithPrefix);
+    
+    size_t pos = buffer.find(boundaryWithPrefix, start_pos);
+    
     if (pos == std::string::npos)
         return -1;
-
-    size_t last_Boundary = size + pos + boundaryWithPrefix.size();
-    if (last_Boundary + 2 <= buffer.size() &&
-        buffer[last_Boundary] == '-' && buffer[last_Boundary + 1] == '-'){
+    
+    size_t boundary_end = pos + boundaryWithPrefix.size();
+    
+    // Check bounds before accessing buffer
+    if (boundary_end + 1 < buffer.size() &&
+        buffer[boundary_end] == '-' && buffer[boundary_end + 1] == '-')
+    {
         client.set_all_recv(true);
-        // std::cout << "my job done here " << std::endl;
-        // exit(15);
     }
-
-    return static_cast<int>(pos + size);
+    
+    return static_cast<int>(pos);
 }
-
 
 void boundary(Client &client)
 {
     static std::string buffer;
-    static int i = 0;
-    static std::string boundary;
-    std::string tmp;
-    static size_t size;
-    static int flag ;
-
+    static int call_count = 0;
+    static std::string boundary_str;
+    
     buffer += client.get_request().get_s_request();
-
-    if (i == 0)
+    
+    if (call_count == 0)
     {
-
-        std::istringstream ss(buffer);
-        std::getline(ss, tmp);
-
-        size_t pos = tmp.find_first_not_of("-");
-        if (pos == std::string::npos) {
+        // Extract boundary from first line
+        size_t first_line_end = buffer.find('\n');
+        if (first_line_end == std::string::npos) {
+            return; // Wait for more data
+        }
+        
+        std::string first_line = buffer.substr(0, first_line_end);
+        
+        // Remove \r if present
+        if (!first_line.empty() && first_line[first_line.length() - 1] == '\r') {
+            first_line = first_line.substr(0, first_line.length() - 1);
+        }
+        
+        // Extract boundary (remove leading --)
+        if (first_line.length() > 2 && first_line.substr(0, 2) == "--") {
+            boundary_str = first_line.substr(2);
+        } else {
             std::cerr << "Invalid boundary format" << std::endl;
+            set_response_error(&client, 400);
             return;
         }
-
-        size_t end = tmp.find("\r");
-        if (end == std::string::npos) {
-            end = tmp.length();
-        }
-
-        boundary = tmp.substr(pos, end - pos);
-        pos = buffer.find("\n");
-
-        if (pos != std::string::npos) {
-            buffer = buffer.substr(pos + 1);
-        }
+        
+        // Remove first line from buffer
+        buffer = buffer.substr(first_line_end + 1);
     }
-    i++;
-
+    call_count++;
+    
     while (true)
     {
-        int index = check_if_have_new_boundary(buffer, boundary, client, size);
-        if (index == -1){
+        int boundary_pos = check_if_have_new_boundary(buffer, boundary_str, client, 0);
+        
+        if (boundary_pos == -1)
+        {
+            // No boundary found, process current buffer
+            if (call_count == 1) {
+                create_file(buffer, client, 0);
+            } else {
+                create_file(buffer, client, 1);
+            }
+            buffer.clear();
             break;
         }
-        if (index == 0){
-            /////////////////////////////////////////
-            buffer = buffer.substr(boundary.size());
+        
+        if (boundary_pos == 0)
+        {
+            // Boundary at start, skip it and continue
+            std::string boundaryWithPrefix = "--" + boundary_str;
+            size_t skip_size = boundaryWithPrefix.size();
+            
+            // Skip \r\n after boundary
+            if (skip_size < buffer.size() && buffer[skip_size] == '\r') skip_size++;
+            if (skip_size < buffer.size() && buffer[skip_size] == '\n') skip_size++;
+            
+            buffer = buffer.substr(skip_size);
+            continue;
         }
         else
         {
-            tmp = buffer.substr(0, index - 2);
-            if ((size_t)index < buffer.size()) {
-                buffer = buffer.substr(index);
-            } else {
-                buffer.clear();
+            // Found boundary, process data before it
+            std::string data_chunk = buffer.substr(0, boundary_pos);
+            
+            // Remove trailing \r\n before boundary
+            if (data_chunk.length() >= 2 && 
+                data_chunk.substr(data_chunk.length() - 2) == "\r\n") {
+                data_chunk = data_chunk.substr(0, data_chunk.length() - 2);
             }
-            fill_data_boudary(tmp, client , flag);
-            flag = 1;
+            
+            int flag = client.get_all_recv() ? 2 : 1;
+            create_file(data_chunk, client, flag);
+            
+            // Remove processed data from buffer
+            buffer = buffer.substr(boundary_pos);
         }
     }
-
-    size = buffer.size();
-    if (client.get_all_recv()) {
+    
+    if (client.get_all_recv())
+    {
         buffer.clear();
-        boundary.clear();
-        i = flag = 0;
-        size = 0;
+        boundary_str.clear();
+        call_count = 0;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void handle_boundary_chanked(Client &client)
 {
     static std::string backup;
     std::string request = backup + client.get_request().get_s_request();
     backup.clear();
-    
+
     while (true)
     {
-       
+
         size_t pos = request.find("\r\n");
         if (pos == std::string::npos)
         {
-           
+
             backup = request;
             return;
         }
-        
-        
+
         std::string line_size = request.substr(0, pos);
         size_t size = hex_to_int(line_size);
-        
+
         if (size == 0)
         {
             client.set_all_recv(true);
@@ -357,21 +418,20 @@ void handle_boundary_chanked(Client &client)
             boundary(client);
             return;
         }
-        
-       
-        if (request.size() < pos + 2 + size + 2)  
+
+        if (request.size() < pos + 2 + size + 2)
         {
             backup = request;
             return;
         }
-        
+
         std::string chunk = request.substr(pos + 2, size);
-        
+
         client.get_request().set_s_request(chunk);
         boundary(client);
-        
-        request = request.substr(pos + 2 + size + 2); 
-        
+
+        request = request.substr(pos + 2 + size + 2);
+
         if (request.empty())
         {
             return;
