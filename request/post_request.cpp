@@ -95,39 +95,49 @@ std::string ft_generate_file_names(const std::string& extension , std::string di
     return NULL;
 }
 
+
 void chunked(Client &client)
 {
     static std::string request;
     request += client.get_request().get_s_request();
-    static std::string result;
     std::string line;
 
     while (true)
     {
         size_t pos = request.find("\r\n");
-
         if (pos == std::string::npos)
             return;
 
         line = request.substr(0, pos + 2);
         size_t size = hex_to_int(line);
+
+        std::string tmp = request.substr(pos + 2);
+        if (tmp.size() < size + 2) 
+            return;
+
+
         if (size == 0)
         {
             client.set_all_recv(true);
-            client.get_request().set_s_request(result);
-            hanlde_post_request(client);
-            request = result = "";
+            request = "";
             return;
         }
-        std::string tmp = request.substr(pos + 2);
-        if (tmp.size() < size)
-            return;
+
+
         request = request.substr(pos + 2);
-        result += request.substr(0, size);
+
+
+        std::string chunk_data = request.substr(0, size);
+
+     
+        client.get_request().set_s_request(chunk_data);
+        hanlde_post_request(client); 
 
         request = request.substr(size + 2);
     }
 }
+
+
 
 void trim_non_printable(std::string &str)
 {
