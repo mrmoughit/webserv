@@ -260,6 +260,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     }
 
     if (timeout_occurred) {
+        // std::cout << "here" << std::endl;
         return (set_response_error(&client , 504), 3);
     } else if (WIFEXITED(status)) {
         if (WEXITSTATUS(status) == 1) {

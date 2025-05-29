@@ -143,8 +143,8 @@ bool Request::fill_headers_map(std::istringstream &ob, std::string &res, Client 
         trim(value);
         if (key == "Connection" && value == "close")
             client.set_Alive(false);
-        else
-            client.set_Alive(true);
+        // else
+        //     client.set_Alive(true);
         headers_map[key] = value;
     }
     if (headers_map.size() == 0){
@@ -285,8 +285,7 @@ void hanlde_post_request(Client &client)
         if (!client.get_request().file.is_open())
         {
             std::cerr << "Error: File is not open" << std::endl;
-            std::cout<<  "exit 33" << std::endl;
-            exit(33);
+            set_response_error(&client , 500);
             return;
         }
         client.get_request().file << client.get_request().get_s_request() << std::flush;

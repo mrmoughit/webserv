@@ -158,7 +158,7 @@ bool check_if_have_cgi(Client &client)
                                 }
                             }
                             else
-                                return (set_response_error(&client, 405), 1);
+                                return (set_response_error(&client, 415), 1);
                         }
                         else if (client.get_request().get_path() == "GET")
                         {
@@ -167,7 +167,7 @@ bool check_if_have_cgi(Client &client)
                         }
                         else
                         {
-                            return (set_response_error(&client, 405), 1);
+                            return (set_response_error(&client, 415), 1);
                             return bol;
                         }
                         if (client.get_Alive())

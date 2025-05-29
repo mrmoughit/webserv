@@ -36,7 +36,7 @@ class Client{
         void fill_map(std::string key , std::string value);
         void print_map();
         Client();
-        ~Client(){};
         void reset();
+        ~Client();
 
 };

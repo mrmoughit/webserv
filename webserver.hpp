@@ -56,11 +56,23 @@ class ServerBlock;
 
 //the global error pages 
 
-extern std::string status_200;
+extern std::string status_201;
 extern std::string status_400;
 extern std::string status_403;
 extern std::string status_404;
 extern std::string status_405;
+
+
+
+
+
+extern std::string status_413;
+extern std::string status_415;
+
+extern std::string status_500;
+extern std::string status_502;
+extern std::string status_505;
+
 
 
 

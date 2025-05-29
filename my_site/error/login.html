@@ -3,6 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <title>Login Page</title>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #page {
+            background: #ffffff;
+            padding: 30px 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #session-response {
+            margin-top: 20px;
+            text-align: center;
+            color: red;
+            font-weight: bold;
+        }
+
+    </style>
 </head>
 <body>
     <div id="page">
@@ -38,7 +111,7 @@
                 const page = document.getElementById('page');
 
                 if (contentLength === "0") {
-                    responseBox.textContent = "wrong key pleaz login";
+                    responseBox.textContent = "wrong key please login";
                 } else {
                     const htmlContent = await response.text();
                     page.style.color = "black";

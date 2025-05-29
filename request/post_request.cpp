@@ -38,28 +38,27 @@ std::string chunked_for_cgi(Client *client)
 
 
 
-void handle_x_www_form_urlencoded(Client &client)
-{
-    std::string tmp = client.get_request().get_s_request();
-    std::istringstream ss(tmp);
-    std::string line;
-    std::string key;
-    std::string value;
+// void handle_x_www_form_urlencoded(Client &client)
+// {
+//     std::string tmp = client.get_request().get_s_request();
+//     std::istringstream ss(tmp);
+//     std::string line;
+//     std::string key;
+//     std::string value;
 
-    client.set_all_recv(true);
-    while (std::getline(ss, line, '&'))
-    {
-        size_t pos = line.find("=");
-        if (pos == std::string::npos)
-        {
-            std::cout << "error" << std::endl;
-            exit(21);
-        }
-        key = line.substr(0, pos);
-        value = line.substr(pos + 1);
-        std::cout << key << " -----------> " << value << std::endl;
-    }
-}
+//     client.set_all_recv(true);
+//     while (std::getline(ss, line, '&'))
+//     {
+//         size_t pos = line.find("=");
+//         if (pos == std::string::npos)
+//         {
+//             std::cout << "error" << std::endl;
+//             exit(21);
+//         }
+//         key = line.substr(0, pos);
+//         value = line.substr(pos + 1);
+//     }
+// }
 
 
 int hex_to_int(const std::string &hexStr)
@@ -179,7 +178,8 @@ void fill_data_boudary(const std::string &tmp, Client &clinet , size_t index)
                 if (file_name_end == std::string::npos)
                 {
                     std::cout << "error" << std::endl;
-                    exit(55);
+                    set_response_error(&clinet , 400);
+                    return ;
                 }
                 std::string dirname = get_file_name(&clinet);
                 std::string filename = dirname + "/" + line.substr(filename_pos, file_name_end - filename_pos);

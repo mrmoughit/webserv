@@ -34,6 +34,7 @@ if username == db_user and password == db_pass:
                 background-color: #f4f4f9;
                 color: #333;
                 text-align: center;
+                margin:10%;
             }}
             h1 {{
                 color: #4CAF50;
@@ -62,6 +63,21 @@ if username == db_user and password == db_pass:
 else:
     html_content = f"""\
     <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                text-align: center;
+                margin:10%;
+            }}
+            h1 {{
+                color: red;
+                font-size: 36px;
+            }}
+        </style>
+    </head>
     <body>
         <h1>Invalid credentials.</h1>
     </body>

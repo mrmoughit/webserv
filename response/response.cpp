@@ -53,6 +53,8 @@ std::string check_auto_index(Client &client , int *index){
     int i = 0;
     *index = 2;
 
+
+
     while(i < (int)client.server_client_obj.get_routes().size()){
         if (client.get_request().get_path() == (client.server_client_obj.get_routes()[i].get_root() + client.server_client_obj.get_routes()[i].get_uri()))
         {
@@ -115,6 +117,7 @@ void response_to_get(Client &client)
                 str =  client.get_request().get_path() + "/" + "index.html";
             else {
                 for (size_t i = 0 ; i < client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index().size() ; i++){
+
                     str = client.get_request().get_path() + "/" + client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index()[i];
                     if (stat(str.c_str(), &default_file) == 0)
                         break ;

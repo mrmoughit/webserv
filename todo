@@ -1,5 +1,6 @@
 
 response in cgi
+
 upload dir if not exist or permission not responed 
 
 
@@ -10,3 +11,36 @@ khalid
 location /error{
  
  cgi not closing connection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+remove all exit from code 
+add default error pages

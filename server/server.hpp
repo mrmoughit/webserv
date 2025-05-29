@@ -8,7 +8,6 @@
 #include <vector>
 #include <sstream>
 
-#define DEFAULT_PORT 8080
 
 // Structure to hold server configuration
 struct ServerConfig {
@@ -66,7 +65,4 @@ public:
 
     // Helper methods
     void getClientIndexByFd(int fd, size_t& client_index);
-    int getServerIndexByFd(int fd);
-    int getServerIndexByHostPortName(const std::string& host, int port, const std::string& server_name);
-    ServerBlock get_ServerConfByIndex(int fd_server);
 };
