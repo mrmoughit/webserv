@@ -44,3 +44,7 @@ location /error{
 
 remove all exit from code 
 add default error pages
+
+
+
+cgi post text plain

@@ -455,9 +455,13 @@ void check_request(Client &client)
         client.set_all_recv(true);
         return;
     }
+    
 
+    
     if (check_if_have_cgi(client))
         return ;
+
+
     
     if (client.get_response().get_response_index())
     {
@@ -465,22 +469,20 @@ void check_request(Client &client)
         return;
     }
 
+    
     const std::string method = client.get_request().get_method();
     const std::string content_type = client.get_request().get_map_values("Content-Type");
     const std::string transfer_encoding = client.get_request().get_map_values("Transfer-Encoding");
-
+    
     if (method == "GET")
     {
         response_to_get(client);
         client.set_all_recv(true);
         return;
     }
-
+    
     if (method == "POST")
     {
-        set_response_error(&client, 201);
-        client.get_response().set_response_index(false);
-
         std::string check = transfer_encoding;
 
         if (content_type.find("boundary=") != std::string::npos && check == "chunked")
@@ -491,11 +493,13 @@ void check_request(Client &client)
 
         else if (check == "chunked")
             chunked(client);
-
-        // else if (content_type == "application/x-www-form-urlencoded")
-        //     handle_x_www_form_urlencoded(client);
         else
             hanlde_post_request(client);
+        if (client.get_all_recv()){
+            if (!client.get_response().get_response_index())
+                set_response_error(&client, 201);
+            return ;
+        }
     }
     else if (method == "DELETE")
     {

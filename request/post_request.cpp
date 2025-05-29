@@ -107,9 +107,7 @@ void chunked(Client &client)
         size_t pos = request.find("\r\n");
 
         if (pos == std::string::npos)
-        {
             return;
-        }
 
         line = request.substr(0, pos + 2);
         size_t size = hex_to_int(line);
@@ -117,15 +115,13 @@ void chunked(Client &client)
         {
             client.set_all_recv(true);
             client.get_request().set_s_request(result);
-            request = result = "";
             hanlde_post_request(client);
+            request = result = "";
             return;
         }
         std::string tmp = request.substr(pos + 2);
         if (tmp.size() < size)
-        {
             return;
-        }
         request = request.substr(pos + 2);
         result += request.substr(0, size);
 

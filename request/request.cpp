@@ -258,21 +258,24 @@ void hanlde_post_request(Client &client)
             return ;
         }
 
-
         client.get_request().file.open(file_name.c_str());
 
+        
         if (!client.get_request().file.is_open())
         {
+            
             std::cerr << "Error: Could not open file " << file_name << std::endl;
             return;
         }
         client.get_request().file << client.get_request().get_s_request() << std::flush;
+        
         if (client.get_request().file.fail())
         {
             std::cerr << "Error: Failed to write to file " << file_name << std::endl;
             client.get_request().file.close();
             return;
         }
+        
         writed += client.get_request().get_s_request().size();
         if (writed >= client.get_request().get_content_length())
         {
