@@ -328,9 +328,8 @@ int get_parts(char **av, std::vector <std::string>& parts)
     size_t i = 0;
     size_t j;
     size_t last_full_line = 0;
-    while ( i < lines.size()) //while loop to skip last empty lines to get the real last line
+    while ( i < lines.size())
     {
-        // std::cout << "servive: " << "i: " << i << "line: " << lines[i] << std::endl;
         if (!lines[i].empty() && check_empt(lines[i].c_str()))
         {
             // std::cout << "not empty" << std::endl;
@@ -397,8 +396,9 @@ int main(int ac, char **av)
         S1.number_of_servers = conf.number_of_server;
         std::vector <ServerBlock> servers = conf.get_server();
         std::vector <RouteBlock> routes = servers[0].get_routes();
-        std::cout << "+++uri: " << routes[0].get_uri() << std::endl;
-        std::cout << "+++root: " << routes[0].get_root() << std::endl;
+        std::cout << "host : " << servers[0].get_host() << std::endl;
+        std::cout << "serv : " << servers[0].get_server_names() << std::endl;
+        // std::cout << "+++root: " << routes[0].get_root() << std::endl;
         // std::cout << "+++uri: " << routes[1].get_uri() << std::endl;
         // std::cout << "+++root: " << routes[1].get_root() << std::endl;
         S1.server_block_obj = servers;

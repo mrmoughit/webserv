@@ -50,11 +50,11 @@ std::vector<std::string> split_brace(std::string line)
     if (found != std::string::npos)
     {
         words.push_back(line.substr(0, found));
-        words.push_back(line.substr(found + 1)); // keeps the first brace and the rest
+        words.push_back(line.substr(found + 1));
     }
     else
     {
-        words.push_back(line); // no brace found, return the whole line
+        words.push_back(line); 
     }
     return words;
 }
@@ -68,9 +68,7 @@ std::vector<std::string> split_words(std::string line)
     size_t found = line.find(".", pos);
     while (found != std::string::npos)
 	{
-        // std::cout << found << " and " << pos << std::endl;
 	    tmp = line.substr(pos, found - pos);
-        // std::cout << tmp << std::endl;
         words.push_back(tmp);
 		pos = found + 1;
 		found = line.find(".", pos);
@@ -80,87 +78,20 @@ std::vector<std::string> split_words(std::string line)
         tmp = line.substr(pos);
         words.push_back(tmp);
     }
-	// for (size_t i = 0; i < words.size(); i++)
-	// 	std::cout << "word " << i + 1 << ": " << words[i] << std::endl;
+
     return words;
 }
 
-std::vector<std::string> get_next_line_words(std::vector<std::string> lines, size_t &i)
-{
-    // size_t i = 1;
-    std::vector<std::string> words = get_words(lines[i]);
-    // std::cout << "##########################################" << std::endl;
-    while (lines.size() > i && words.empty())
-    {
-        i++;
-        words.clear();//maybe i need to clear the words before
-        words = get_words(lines[i]);
-    }
-    return words;
-    // if (words.empty())
-    // {
-    //     std::cerr << "Error No Words anymore!" << std::endl;
-    //     return 1;//return 1
-    // }
-}
 
-
-// int check_line(std::vector<std::string>& lines, size_t& i)// should pass index i if we check an empty 
-// {
-//     std::vector<std::string> words = get_words(lines[i]);
-//     //cases of anything else than server "server, server{, server {
-//     if (words.size() == 1)//should be just 2 words
-// 		return (std::cerr << "invalid server structre " << std::endl, 1);
-//     if (words[0] != "server" && words[0] != "server{") //first word should be one of this
-//     {
-// 		size_t pos = lines[0].find('{');
-// 		if (pos != std::string::npos)
-// 		{
-// 			std::string updated_line = lines[i].substr(0, pos);
-// 			updated_line = trimstr(updated_line);
-// 			std::cout << "upadated line: |" << updated_line << std::endl;
-// 			if (updated_line != "server")
-// 			{
-// 				std::cerr << "invalid server name" << std::endl;
-// 				return 1;
-// 			}
-// 			lines[i] = lines[i].substr(pos + 1);
-// 			std::cout << "line upadated: " << lines[i] << std::endl;
-// 			return (0);
-// 		}
-//     }
-//     if (words.size() > 1 && words[0] == "server" && words[1] != "{")//in case server {
-//     {
-// 		std::cerr << "invalid server name unwanted word: " << words[1] << std::endl;
-//         return 1;
-//     }
-//     if ( words.size() == 3 && words[0] != "server{")
-//     {
-// 		return (std::cerr << "invalid server structre " << std::endl, 1);
-//     }
-// 	size_t s = 1;
-// 	if (words[0] == "server")
-// 		s = 2;
-// 	std::string rest;
-// 	while (s < words.size())
-// 	{
-// 		rest += " ";
-// 		rest += words[s];
-// 		s++;
-// 	}
-// 	// std::cout << "rest" << rest << std::endl;
-// 	lines[i] = rest; 
-//     return 0;
-// }
 
 int check_line(std::vector<std::string>& lines, size_t& i)
 {
 	std::vector <std::string> words = split_brace(lines[i]);
 	if (words.size() < 2)
-		return (std::cout << "Error invalid server struct" << std::endl, 1);
+		return (std::cerr << "Error invalid server struct" << std::endl, 1);
 	std::string first_word = trimstr(words[0]);
 	if (first_word != "server")
-		return (std::cout << "Error unwanted word : " << words[0] << std::endl, 1);
+		return (std::cerr << "Error unwanted word : " << words[0] << std::endl, 1);
 	size_t x = 1;
 	std::string rest;
 	while (x < words.size())
@@ -203,55 +134,27 @@ std::string trimstr(std::string str)
 	return trimed;
 }
 
-std::string int_to_string(int value)
-{
-	std::ostringstream oss;
-	oss << value;
-	return oss.str();
-}
-
-std::string convert_hostname(std::string host_name, bool& status)
-{
-	struct addrinfo hints, *res;
-	std::string ip_address;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET; 
-    hints.ai_socktype = SOCK_STREAM;
-
-    int status_code = getaddrinfo(host_name.c_str(), NULL, &hints, &res);
-    if (status_code != 0)
-    {
-        std::cerr << "Failed to get hostname: " << host_name << "\n";
-		status = false;
-        return ip_address;
-    }
-	struct sockaddr_in *ipv4 =  (struct sockaddr_in *)res->ai_addr;
-	unsigned char* bytes = (unsigned char*)&(ipv4->sin_addr);
-	ip_address = int_to_string(bytes[0]) + "." + 
-				 int_to_string(bytes[1]) + "." +
-				 int_to_string(bytes[2]) + "." +
-				 int_to_string(bytes[3]);
-    freeaddrinfo(res);
-    return (ip_address);
-}
-
-
 std::string pars_host(std::vector<std::string> words, bool& status)
 {
 
 	std::string host;
-	if (words.size() > 2 || words.size() == 1)
-		return (status = false, std::cerr << "Error Invalid structre"<<  std::endl, host);
+	if (words.size() != 2)
+		return (status = false, std::cerr << "Error Invalid server structre"<<  std::endl, host);
 	if (words[1].find('{') != std::string::npos || words[1].find('}') != std::string::npos)
-		return (status = false, std::cout << "Error unwanted braces" << std::endl, host);
+		return (status = false, std::cerr << "Error unwanted braces" << std::endl, host);
 	std::string address = words[1];
+	if (address == "localhost")
+	{
+		host  = "127.0.0.1";
+		return host;
+	}
 	size_t i = 0;
 	while(address[i])
 	{
 		if (address.length() > i + 1)
 		{
 			if (address[i] == '.' && address[i  + 1] == '.')
-				return (convert_hostname(address, status));
+				return (status = false, std::cerr << "Error invalid host" << std::endl, host);
 		}
 		i++;
 	}
@@ -259,22 +162,24 @@ std::string pars_host(std::vector<std::string> words, bool& status)
 	size_t x = 0;
 	int numb;
 	if (octets.size() != 4)
-		return (convert_hostname(address, status));
+	{
+		return (status = false, std::cerr << "Error invalid host" << std::endl, host);
+	}
 	while (octets.size() > x)
 	{
 		size_t j = 0;
 		while(octets[x][j])
 		{
 			if (!isdigit(octets[x][j]))
-				return (convert_hostname(address, status));
+				return (status = false, std::cerr << "Error invalid host" << std::endl, host);
 			if (octets[x][0] == '0' && octets[x].length() > 1)
-				return (convert_hostname(address, status));
+				return (status = false, std::cerr << "Error invalid host" << std::endl, host);
 			j++;
 		}
 		std::stringstream ss(octets[x]);
 		ss >> numb;
 		if (numb > 255 || numb < 0)
-			return (convert_hostname(address, status));
+			return (status = false, std::cerr << "Error invalid host" << std::endl, host);
 		x++;
 	}
 	host = address;
@@ -328,13 +233,7 @@ std::string pars_server_names(std::vector<std::string> words, bool& status)
 	return (status = false, std::cout << "Error too many serverNames" << std::endl, names);
 		if (words[1].find('{') != std::string::npos || words[1].find('}') != std::string::npos)
 			return (status = false, std::cout << "Error unwanted braces" << std::endl, names);
-	// names = pars_host(words, status);
-	// exit(1);
-	// return (names);
 	names = words[1];
-	// names.erase(names.begin());
-	
-	// std::cout << "#==> server name get parsed" << std::endl;
 	return names;
 }
 
@@ -402,7 +301,6 @@ size_t pars_cbs(std::vector <std::string> words, bool& status)
 	else
 		return (status = false, std::cout << "Error invalid unit" << std::endl, bytes);
 
-	// std::cout << "#==> client body size get parsed" << std::endl;
 return bytes;	
 }
 
@@ -479,19 +377,19 @@ bool fill_rest(ServerBlock& server, std::vector<std::string> &lines, size_t &i)
 			break;
 		if (words[0] == "}" || words[0][0] == '}')
 		{
-			if (words[0] == "}" && words.size() == 1) //case of  we have just } "this for handling }; in first server with conf of more than 1 server"
+			if (words[0] == "}" && words.size() == 1)
 			{
 				if (i < lines.size() - 1)
 				{
-					std::cout << "+++case of first server" << std::endl;
+					std::cerr << "Error unwanted ';' at the end of server" << std::endl;
 					status = false;
 				}
 				lines[i] = " ";
-				return (std::cout << "end of serverBlock " << std::endl, status);
+				return (status);
 			}
-			if (words[0].length() > 1) // case of have }server
+			if (words[0].length() > 1)
 				words[0] = words[0].substr(1);
-			else if (words[0] == "}" && words.size() > 1) //case of having } server
+			else if (words[0] == "}" && words.size() > 1) 
 				words[0] = " ";
 			std::string rest;
 			size_t s = 0;
@@ -502,12 +400,12 @@ bool fill_rest(ServerBlock& server, std::vector<std::string> &lines, size_t &i)
 				s++;
 			}
 			lines[i] = rest;
-			return (std::cout << "end of ServerBlock" << std::endl, status);				
+			return (status);				
 		}
 		else if (words[0] == "host")
-			server.set_host(pars_host(words, status));// handle case if host is a domain and check if it include '{' or '}'
+			server.set_host(pars_host(words, status));
 		else if (words[0] == "listen")
-			server.set_port(pars_port(words, status));//
+			server.set_port(pars_port(words, status));
 		else if (words[0] == "server_name")
 			server.set_server_names(pars_server_names(words, status));
 		else if (words[0] == "index")
@@ -530,7 +428,6 @@ bool fill_rest(ServerBlock& server, std::vector<std::string> &lines, size_t &i)
 			return false;
 		}
 		i++;
-		words.clear();// check if that necessaire
 		words = get_words(lines[i]);
 	}
 	return status;

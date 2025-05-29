@@ -6,7 +6,7 @@
 /*   By: kid-ouis <kid-ouis@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 12:01:28 by kid-ouis          #+#    #+#             */
-/*   Updated: 2025/05/25 18:33:43 by kid-ouis         ###   ########.fr       */
+/*   Updated: 2025/05/29 17:47:58 by kid-ouis         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int check_first_line(RouteBlock& route, std::vector <std::string>& lines, size_t
 	std::string URI;
 	std::vector <std::string> words = get_words(lines[i]);
 	if (words[0] != "location" && words[0] != "location{")
-		return (std::cout << "end of locationblock" << std::endl, 1);
+		return (1);//end of locationblock
 	if (words.size() < 4)
 			return (status = false, std::cout << "invalid location structre" << std::endl, 1);
 	URI = words[1];
@@ -32,7 +32,6 @@ int check_first_line(RouteBlock& route, std::vector <std::string>& lines, size_t
 	}
 	else if (words[2] != "{")
 		return (status = false, std::cout << "invalid location structre" << std::endl, 1);
-	std::cout << "+++++uri: " << URI << std::endl;
 	if (URI.find('{') != std::string::npos || URI.find('}') != std::string::npos)
 		return (status = false, std::cout << "Error unwanted braces" << std::endl, 1);
 	if (URI[0] != '/')
@@ -46,7 +45,6 @@ int check_first_line(RouteBlock& route, std::vector <std::string>& lines, size_t
 		rest += words[s];
 		s++;
 	}
-	// std::cout << "rest" << rest << std::endl;
 	lines[i] = rest;
 	return 0;
 	
@@ -129,7 +127,6 @@ std::string pars_temp_path(std::vector <std::string> words,bool& check)
 	if (check_type(words[1]) != 0)
 		return (check  = false , std::cout << "Error client_body_temp_path not directory" << std::endl, tmp_path);
 	tmp_path = words[1];
-		// std::cout << "#==> temp_path get parsed" << std::endl;
 	return (tmp_path);
 }
 
@@ -174,8 +171,8 @@ bool fill_route(RouteBlock& route, std::vector <std::string>& lines,  size_t& i)
 			return false;
 		if (words[0] == "}" || words[0][0] == '}')
 		{
-			if (words[0] == "}" && words.size() == 1) //case of  we have just }
-				return (std::cout << "end of RouteBlock and  unexpected ';' after brace" << std::endl, false);//false cause even if the routeblock filled if there is char after brace it's error
+			if (words[0] == "}" && words.size() == 1)
+				return (std::cerr << "Error unexpected ';' after routeblock brace" << std::endl, false);
 			if (words[0].length() > 1) // case of have }location or  }}
 				words[0] = words[0].substr(1);
 			else if (words[0] == "}" && words.size() > 1) //case of having } location
@@ -189,7 +186,7 @@ bool fill_route(RouteBlock& route, std::vector <std::string>& lines,  size_t& i)
 				s++;
 			}
 			lines[i] = rest;
-			return (std::cout << "end of RouteBlock" << std::endl, status);				
+			return (status);
 		}
 		else if (words[0] == "allowed_methods")
 			route.set_methods(pars_methods(words, status));
@@ -204,17 +201,13 @@ bool fill_route(RouteBlock& route, std::vector <std::string>& lines,  size_t& i)
 		else if (words[0] == "root")
 			route.set_root(get_root(words, status));
 		else if (words[0] == "return")
-		{
             route.set_redirections(get_redirection(words, status));
-		}
 		else
 		{
 			std::cout << "word: " << words[0] << " invalid element in routeblock" << std::endl;
 			return false;
 		}
-			
 		i++;
-		words.clear();
 		words = get_words(lines[i]);
 	}
 	return status;
@@ -263,13 +256,10 @@ std::vector <RouteBlock> pars_routes(std::vector <std::string>& lines, size_t& i
 		}
 		std::vector <std::string> words = get_words(lines[i]);
 		hold  = i;
-		i = hold;//back to first line in routeblock after getting root;
+		i = hold;
 		status = fill_route(route, lines , i);
 		if (!status)
 			return (status = false, std::cout << "not valid routeblock"  << std::endl, vec_routes);
-		// status = check_index(route.get_index(), route.get_root());
-		// if (!status)
-		// 	return (status = false, std::cout << "not valid routeblock"  << std::endl, vec_routes);
 		vec_routes.push_back(route);
 	}
 	 return vec_routes;

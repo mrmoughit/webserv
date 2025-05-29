@@ -83,8 +83,8 @@ int Server::createServer(ServerConfig& config) {
     config.addr.sin_family = AF_INET;
     config.addr.sin_port = htons(config.port);
     
-    // Always use INADDR_ANY (0.0.0.0) for binding
-    config.addr.sin_addr.s_addr = INADDR_ANY;
+    
+    config.addr.sin_addr.s_addr = inet_addr(config.host.c_str());
 
     // Bind the socket
     if (bind(server_fd, (struct sockaddr*)&config.addr, sizeof(config.addr)) < 0) {

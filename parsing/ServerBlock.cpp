@@ -16,27 +16,19 @@
 ServerBlock::ServerBlock()
 {
     is_location_url = -1;
-    // dupindex = 0;
-    // Port = -1;
     client_body_size = 1048576;
     server_root = "./html";
-    // std::cout << "ServerBlock Default constructor called" << std::endl;
+
 }
-ServerBlock::~ServerBlock()
-{
-    // std::cout << "ServerBlock Destructor called" << std::endl;
-}
+
 
 ServerBlock::ServerBlock(const ServerBlock& other)
 {
-    *this = other;
-    // std::cout << "ServerBlock Copy Constructor called" << std::endl;
-    
+    *this = other; 
 }
 
 ServerBlock& ServerBlock::operator=(const ServerBlock& other)
 {
-    // std::cout << "ServerBlock Copy assignment operator called" << std::endl;
     if (this != &other)
     {
         this->Host = other.Host;
@@ -47,7 +39,6 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& other)
         this->index = other.index;
         this->routes = other.routes;
         this->error_pages = other.error_pages;
-        this->dupindex = other.dupindex;
     }
     return *this;
 }
@@ -65,9 +56,6 @@ std::string& ServerBlock::get_server_root(void)
 
 void ServerBlock::set_host(std::string set_host)
 {
-    // std::cout << "set host called for : " << set_host << std::endl;
-    // if (!Host.empty())
-    //     dupindex++;
     Host = set_host;
 }
 
@@ -78,8 +66,6 @@ std::string& ServerBlock::get_host(void)
 
 void ServerBlock::set_port(int set_port)
 {
-    // if (Port != -1)
-    //     dupindex++;
     if (set_port > 0)
         Port.push_back(set_port);
 }
@@ -91,8 +77,6 @@ std::vector <int> ServerBlock::get_port(void)
 
 void ServerBlock::set_server_names(std::string set_server_names)
 {
-    // if (!Server_names.empty())
-    //     dupindex++;
     Server_names = set_server_names;
     
 }

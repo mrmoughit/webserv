@@ -88,24 +88,25 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     printf("Executing script: %s\n", full_path.c_str());
 	char *argv[] = {(char *)interpreter, (char *) full_path.c_str(), NULL};
 
-  int fd[2];
-   int input_fd[2];
-    if (pipe(fd) == -1) {
-        std::cerr << "Pipe creation failed: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
+    int fd[2];
+    int input_fd[2];
+    if (pipe(fd) == -1) 
+        return (std::cerr << "Pipe creation failed: " << strerror(errno) << std::endl, -1);
 
     // Create input pipe if POST data exists
     bool has_post_data = !post_data.empty();
     if (has_post_data) {
         if (pipe(input_fd) == -1) {
-            std::cerr << "Input pipe creation failed" << std::endl;
             close(fd[0]);
             close(fd[1]);
-            return -1;
+            return (std::cerr << "Input pipe creation failed" << std::endl, -1);
         }
     }
+
+
+    // Set pipe to non-blocking mode
+    int flags = fcntl(fd[0], F_GETFL, 0);
+    fcntl(fd[0], F_SETFL, flags | O_NONBLOCK);
     
     pid_t pid;
     if ((pid = fork()) == -1) {
@@ -142,63 +143,72 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         }
         
         close(fd[1]);
-        
-        // SET TIMEOUT IN CHILD PROCESS
-        alarm(CGI_TIMEOUT);
-        
         execve(argv[0], argv, envp);
         // If execve returns, it failed
         std::cerr << "execve failed: " << strerror(errno) << std::endl;
         exit(1);
     }
     
-    // Parent process
     close(fd[1]);
+    
+    time_t start_time = time(NULL);
+    bool timeout_occurred = false;
 	
-        // Send POST data to child process if needed
-    if (has_post_data) {
-        close(input_fd[0]);  // Close read end of input pipe
 
+    if (has_post_data) 
+    {
+        close(input_fd[0]);  // Close read end of input pipe
+        
+        // Set input pipe to non-blocking mode for timeout handling
+        int input_flags = fcntl(input_fd[1], F_GETFL, 0);
+        fcntl(input_fd[1], F_SETFL, input_flags | O_NONBLOCK);
+        
+        // Write POST data to child's stdin with timeout
         ssize_t written = 0;
         size_t total_written = 0;
         size_t data_size = post_data.size();
         bool write_error = false;
         
-        while (total_written < data_size && !write_error) {
+        while (total_written < data_size && !write_error && !timeout_occurred) {
+            if (time(NULL) - start_time > CGI_TIMEOUT) {
+                std::cerr << "CGI script execution timed out during POST data write after " << CGI_TIMEOUT << " seconds" << std::endl;
+                kill(pid, SIGKILL);
+                timeout_occurred = true;
+                break;
+            }
+            
             written = write(input_fd[1], post_data.c_str() + total_written, data_size - total_written);
             if (written > 0) {
                 total_written += written;
             } else if (written == 0) {
-                // No data written, try again
                 continue;
-            } else {
-                std::cerr << "Failed to write POST data" << std::endl;
-                write_error = true;
-                break;
             }
         }
         close(input_fd[1]);
+        
+        if (timeout_occurred) {
+            close(fd[0]);
+            return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit during POST data write" << std::endl, 3);
+        }
     }
-
-
-
     
-    char buffer[10000];
+    char buffer[1024];
 	std::string content;
-    
-// Simplified reading without poll
-    while (true)
+
+    while (true) 
     {
+        // Check if we've exceeded our timeout
+        if (time(NULL) - start_time > CGI_TIMEOUT) {
+            std::cerr << "CGI script execution timed out after " << CGI_TIMEOUT << " seconds" << std::endl;
+                kill(pid, SIGKILL);
+            timeout_occurred = true;
+            break;
+        }
         ssize_t n = read(fd[0], buffer, sizeof(buffer));
         if (n > 0) {
             content.append(buffer, n);
         } else if (n == 0) {
-            // EOF - child process ended
-            break;
-        } else {
-            // Error
-            std::cerr << "Read error" << std::endl;
-            break;
+            break; // EOF
         }
     }
     
@@ -206,12 +216,11 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     
     // Wait for child if it's still running
     int status = 0;
-    waitpid(pid, &status, 0);
-    
+    if (!timeout_occurred) {
+        waitpid(pid, &status, 0);
+    }
     std::cout << "++status: " << status << std::endl;
-    
-    // CHECK IF CHILD WAS KILLED BY ALARM SIGNAL
-    if (WIFSIGNALED(status) && WTERMSIG(status) == SIGALRM) {
+    if (timeout_occurred) {
         return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit" << std::endl, 3);
     } else if (WIFEXITED(status)) {
         if (WEXITSTATUS(status) == 1) {
@@ -225,6 +234,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     
 	std::cout << "####content###" << std::endl;
     // std::cout << content;
+
     if (check_extension(full_path) == 1)
     {
         status = check_content(content);
@@ -328,7 +338,7 @@ int cgi_handler(Client &client , std::string body)
 		else if (code == 2)
 			interpreter = "/usr/bin/python3";
 		int status = exec_script(full_path, env, interpreter, client, body);
-
+        std::cout << "status: " << status << std::endl;
         for (size_t i = 0; i < env_vec.size() - 1; ++i)
         {
             delete[] env_vec[i];

@@ -21,7 +21,6 @@ class Confile{
         size_t number_of_server;
         bool status;
         Confile();
-        ~Confile();
         Confile(const Confile& other);
         Confile& operator=(const Confile& other);
 
