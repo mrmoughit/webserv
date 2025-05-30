@@ -92,7 +92,7 @@ ServerBlock Confile::pars_server(std::vector<std::string>& lines, size_t& i)
     size_t hold = i;
     if (check_line(lines, i))
     {
-        status = false; //status is public memeber in confileclass
+        status = false;
         return (server);
     }
     i = hold;

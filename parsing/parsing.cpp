@@ -25,9 +25,6 @@ std::vector <std::string> get_lines(std::vector <std::string> parts)
 			lines.push_back(line);
 		i++;
 	}
-    // for (size_t i = 0; i < lines.size(); ++i) {
-    //	  std::cout << "line " << i + 1 << ": " << lines[i] << std::endl;
-	// }
 	return lines;
 }
 
@@ -73,7 +70,7 @@ std::vector<std::string> split_words(std::string line)
 		pos = found + 1;
 		found = line.find(".", pos);
 	}
-    if (pos != 0)// condition to avoid case of spilting string like this "" it will fill vector with nothing 
+    if (pos != 0)
     {
         tmp = line.substr(pos);
         words.push_back(tmp);
@@ -81,7 +78,6 @@ std::vector<std::string> split_words(std::string line)
 
     return words;
 }
-
 
 
 int check_line(std::vector<std::string>& lines, size_t& i)

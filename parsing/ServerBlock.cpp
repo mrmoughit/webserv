@@ -154,8 +154,6 @@ bool ServerBlock::is_valid_method(std::string path, std::string method)
         }
         i++;
     }
-    // std::cout  <<  "nOOOOOOOOOOOOOOO " << std::endl;
-
     return true;
 }
 
@@ -188,8 +186,6 @@ std::string ServerBlock::find_error_page_path(int n){
     (void)n;
     while (it != error_pages.end())
     {
-        // std::cout << it->first << std::endl;
-        // std::cout << it->second << std::endl;
         if(it->first == n)
             return it->second;
         ++it;

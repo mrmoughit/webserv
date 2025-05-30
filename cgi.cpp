@@ -2,12 +2,9 @@
 #define CGI_TIMEOUT 5
 
 
-
-
 int check_status(std::string header)
 {
     std::vector <std::string> words = get_words(header);
-    std::cout << "word 1: " << words[0] << std::endl;
     if (!words.empty())
     {
         if (words[0] == "Status:")
@@ -29,12 +26,9 @@ int check_content(std::string& content)
     std::string delimiter = "\r\n\r\n";
     size_t pos = content.find(delimiter);
         if (pos != std::string::npos) {
-        // Extract from the end of the delimiter to the end of the string
         std::string header = content.substr(0, pos);
-        std::cout << std::endl << "=> header: " << header << "$$" << std::endl;
         std::string body = content.substr(pos + delimiter.length());
         content = body;
-        std::cout << "Body:\n" << body << std::endl;
         return (check_status(header));
     }
     return 0;
@@ -85,7 +79,6 @@ int check_extension(std::string full_path)
 int exec_script(std::string full_path, char *envp[], const char* interpreter,  Client &client, const std::string& post_data)
 {
     (void)client;
-    printf("Executing script: %s\n", full_path.c_str());
 	char *argv[] = {(char *)interpreter, (char *) full_path.c_str(), NULL};
 
     int fd[2];
@@ -93,7 +86,6 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     if (pipe(fd) == -1) 
         return (std::cerr << "Pipe creation failed: " << strerror(errno) << std::endl, -1);
 
-    // Create input pipe if POST data exists
     bool has_post_data = !post_data.empty();
     if (has_post_data) {
         if (pipe(input_fd) == -1) {
@@ -104,7 +96,6 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     }
 
 
-    // Set pipe to non-blocking mode
     int flags = fcntl(fd[0], F_GETFL, 0);
     fcntl(fd[0], F_SETFL, flags | O_NONBLOCK);
     
@@ -121,7 +112,6 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     }
     
     if (pid == 0) {
-        // Child process
         close(fd[0]);
 
         if (has_post_data) {
@@ -144,33 +134,29 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         
         close(fd[1]);
         execve(argv[0], argv, envp);
-        // If execve returns, it failed
         std::cerr << "execve failed: " << strerror(errno) << std::endl;
         exit(1);
     }
     
     close(fd[1]);
     
-    time_t start_time = time(NULL);
+    std::time_t start_time = std::time(NULL);
     bool timeout_occurred = false;
 	
 
     if (has_post_data) 
     {
-        close(input_fd[0]);  // Close read end of input pipe
-        
-        // Set input pipe to non-blocking mode for timeout handling
+        close(input_fd[0]);
         int input_flags = fcntl(input_fd[1], F_GETFL, 0);
         fcntl(input_fd[1], F_SETFL, input_flags | O_NONBLOCK);
-        
-        // Write POST data to child's stdin with timeout
+
         ssize_t written = 0;
         size_t total_written = 0;
         size_t data_size = post_data.size();
         bool write_error = false;
         
         while (total_written < data_size && !write_error && !timeout_occurred) {
-            if (time(NULL) - start_time > CGI_TIMEOUT) {
+            if (std::time(NULL) - start_time > CGI_TIMEOUT) {
                 std::cerr << "CGI script execution timed out during POST data write after " << CGI_TIMEOUT << " seconds" << std::endl;
                 kill(pid, SIGKILL);
                 timeout_occurred = true;
@@ -197,8 +183,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
 
     while (true) 
     {
-        // Check if we've exceeded our timeout
-        if (time(NULL) - start_time > CGI_TIMEOUT) {
+        if (std::time(NULL) - start_time > CGI_TIMEOUT) {
             std::cerr << "CGI script execution timed out after " << CGI_TIMEOUT << " seconds" << std::endl;
                 kill(pid, SIGKILL);
             timeout_occurred = true;
@@ -208,18 +193,15 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         if (n > 0) {
             content.append(buffer, n);
         } else if (n == 0) {
-            break; // EOF
+            break;
         }
     }
     
     close(fd[0]);
-    
-    // Wait for child if it's still running
     int status = 0;
     if (!timeout_occurred) {
         waitpid(pid, &status, 0);
     }
-    std::cout << "++status: " << status << std::endl;
     if (timeout_occurred) {
         return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit" << std::endl, 3);
     } else if (WIFEXITED(status)) {
@@ -231,14 +213,11 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     } else if (WIFSIGNALED(status)) {
         return (std::cerr << "500 Internal Server Error: Script terminated by signal " << WTERMSIG(status) << std::endl, 1);
     }
-    
-	std::cout << "####content###" << std::endl;
-    // std::cout << content;
+
 
     if (check_extension(full_path) == 1)
     {
         status = check_content(content);
-        std::cout << "->Status: " << status << std::endl;
         if (status == 500)
         return (std::cerr << "500 Internal Server Error: Script terminated by signal " << std::endl, 1);
         if (status == 404)
@@ -269,7 +248,6 @@ std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string 
     std::map<std::string, std::string>::iterator it;
     for (it  = map.begin(); it != map.end(); ++it)
     {
-        // std::cout << it->first << " => " << it->second << std::endl;
         std::string key = convert_to_up(it->first);
         if (key == "CONTENT_TYPE" || key == "CONTENT_LENGTH")
         {
@@ -314,7 +292,6 @@ std::vector<char*> get_env( std::map<std::string,std::string> &map, std::string 
 
 int cgi_handler(Client &client , std::string body)
 {
-    
     std::map<std::string,std::string> map = client.get_request().get_headers_map();
     
 	std::string full_path = client.get_request().get_path();
@@ -322,28 +299,22 @@ int cgi_handler(Client &client , std::string body)
 
     std::vector<char*> env_vec = get_env(map, full_path, method);
     char** env = &env_vec[0];
-    for (int i = 0; env[i] != NULL; ++i) {
-        std::cout << env[i] << std::endl;
-    }
-
+ 
 	int code = check_extension(full_path);
 	const char* interpreter;
 	if (code > 0)
 	{
 		if (code == 1)
-		{
-			// change redirect status from envp to 1; 
+		{ 
 			interpreter = "/usr/bin/php-cgi";
 		}
 		else if (code == 2)
 			interpreter = "/usr/bin/python3";
 		int status = exec_script(full_path, env, interpreter, client, body);
-        std::cout << "status: " << status << std::endl;
         for (size_t i = 0; i < env_vec.size() - 1; ++i)
         {
             delete[] env_vec[i];
         }
-
 		return status;
 	}
 	else

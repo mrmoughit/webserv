@@ -26,6 +26,5 @@ class Confile{
 
         ServerBlock pars_server(std::vector<std::string>& lines, size_t &i);
         void set_server(std::vector<std::string> lines);
-        // void set_default_server(std::vector <ServerBlock> default_servers);
         std::vector <ServerBlock>& get_server();
 };
