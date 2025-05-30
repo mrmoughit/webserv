@@ -12,27 +12,22 @@ int get_parts(char **av, std::vector <std::string>& parts)
     std::vector<std::string> lines;
     while(std::getline(infile, line, '\n'))
         lines.push_back(line);
-    std::cout << "size : " << lines.size() << std::endl;
     if (lines.empty())
         return (std::cerr << "Error empty file!" << std::endl, 1);
     size_t i = 0;
     size_t j;
     size_t last_full_line = 0;
-    while ( i < lines.size()) //while loop to skip last empty lines to get the real last line
+    while ( i < lines.size())
     {
-        // std::cout << "servive: " << "i: " << i << "line: " << lines[i] << std::endl;
         if (!lines[i].empty() && check_empt(lines[i].c_str()))
         {
-            // std::cout << "not empty" << std::endl;
             last_full_line = i;
             j  = 0;
             while (j < lines[i].length())
             {
                 if (lines[i][j] == '#')
                 {
-                    std::cout << "line: " << lines[i] << std::endl;
                     lines[i] = lines[i].substr(0, j);
-                    std::cout << "line after substr: " << lines[i] << std::endl;
                     break;
                 }
                 j++;
@@ -43,7 +38,7 @@ int get_parts(char **av, std::vector <std::string>& parts)
     if (last_full_line == 0)
         return (std::cerr << "Error empty file!" << std::endl, 1);
     std::string newlastline = trimstr(lines[last_full_line]);
-    if (newlastline.find(';') != std::string::npos) //check line l3amer
+    if (newlastline.find(';') != std::string::npos)
         return (std::cout << "Error ';' at the end of file!" << std::endl, 1);
     std::string lines_string;
     i = 0;

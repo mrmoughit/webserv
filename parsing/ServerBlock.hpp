@@ -24,12 +24,9 @@ class ServerBlock{
         std::vector <std::string>      index;
         std::vector<RouteBlock>        routes;
         std::map<int, std::string>     error_pages;
-        // std::string                    client_body_temp_path;
     public:
         int is_location_url;
-        int dupindex; 
         ServerBlock();
-        ~ServerBlock();
         ServerBlock(const ServerBlock& other);
         ServerBlock& operator=(const ServerBlock& other);
         void set_host(std::string set_host);
@@ -52,4 +49,6 @@ class ServerBlock{
         std::string find_error_page_path(int n);
         std::string  is_location_path(std::string path);
         void set_dafault_data(void);
+        void update_server_info(RouteBlock &route);
+
 };
