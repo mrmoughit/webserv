@@ -153,6 +153,7 @@ bool check_if_have_cgi(Client &client)
                                 if (client.get_request().get_content_length() == body_cgi.size())
                                 {
                                     cgi_handler(client, body_cgi, path);
+                                    std::cout << client.get_response().get_response() << std::endl;
                                     body_cgi = "";
                                     client.set_all_recv(true);
                                 }

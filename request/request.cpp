@@ -252,6 +252,8 @@ void hanlde_post_request(Client &client)
         std::string dirname =   get_file_name(&client);
         std::string file_name = ft_generate_file_names(extension , dirname);
 
+
+
         if (dirname.empty()){
             first = writed = 0;
             client.set_all_recv(true);

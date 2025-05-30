@@ -91,6 +91,7 @@ std::string ft_generate_file_names(const std::string &extension, std::string dir
     return NULL;
 }
 
+
 void chunked(Client &client)
 {
     static std::string request;
@@ -352,49 +353,3 @@ void boundary(Client &client)
     }
 }
 
-void handle_boundary_chanked(Client &client)
-{
-    static std::string backup;
-    std::string request = backup + client.get_request().get_s_request();
-    backup.clear();
-
-    while (true)
-    {
-
-        size_t pos = request.find("\r\n");
-        if (pos == std::string::npos)
-        {
-
-            backup = request;
-            return;
-        }
-
-        std::string line_size = request.substr(0, pos);
-        size_t size = hex_to_int(line_size);
-
-        if (size == 0)
-        {
-            client.set_all_recv(true);
-            client.get_request().set_s_request(request);
-            backup.clear();
-            boundary(client);
-            return;
-        }
-
-        if (request.size() < pos + 2 + size + 2)
-        {
-            backup = request;
-            return;
-        }
-
-        std::string chunk = request.substr(pos + 2, size);
-
-        client.get_request().set_s_request(chunk);
-        boundary(client);
-
-        request = request.substr(pos + 2 + size + 2);
-
-        if (request.empty())
-            return;
-    }
-}
