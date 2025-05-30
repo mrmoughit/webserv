@@ -141,46 +141,23 @@ void trim_non_printable(std::string &str)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void create_file(std::string &buffer, Client &client, int flag)
 {
     static std::ofstream file;
+    static bool file_created = false;
     
+
     if (flag == 2)
     {
-        // Close file and return
         if (file.is_open()) {
             file.close();
         }
+        file_created = false;
         return;
     }
     
     if (flag == 1)
     {
-        // Write raw binary data to already open file - NO line processing
         if (file.is_open()) {
             file.write(buffer.c_str(), buffer.size());
             file.flush();
@@ -188,7 +165,7 @@ void create_file(std::string &buffer, Client &client, int flag)
         return;
     }
     
-    // flag == 0: Parse headers and create new file
+    
     std::istringstream ss(buffer);
     std::string line;
     std::getline(ss, line);
@@ -196,6 +173,7 @@ void create_file(std::string &buffer, Client &client, int flag)
     if (line.find("Content-Disposition:") != std::string::npos)
     {
         size_t filename_pos = line.find("filename=\"");
+
         if (filename_pos != std::string::npos)
         {
             filename_pos += 10;
@@ -215,7 +193,6 @@ void create_file(std::string &buffer, Client &client, int flag)
                 return;
             }
             
-            // Close previous file if open
             if (file.is_open()) {
                 file.close();
             }
@@ -225,15 +202,14 @@ void create_file(std::string &buffer, Client &client, int flag)
                 set_response_error(&client, 500);
                 return;
             }
+            file_created = true;
             
-            // Skip Content-Type header and find empty line
             while (std::getline(ss, line)) {
                 if (line.empty() || line == "\r") {
-                    break; // Found empty line, file content starts next
+                    break;
                 }
             }
             
-            // Get remaining content after headers as raw binary data
             std::string remaining_content;
             std::string temp_line;
             bool first_line = true;
@@ -250,10 +226,8 @@ void create_file(std::string &buffer, Client &client, int flag)
                 file.flush();
             }
         }
-    }
-    else
-    {
-        set_response_error(&client, 415);
+        else
+            set_response_error(&client, 415);
     }
 }
 
@@ -273,12 +247,9 @@ int check_if_have_new_boundary(const std::string &buffer, const std::string &bou
     
     size_t boundary_end = pos + boundaryWithPrefix.size();
     
-    // Check bounds before accessing buffer
     if (boundary_end + 1 < buffer.size() &&
         buffer[boundary_end] == '-' && buffer[boundary_end + 1] == '-')
-    {
         client.set_all_recv(true);
-    }
     
     return static_cast<int>(pos);
 }
@@ -288,34 +259,29 @@ void boundary(Client &client)
     static std::string buffer;
     static int call_count = 0;
     static std::string boundary_str;
+    static bool processing_file = false;
     
     buffer += client.get_request().get_s_request();
     
     if (call_count == 0)
     {
-        // Extract boundary from first line
         size_t first_line_end = buffer.find('\n');
         if (first_line_end == std::string::npos) {
-            return; // Wait for more data
+            return;
         }
         
         std::string first_line = buffer.substr(0, first_line_end);
         
-        // Remove \r if present
         if (!first_line.empty() && first_line[first_line.length() - 1] == '\r') {
             first_line = first_line.substr(0, first_line.length() - 1);
         }
         
-        // Extract boundary (remove leading --)
         if (first_line.length() > 2 && first_line.substr(0, 2) == "--") {
             boundary_str = first_line.substr(2);
         } else {
-            std::cerr << "Invalid boundary format" << std::endl;
-            set_response_error(&client, 400);
             return;
         }
         
-        // Remove first line from buffer
         buffer = buffer.substr(first_line_end + 1);
     }
     call_count++;
@@ -326,9 +292,9 @@ void boundary(Client &client)
         
         if (boundary_pos == -1)
         {
-            // No boundary found, process current buffer
-            if (call_count == 1) {
+            if (!processing_file) {
                 create_file(buffer, client, 0);
+                processing_file = true;
             } else {
                 create_file(buffer, client, 1);
             }
@@ -338,11 +304,14 @@ void boundary(Client &client)
         
         if (boundary_pos == 0)
         {
-            // Boundary at start, skip it and continue
+            if (processing_file) {
+                create_file(buffer, client, 2);
+                processing_file = false;
+            }
+            
             std::string boundaryWithPrefix = "--" + boundary_str;
             size_t skip_size = boundaryWithPrefix.size();
             
-            // Skip \r\n after boundary
             if (skip_size < buffer.size() && buffer[skip_size] == '\r') skip_size++;
             if (skip_size < buffer.size() && buffer[skip_size] == '\n') skip_size++;
             
@@ -351,44 +320,37 @@ void boundary(Client &client)
         }
         else
         {
-            // Found boundary, process data before it
             std::string data_chunk = buffer.substr(0, boundary_pos);
             
-            // Remove trailing \r\n before boundary
             if (data_chunk.length() >= 2 && 
                 data_chunk.substr(data_chunk.length() - 2) == "\r\n") {
                 data_chunk = data_chunk.substr(0, data_chunk.length() - 2);
             }
             
-            int flag = client.get_all_recv() ? 2 : 1;
-            create_file(data_chunk, client, flag);
+            if (!processing_file) {
+                create_file(data_chunk, client, 0);
+                processing_file = true;
+            } else {
+                create_file(data_chunk, client, 1);
+            }
+            create_file(data_chunk, client, 2);
+            processing_file = false;
             
-            // Remove processed data from buffer
             buffer = buffer.substr(boundary_pos);
         }
     }
     
     if (client.get_all_recv())
     {
+        if (processing_file) {
+            create_file(buffer, client, 2);
+        }
         buffer.clear();
         boundary_str.clear();
         call_count = 0;
+        processing_file = false;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void handle_boundary_chanked(Client &client)
 {
@@ -433,8 +395,6 @@ void handle_boundary_chanked(Client &client)
         request = request.substr(pos + 2 + size + 2);
 
         if (request.empty())
-        {
             return;
-        }
     }
 }
