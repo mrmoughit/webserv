@@ -257,8 +257,6 @@ std::string get_file_name(Client *client){
 
         struct stat statbuf;
 
-        std::cout << dir << std::endl;
-
         if (stat(dir.c_str(), &statbuf) == -1) {
             set_response_error(client , 502);
             return "";

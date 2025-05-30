@@ -1,6 +1,27 @@
 #include "../webserver.hpp"
 
-std::string get_response_title(int status ){
+int check_uri(Client *client)
+{
+
+    std::string path = client->get_request().get_path();
+    struct stat statbuf;
+
+    if (stat(path.c_str(), &statbuf) == -1)
+    {
+        set_response_error(client, 404);
+        return 0;
+    }
+
+    if (!S_ISDIR(statbuf.st_mode))
+    {
+        set_response_error(client, 405);
+        return 0;
+    }
+    return 1;
+
+}
+std::string get_response_title(int status)
+{
 
     if (status == 400)
         return "Bad Request";
@@ -24,10 +45,9 @@ std::string get_response_title(int status ){
         return "	Internal Server Error";
     if (status == 504)
         return "	Gateway Timeout";
-    else 
+    else
         return "ok";
 }
-
 
 void trim(std::string &str)
 {
@@ -185,7 +205,6 @@ bool check_if_have_cgi(Client &client)
                                     client.set_all_recv(true);
                                 }
                             }
-                            
                         }
                         else if (client.get_request().get_method() == "GET")
                         {

@@ -139,3 +139,4 @@ std::string chunked_for_cgi(Client *client);
 bool check_if_have_cgi(Client &client);
 int hex_to_int(const std::string &hexStr);
 std::string get_response_title(int status );
+int check_uri(Client *client);
