@@ -1,65 +1,24 @@
 
-response in cgi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 upload dir if not exist or permission not responed 
-
-
-
-
-khalid 
-
-location /error{
- 
- cgi not closing connection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-cgi post text plain
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-404 ok ??????????
+i dont recv any request in the second time in cgi 

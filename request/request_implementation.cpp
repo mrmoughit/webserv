@@ -170,6 +170,23 @@ std::string status_505 =
     "</div>"
     "</body></html>";
 
+std::string status_504 =
+    "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>504</title>"
+    "<style>"
+    "  body{font-family:\"Arial\",sans-serif;background:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}"
+    "  .error-container{text-align:center;max-width:600px;padding:40px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}"
+    "  h1{font-size:100px;margin:0;color:#e67e22}"
+    "  p{font-size:18px;margin-top:20px}"
+    "  a{color:#3498db;text-decoration:none}"
+    "  a:hover{text-decoration:underline}"
+    "</style></head><body>"
+    "<div class=\"error-container\">"
+    "  <h1>504</h1>"
+    "  <p>Gateway Timeout: The server took too long to respond.</p>"
+    "  <p><a href=\"/\">Go back to homepage</a></p>"
+    "</div>"
+    "</body></html>";
+
 void set_response_error(Client *client, int status)
 {
     std::string error_path = client->server_client_obj.find_error_page_path(status);
@@ -197,6 +214,7 @@ void set_response_error(Client *client, int status)
                 res += " \r\n";
             }
         }
+
         std::ostringstream content_length;
         std::ostringstream oss;
         oss << status;
@@ -223,12 +241,14 @@ void set_response_error(Client *client, int status)
             string = status_502;
         else if (status == 500)
             string = status_500;
+        else if (status == 504)
+            string = status_504;
 
         res += str;
         content_length << string.size();
         str = content_length.str();
 
-        res += " OK\r\n";
+        res += get_response_title(status) + " \r\n";
         res += "Content-Type: text/html; charset=UTF-8\r\n";
         res += "Content-Length: " + str + "\r\n";
         if (client->get_Alive())
@@ -248,7 +268,7 @@ void set_response_error(Client *client, int status)
     std::string res = fill_response(client->get_response().get_fileStream(), error_path, *client, status);
     if (res.empty())
     {
-        res = "HTTP/1.1 500 OK\r\n";
+        res = "HTTP/1.1 500 " + get_response_title(status) + " \r\n";;
         res += "Content-Type: text/html; charset=UTF-8\r\n";
         if (client->get_Alive())
             res += "Connection: keep-alive\r\n";

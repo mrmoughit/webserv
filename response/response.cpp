@@ -259,17 +259,17 @@ std::string get_file_name(Client *client){
 
         std::cout << dir << std::endl;
 
-        if (stat(dir.c_str(), &statbuf) == -1) { // if not exist path 
+        if (stat(dir.c_str(), &statbuf) == -1) {
             set_response_error(client , 502);
             return "";
         }
         
-        if (!S_ISDIR(statbuf.st_mode)) { // not a dir 
+        if (!S_ISDIR(statbuf.st_mode)) {
             set_response_error(client , 502);
             return "";
         }
         
-        if ((statbuf.st_mode & S_IWUSR) == 0) {  // for permession 
+        if ((statbuf.st_mode & S_IWUSR) == 0) { 
             set_response_error(client , 502);
             return "";
         }
@@ -282,17 +282,17 @@ std::string get_file_name(Client *client){
 
         struct stat statbuf;
 
-        if (stat(dir.c_str(), &statbuf) == -1) { // if not exist path 
+        if (stat(dir.c_str(), &statbuf) == -1) {
             set_response_error(client , 502);
             return "";
         }
         
-        if (!S_ISDIR(statbuf.st_mode)) { // not a dir 
+        if (!S_ISDIR(statbuf.st_mode)) {
             set_response_error(client , 502);
             return "";
         }
         
-        if ((statbuf.st_mode & S_IWUSR) == 0) {  // for permession 
+        if ((statbuf.st_mode & S_IWUSR) == 0) { 
             set_response_error(client , 502);
             return "";
         }
