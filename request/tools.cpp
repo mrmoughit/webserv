@@ -191,7 +191,6 @@ bool check_if_have_cgi(Client &client)
                         {
                             client.set_all_recv(true);
                             cgi_handler(client, "", path);
-                            std::cout <<"-------------------->> " <<  client.get_response().get_response() << std::endl;
                         }
                         else
                         {
@@ -215,7 +214,7 @@ bool check_if_have_cgi(Client &client)
                     std::string content_type = client.get_request().get_map_values("Content-Type");
                     std::string chunk = client.get_request().get_map_values("Transfer-Encoding");
 
-                    if (chunk == "chunked" && (content_type == "application/x-www-form-urlencoded" || content_type == "text/plain"))
+                    if (chunk == "chunked")
                     {
                         std::string tmp = chunked_for_cgi(&client);
                         if (!tmp.empty())
@@ -226,7 +225,7 @@ bool check_if_have_cgi(Client &client)
                             body_cgi = "";
                         }
                     }
-                    else if (content_type == "application/x-www-form-urlencoded" || content_type == "text/plain")
+                    else
                     {
                         body_cgi += client.get_request().get_s_request();
                         if (client.get_request().get_content_length() == body_cgi.size())
@@ -236,8 +235,6 @@ bool check_if_have_cgi(Client &client)
                             client.set_all_recv(true);
                         }
                     }
-                    else
-                        return (set_response_error(&client, 415), 1);
                 }
                 else if (client.get_request().get_method() == "GET")
                 {

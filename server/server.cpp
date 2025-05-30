@@ -293,7 +293,7 @@ void Server::startServer() {
                 
                 Client& client = clients[client_index];
                 handleClientWrite(idx);
-                if (client.get_response().get_fileStream().eof()) {
+                if (!client.get_response().get_fileStream().is_open() ||  client.get_response().get_fileStream().eof()) {
                     pollfds[idx].events = POLLIN;
                     
                     // Handle connection closure or keep-alive
