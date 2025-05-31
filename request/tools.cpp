@@ -110,7 +110,7 @@ std::string fill_response(std::ifstream &fileStream, std::string &filePath, Clie
 
     if (!fileStream.is_open())
     {
-        std::cout << "cat't open " << filePath << std::endl;
+        std::cout << "cant't open " << filePath << std::endl;
         return "";
     }
 

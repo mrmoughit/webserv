@@ -114,25 +114,27 @@ void response_to_get(Client &client)
         
         else if (client.server_client_obj.is_location_url  > -1){                          //  if i have locaion 
             if (client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index().size() == 0)
-                str =  client.get_request().get_path() + "/" + "index.html";
+            str =  client.get_request().get_path() + "/" + "index.html";
             else {
                 for (size_t i = 0 ; i < client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index().size() ; i++){
-
+                    
                     str = client.get_request().get_path() + "/" + client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index()[i];
                     if (stat(str.c_str(), &default_file) == 0)
-                        break ;
+                    break ;
                 }
             }
         }
-
+        
         else if (client.server_client_obj.is_location_url == -1 && client.server_client_obj.get_index().size()) { 
             for (size_t i = 0 ; i < client.server_client_obj.get_index().size() ; i++){
                 str = client.get_request().get_path() + "/" + client.server_client_obj.get_index()[i];
                 if (stat(str.c_str(), &default_file) == 0)
-                    break ;
+                break ;
             }
         }
+
         
+
         if (stat(str.c_str(), &default_file) == -1)
         {
             flag = 0;
@@ -143,6 +145,7 @@ void response_to_get(Client &client)
             }
         }
         
+
         if (flag == 2 && client.server_client_obj.is_location_url == -1){
             set_response_error(&client , 403);
             closedir(dir);
@@ -155,13 +158,20 @@ void response_to_get(Client &client)
                 return ;
             }
             res = fill_response(client.get_response().get_fileStream(), str, client , 200);
-            client.get_response().set_response(res);
+            if (res.empty())
+                set_response_error(&client , 403);
+            else
+                client.get_response().set_response(res);
             closedir(dir);
             return ;
         }
         else if (flag == 0){
+
             res = fill_response(client.get_response().get_fileStream(), str, client , 200);
-            client.get_response().set_response(res);
+            if (res.empty())
+                set_response_error(&client , 403);
+            else
+                client.get_response().set_response(res);
             closedir(dir);
             return ;
         }
@@ -236,7 +246,10 @@ void response_to_get(Client &client)
         }
                 
         res = fill_response(client.get_response().get_fileStream(), pat, client , 200);
-        client.get_response().set_response(res);
+        if (res.empty())
+            set_response_error(&client , 403);
+        else
+            client.get_response().set_response(res);
     }
     else
     {

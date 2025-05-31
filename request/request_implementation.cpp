@@ -423,19 +423,25 @@ void parse_request(Client &client)
         return;
 }
 
-void handle_delete_request(std::string path)
+void handle_delete_request( Client * client , std::string path)
 {
     struct stat buf;
 
     if (stat(path.c_str(), &buf) == -1)
     {
-        throw std::runtime_error("Invalid path");
+        std::cout << "here    " << std::endl;
+        if (errno == ENOENT)
+            return set_response_error(client , 404);
+        else if (errno == EACCES)
+            return set_response_error(client , 403);
     }
+
     if (S_ISDIR(buf.st_mode))
     {
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
         {
+            std::cout << "here    2" << std::endl;
             throw std::runtime_error("cannot open dir ");
         }
         struct dirent *entry;
@@ -446,10 +452,11 @@ void handle_delete_request(std::string path)
                 continue;
             }
             std::string fullPath = std::string(path) + "/" + entry->d_name;
-            handle_delete_request(fullPath);
+            handle_delete_request(client , fullPath);
         }
         if (remove(path.c_str()))
         {
+            std::cout << "here    3" << std::endl;
             throw std::runtime_error("remove field , can't remove dir ");
         }
         closedir(dir);
@@ -458,6 +465,7 @@ void handle_delete_request(std::string path)
     {
         if (remove(path.c_str()) != 0)
         {
+            std::cout << "here    4" << std::endl;
             throw std::runtime_error("remove field , can't remove file ");
         }
     }
@@ -519,14 +527,9 @@ void check_request(Client &client)
     {
         client.set_all_recv(true);
         std::string path = client.get_request().get_path();
-        try
-        {
-            handle_delete_request(path);
-            set_response_error(&client, 204);
-        }
-        catch (const std::exception &e)
-        {
-            set_response_error(&client, 404);
-        }
+
+        set_response_error(&client, 204);
+        handle_delete_request(&client , path);
+
     }
 }
