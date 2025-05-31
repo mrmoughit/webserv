@@ -31,32 +31,34 @@ except FileNotFoundError:
 
 
 if key_found:
-    html_content = f"""\
-<html>
-<head>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            text-align: center;
-        }}
-        h1 {{
-            color: #4CAF50;
-            font-size: 36px;
-        }}
-        p {{
-            font-size: 18px;
-            margin: 10px 0;
-        }}
-    </style>
-</head>
-<body>
-    <h1>Key Found from session script</h1>
-    <p>Welcome, {username}!</p>
-    <p>Your key was found and is valid.</p>
-</body>
-</html>
-"""
+    print(f"""\
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                text-align: center;
+            }}
+            h1 {{
+                color: #4CAF50;
+                font-size: 36px;
+            }}
+            p {{
+                font-size: 18px;
+                margin: 10px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Key Found </h1>
+        <p>Welcome, {username}!</p>
+        <p>Your key was found and is valid.</p>
+    </body>
+    </html>
+    """)
+
+
 
 
