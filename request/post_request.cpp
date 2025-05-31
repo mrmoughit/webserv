@@ -145,7 +145,7 @@ void trim_non_printable(std::string &str)
 void create_file(std::string &buffer, Client &client, int flag)
 {
     static std::ofstream file;
-    static bool file_created = false;
+    // static bool file_created = false;
     
 
     if (flag == 2)
@@ -153,7 +153,7 @@ void create_file(std::string &buffer, Client &client, int flag)
         if (file.is_open()) {
             file.close();
         }
-        file_created = false;
+        // file_created = false;
         return;
     }
     
@@ -203,7 +203,7 @@ void create_file(std::string &buffer, Client &client, int flag)
                 set_response_error(&client, 500);
                 return;
             }
-            file_created = true;
+            // file_created = true;
             
             while (std::getline(ss, line)) {
                 if (line.empty() || line == "\r") {

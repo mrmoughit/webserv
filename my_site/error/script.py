@@ -22,7 +22,7 @@ def generate_random_key(length=50):
 
 if username == db_user and password == db_pass:
     key = generate_random_key(50)
-    with open('db_cgi.txt', 'a') as file:
+    with open('db_cgi.txt', 'w') as file:
         file.write(f"user {username} key {key}\n")
 
     html_content = f"""\
@@ -54,12 +54,6 @@ if username == db_user and password == db_pass:
     </html>
     """
     
-    print("HTTP/1.1 200 ok")
-    print("Content-Type: text/html")
-    print(f"Content-Length: {len(html_content.encode('utf-8'))}")
-    print(f"Set-Cookie: session_key={key}; Path=/;")
-    print()
-    print(html_content)
 else:
     html_content = f"""\
     <html>
@@ -83,9 +77,3 @@ else:
     </body>
     </html>
     """
-
-    print("HTTP/1.1 200 ok")
-    print("Content-Type: text/html")
-    print(f"Content-Length: {len(html_content.encode('utf-8'))}")
-    print()
-    print(html_content)

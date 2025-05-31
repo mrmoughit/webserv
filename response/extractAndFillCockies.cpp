@@ -1,16 +1,17 @@
 #include "../webserver.hpp"
 
-void extract_cockies(){
+std::string get_cockies(){
+
     std::ifstream file("db_cgi.txt");
 
     if (!file.is_open()) {
         std::cerr << "Error: Could not open the file!" << std::endl;
-        return ;
+        return "";
     }
 
     std::string line;
+    std::string user, key;
     while (std::getline(file, line)) {
-        std::string user, key;
 
         size_t user_pos = line.find("user");
         size_t key_pos = line.find("key");
@@ -26,12 +27,18 @@ void extract_cockies(){
             size_t key_start = key_pos + 4; 
             key = line.substr(key_start);
 
-            std::cout << "User: " << user << std::endl;
-            std::cout << "Key: " << key << std::endl;
-        } else {
-            std::cerr << "Error: 'user' or 'key' not found in the line!" << std::endl;
         }
     }
-
     file.close();
+    return key;
 }
+
+
+
+
+
+
+
+
+
+

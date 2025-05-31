@@ -13,7 +13,8 @@ SRC = request/request.cpp \
 	  parsing/check_tools.cpp\
 	  main.cpp \
 	  cgi.cpp \
-	  request/post_request.cpp
+	  request/post_request.cpp\
+	  response/extractAndFillCockies.cpp
 
 
 OBJ = $(SRC:.cpp=.o)

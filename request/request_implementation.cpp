@@ -501,7 +501,7 @@ void check_request(Client &client)
         std::string check = transfer_encoding;
         if (!check_uri(&client))
             return ;
-        if (content_type.find("boundary=") != std::string::npos && check.empty())
+        if (content_type.find("boundary=") != std::string::npos && !check.empty())
             boundary(client);
 
         else if (check == "chunked")

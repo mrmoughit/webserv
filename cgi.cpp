@@ -199,9 +199,7 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
     
     close(fd[0]);
     int status = 0;
-    if (!timeout_occurred) {
-        waitpid(pid, &status, 0);
-    }
+    waitpid(pid, &status, 0);
     if (timeout_occurred) {
         return (std::cerr << "504 Gateway Timeout: Script execution exceeded time limit" << std::endl, set_response_error(&client , 504),3);
     } else if (WIFEXITED(status)) {
@@ -223,8 +221,33 @@ int exec_script(std::string full_path, char *envp[], const char* interpreter,  C
         if (status == 404)
             return (std::cerr << "404 Not Found: Requested file not found" << std::endl,set_response_error(&client , 404) , 2);
     }
-    std::string str = client.get_response().get_response();
-    str += content ;
+
+    int length = std::strlen(content.c_str());
+    std::stringstream ss;
+    ss << length;
+    std::string result = ss.str();
+
+
+    std::string str = "HTTP/1.1 200 OK\r\n";
+    str += "Server: webserv/0.1\r\n";
+    str += "Content-Type: text/html\r\n";
+    str += "Content-Length: ";
+    str += result;
+    str += "\r\n";
+    str += "Connection: close\r\n";
+
+
+
+    std::string cockies_key = get_cockies();
+    if (!cockies_key.empty()){
+        str += "Set-Cookie: session_id=";
+        str += cockies_key;
+        str += "; Path=/;\r\n";
+    }
+    str += "\r\n";
+    str += content;
+
+
     client.get_response().set_response(str);
     return 0;
 }

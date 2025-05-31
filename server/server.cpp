@@ -79,7 +79,7 @@ int Server::createServer(ServerConfig& config) {
     memset(&config.addr, 0, sizeof(config.addr));
     config.addr.sin_family = AF_INET;
     config.addr.sin_port = htons(config.port);
-    config.addr.sin_addr.s_addr = INADDR_ANY;
+    config.addr.sin_addr.s_addr = inet_addr(config.host.c_str());
     
     if (bind(server_fd, (struct sockaddr*)&config.addr, sizeof(config.addr)) < 0) {
         std::cerr << "Bind failed for " << config.host << ":" << config.port << std::endl;
