@@ -25,7 +25,7 @@ if username == db_user and password == db_pass:
     with open('db_cgi.txt', 'w') as file:
         file.write(f"user {username} key {key}\n")
 
-    html_content = f"""\
+    print(f"""\
     <html>
     <head>
         <style>
@@ -34,7 +34,7 @@ if username == db_user and password == db_pass:
                 background-color: #f4f4f9;
                 color: #333;
                 text-align: center;
-                margin:10%;
+                margin: 10%;
             }}
             h1 {{
                 color: #4CAF50;
@@ -52,10 +52,12 @@ if username == db_user and password == db_pass:
         <p>Your credentials are correct, and a cookie has been set.</p>
     </body>
     </html>
-    """
+    """)
     
 else:
-    html_content = f"""\
+    with open('db_cgi.txt', 'w'):
+        pass
+    print("""\
     <html>
     <head>
         <style>
@@ -76,4 +78,4 @@ else:
         <h1>Invalid credentials.</h1>
     </body>
     </html>
-    """
+    """)
