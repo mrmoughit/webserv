@@ -5,6 +5,7 @@ Request::Request()
     redirection = -1;
     index = false;
     is_string_req_send = false;
+    content_length = 0;
 }
 Request::~Request() {};
 

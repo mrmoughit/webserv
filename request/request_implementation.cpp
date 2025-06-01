@@ -405,7 +405,7 @@ void parse_request(Client &client)
         size_t size;
         ss >> size;
         client.get_request().set_content_length(size);
-        if (ss.fail() || size == 0)
+        if (ss.fail() || size == 0 || client.get_request().get_map_values("Content-Type") == "NULL")
         {
             set_response_error(&client, 400);
             return;
@@ -429,7 +429,6 @@ void handle_delete_request( Client * client , std::string path)
 
     if (stat(path.c_str(), &buf) == -1)
     {
-        std::cout << "here    " << std::endl;
         if (errno == ENOENT)
             return set_response_error(client , 404);
         else if (errno == EACCES)
@@ -441,7 +440,6 @@ void handle_delete_request( Client * client , std::string path)
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
         {
-            std::cout << "here    2" << std::endl;
             throw std::runtime_error("cannot open dir ");
         }
         struct dirent *entry;
@@ -465,7 +463,6 @@ void handle_delete_request( Client * client , std::string path)
     {
         if (remove(path.c_str()) != 0)
         {
-            std::cout << "here    4" << std::endl;
             throw std::runtime_error("remove field , can't remove file ");
         }
     }
