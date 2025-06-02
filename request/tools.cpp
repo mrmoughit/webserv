@@ -24,29 +24,33 @@ std::string get_response_title(int status)
 {
 
     if (status == 400)
-        return "Bad Request";
+        return " Bad Request";
     if (status == 404)
-        return "Not Found";
+        return " Not Found";
     if (status == 403)
-        return "Forbidden";
+        return " Forbidden";
     if (status == 201)
-        return "Created";
+        return " Created";
     if (status == 405)
-        return "Method Not Allowed";
+        return " Method Not Allowed";
     if (status == 415)
-        return "Unsupported Media Type";
+        return " Unsupported Media Type";
     if (status == 505)
-        return "HTTP Version Not Supported";
+        return " HTTP Version Not Supported";
     if (status == 413)
-        return "Payload Too Large";
+        return " Payload Too Large";
     if (status == 502)
-        return "Bad Gateway";
+        return " Bad Gateway";
     if (status == 500)
-        return "	Internal Server Error";
+        return " Internal Server Error";
     if (status == 504)
-        return "	Gateway Timeout";
+        return " Gateway Timeout";
+    else if (status == 204)
+        return " No Content";
+    else if (status == 431)
+        return " Request Header Fields Too Large";
     else
-        return "ok";
+        return " ok";
 }
 
 void trim(std::string &str)

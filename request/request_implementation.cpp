@@ -187,6 +187,42 @@ std::string status_504 =
     "</div>"
     "</body></html>";
 
+std::string status_204 =
+    "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>204</title>"
+    "<style>"
+    "  body{font-family:\"Arial\",sans-serif;background:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}"
+    "  .error-container{text-align:center;max-width:600px;padding:40px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}"
+    "  h1{font-size:100px;margin:0;color:#2ecc71}"
+    "  p{font-size:18px;margin-top:20px}"
+    "  a{color:#3498db;text-decoration:none}"
+    "  a:hover{text-decoration:underline}"
+    "</style></head><body>"
+    "<div class=\"error-container\">"
+    "  <h1>204</h1>"
+    "  <p>No Content: The request was successful, but there is no content to return.</p>"
+    "  <p><a href=\"/\">Go back to homepage</a></p>"
+    "</div>"
+    "</body></html>";
+
+
+
+std::string status_431 =
+    "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>431</title>"
+    "<style>"
+    "  body{font-family:\"Arial\",sans-serif;background:#f4f4f4;color:#333;margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh}"
+    "  .error-container{text-align:center;max-width:600px;padding:40px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.1);border-radius:8px}"
+    "  h1{font-size:100px;margin:0;color:#e74c3c}"
+    "  p{font-size:18px;margin-top:20px}"
+    "  a{color:#3498db;text-decoration:none}"
+    "  a:hover{text-decoration:underline}"
+    "</style></head><body>"
+    "<div class=\"error-container\">"
+    "  <h1>431</h1>"
+    "  <p>Request Header Fields Too Large: The server is refusing to process the request because the headers are too large.</p>"
+    "  <p><a href=\"/\">Go back to homepage</a></p>"
+    "</div>"
+    "</body></html>";
+
 void set_response_error(Client *client, int status)
 {
     std::string error_path = client->server_client_obj.find_error_page_path(status);
@@ -243,6 +279,10 @@ void set_response_error(Client *client, int status)
             string = status_500;
         else if (status == 504)
             string = status_504;
+        else if (status == 204)
+            string = status_204;
+           else if (status == 431)
+            string = status_431;
 
         res += str;
         content_length << string.size();
@@ -376,6 +416,14 @@ void parse_request(Client &client)
         client.get_response().set_response_index(true);
         return;
     }
+
+    int headers_len = client.get_request().get_headers_map().size();
+    if (headers_len == 0)
+        return set_response_error(&client , 400);
+    if (headers_len > 15)
+        return set_response_error(&client , 431);
+
+
     std::string tmp = client.get_request().get_map_values("Content-Length");
 
     std::string tmp1 = pa;
@@ -398,6 +446,31 @@ void parse_request(Client &client)
         set_response_error(&client, 405);
         return;
     }
+
+
+    if (method == "GET" || method == "DELETE")
+    {
+        if (client.get_request().get_map_values("Content-Length") != "NULL"){
+            std::istringstream ss(tmp);
+            size_t size;
+            ss >> size;
+            client.get_request().set_content_length(size);
+
+            if (ss.fail())
+            {
+                set_response_error(&client, 400);
+                return;
+            }
+            if (size > 0)
+            {
+                set_response_error(&client, 400);
+                return;
+            }
+
+            
+        }
+    }
+
 
     if (method == "POST")
     {
@@ -423,7 +496,7 @@ void parse_request(Client &client)
         return;
 }
 
-void handle_delete_request( Client * client , std::string path)
+void handle_delete_request( Client *client , std::string path)
 {
     struct stat buf;
 
@@ -439,9 +512,8 @@ void handle_delete_request( Client * client , std::string path)
     {
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
-        {
-            throw std::runtime_error("cannot open dir ");
-        }
+            return set_response_error(client , 404);
+
         struct dirent *entry;
         while ((entry = readdir(dir)) != NULL)
         {
@@ -452,19 +524,17 @@ void handle_delete_request( Client * client , std::string path)
             std::string fullPath = std::string(path) + "/" + entry->d_name;
             handle_delete_request(client , fullPath);
         }
-        if (remove(path.c_str()))
-        {
-            std::cout << "here    3" << std::endl;
-            throw std::runtime_error("remove field , can't remove dir ");
+        if (remove(path.c_str())){
+            closedir(dir);
+            return set_response_error(client , 404);
         }
         closedir(dir);
     }
     else
     {
         if (remove(path.c_str()) != 0)
-        {
-            throw std::runtime_error("remove field , can't remove file ");
-        }
+            return set_response_error(client , 404);
+            
     }
 }
 
@@ -527,6 +597,9 @@ void check_request(Client &client)
 
         set_response_error(&client, 204);
         handle_delete_request(&client , path);
+
+
+        // std::cout << client.get_response().get_response() << std::endl;
 
     }
 }

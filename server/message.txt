@@ -198,6 +198,7 @@ void Server::startServer() {
     while (true) {
         int poll_count = poll(pollfds.data(), pollfds.size(), 500);
         if (poll_count < 0) {
+            // std::cerr << "Poll failed" << std::endl;
             continue;
         }
         for (int i = static_cast<int>(pollfds.size() - 1); i >= 0; i--) {
@@ -337,6 +338,7 @@ void Server::handleClientWrite(size_t index) {
         int bytes_read = fileStream.gcount();
         
         if (bytes_read > 0) {
+            // ssize_t bytes_sent = send(client_fd, buffer, bytes_read, MSG_NOSIGNAL);
             ssize_t bytes_sent = send(client_fd, buffer, bytes_read, 0);
             if (bytes_sent <= 0) {
                 closeClientConnection(index);
