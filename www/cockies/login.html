@@ -81,7 +81,7 @@
     <div id="page">
 
         <h2>Login</h2>
-        <form action="error/script.py" method="POST">
+        <form action="cockies/script.py" method="POST">
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username" required><br><br>
             
@@ -98,7 +98,7 @@
         const cookies = document.cookie;
 
         if (cookies) {
-            fetch('error/session.py', {
+            fetch('cockies/session.py', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'

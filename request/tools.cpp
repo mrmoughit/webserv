@@ -46,7 +46,7 @@ std::string get_response_title(int status)
     if (status == 504)
         return " Gateway Timeout";
     else if (status == 204)
-        return " No Content";
+        return " Deleted";
     else if (status == 431)
         return " Request Header Fields Too Large";
     else

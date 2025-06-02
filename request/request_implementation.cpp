@@ -595,8 +595,5 @@ void check_request(Client &client)
         set_response_error(&client, 204);
         handle_delete_request(&client , path);
 
-
-        // std::cout << client.get_response().get_response() << std::endl;
-
     }
 }
