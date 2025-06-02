@@ -77,7 +77,6 @@ int Server::createServer(ServerConfig& config) {
     if (bind(server_fd, (struct sockaddr*)&config.addr, sizeof(config.addr)) < 0) {
         std::cerr << "Bind failed for " << config.host << ":" << config.port << std::endl;
         close(server_fd);
-        // check if we need to close all server if one of them does not bind
         return -1;
     }
 
@@ -121,7 +120,7 @@ int Server::acceptClient(int server_fd, ServerBlock& server_block) {
     pollfds.push_back(new_pollfd);
     pollfds_clients.push_back(new_pollfd);
     
-    std::cout << "\033[33mNew client connected - FD: " << client_fd << "\033[0m" << std::endl;
+    // std::cout << "\033[33mNew client connected - FD: " << client_fd << "\033[0m" << std::endl;
     
     return client_fd;
 }
@@ -161,7 +160,7 @@ void Server::closeClientConnection(size_t index) {
         delete response;
         response = NULL;
         clients.erase(clients.begin() + client_index);
-        std::cout << "\033[31mClosing cient connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
+        // std::cout << "\033[31mClosing cient connection. Socket FD: " << client_fd << "\033[0m" << std::endl;
         close(client_fd);
         pollfds.erase(pollfds.begin() + index);
     } else {
@@ -182,7 +181,6 @@ void Server::closeServer() {
     }
     for (size_t i = 0; i < server_configs.size(); i++) {
         if (server_configs[i].fd >= 0) {
-            std::cout << "Closing server socket: " << server_configs[i].fd << std::endl;
             close(server_configs[i].fd);
             server_configs[i].fd = -1;
         }
@@ -206,12 +204,10 @@ void Server::startServer() {
             if (idx >= pollfds.size()) continue;
     
             if (pollfds[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-                // Determine if this is a server or client socket
                 bool is_server = false;
                 for (size_t j = 0; j < pollfds_servers.size(); j++) {
                     if (pollfds[idx].fd == pollfds_servers[j].fd) {
                         is_server = true;
-                        // std::cerr << "Server socket error on fd " << pollfds[idx].fd << std::endl;
                         break;
                     }
                 }
@@ -229,7 +225,9 @@ void Server::startServer() {
                         
                         int server_block_idx = server_configs[j].server_block_index;
                         if (server_block_idx >= 0 && server_block_idx < static_cast<int>(server_block_obj.size())) {
-                            acceptClient(server_configs[j].fd, server_block_obj[server_block_idx]);
+                            if (acceptClient(server_configs[j].fd, server_block_obj[server_block_idx]) < 0) {
+                                std::cerr << "Failed to accept client on server fd: " << server_configs[j].fd << std::endl;
+                            }
                         } else {
                             std::cerr << "Invalid server_block_idx: " << server_block_idx << std::endl;
                         }
@@ -240,7 +238,6 @@ void Server::startServer() {
                 if (!is_server) {
                     int client_fd = pollfds[idx].fd;
                     
-                    // Find the corresponding client object
                     size_t client_index;
                     getClientIndexByFd(client_fd, client_index);
                     
@@ -254,9 +251,7 @@ void Server::startServer() {
 
                     if (bytes_read <= 0) {
                         if (bytes_read == 0) {
-                            std::cout << "Client disconnected. Socket FD: " << client_fd << std::endl;
                         } else {
-                            std::cerr << "Recv error on fd " << client_fd << std::endl;
                         }
                         closeClientConnection(idx);
                         continue;
@@ -278,8 +273,7 @@ void Server::startServer() {
                 getClientIndexByFd(client_fd, client_index);
                 
                 if (client_index >= clients.size()) {
-                    // not found
-                    // std::cerr << "No matching client found for fd: " << client_fd << std::endl;
+
                     closeClientConnection(idx);
                     continue;
                 }
@@ -289,11 +283,9 @@ void Server::startServer() {
                 if (!client.get_response().get_fileStream().is_open() ||  client.get_response().get_fileStream().eof()) {
                     pollfds[idx].events = POLLIN;
                     
-                    // Handle connection closure or keep-alive
                     if (!client.get_Alive()) {
                         closeClientConnection(idx);
                     } else {
-                        // Reset client state for the next request
                         client.reset();
                     }
                 }
@@ -304,7 +296,6 @@ void Server::startServer() {
 
 void Server::handleClientWrite(size_t index) {
     if (index >= pollfds.size()) {
-        std::cerr << "Invalid pollfd index in handleClientWrite" << std::endl;
         return;
     }
     
