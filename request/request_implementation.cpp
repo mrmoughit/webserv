@@ -420,7 +420,7 @@ void parse_request(Client &client)
     int headers_len = client.get_request().get_headers_map().size();
     if (headers_len == 0)
         return set_response_error(&client , 400);
-    if (headers_len > 15)
+    if (headers_len > 30)
         return set_response_error(&client , 431);
 
 

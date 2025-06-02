@@ -58,15 +58,5 @@ if key_found:
 </body>
 </html>
 """
+print(html_content)
 
-    print("HTTP/1.1 200 ok")
-    print("Content-Type: text/html")
-    print(f"Content-Length: {len(html_content.encode('utf-8'))}")
-    print()
-    print(html_content)
-
-else:
-    print("HTTP/1.1 403 forbiden")
-    print("Content-Type: text/html")
-    print("Content-Length: 0")
-    print()

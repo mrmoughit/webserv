@@ -1,5 +1,0 @@
-print("HTTP/1.1 200 ok")
-print("Content-Type: text/html")
-print("Content-Length: 8")
-print()
-print("sdfghjkl")

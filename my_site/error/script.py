@@ -53,12 +53,6 @@ if username == db_user and password == db_pass:
     </body>
     </html>
     """
-    
-    print("HTTP/1.1 200 ok")
-    print("Content-Type: text/html")
-    print(f"Content-Length: {len(html_content.encode('utf-8'))}")
-    print(f"Set-Cookie: session_key={key}; Path=/;")
-    print()
     print(html_content)
 else:
     html_content = f"""\
@@ -83,9 +77,4 @@ else:
     </body>
     </html>
     """
-
-    print("HTTP/1.1 200 ok")
-    print("Content-Type: text/html")
-    print(f"Content-Length: {len(html_content.encode('utf-8'))}")
-    print()
     print(html_content)
