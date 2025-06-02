@@ -461,13 +461,11 @@ void parse_request(Client &client)
                 set_response_error(&client, 400);
                 return;
             }
-            if (size > 0)
-            {
-                set_response_error(&client, 400);
-                return;
-            }
 
-            
+            if (method == "GET" && size > 0)
+                return set_response_error(&client , 400);
+            else if (method == "DELETE" && size > client.server_client_obj.get_client_body_size())
+                return set_response_error(&client , 413);
         }
     }
 
