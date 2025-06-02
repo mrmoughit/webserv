@@ -15,6 +15,7 @@
 
 ServerBlock::ServerBlock()
 {
+    auto_index = 0;
     is_location_url = -1;
     client_body_size = 1048576;
     server_root = "./html";
@@ -39,6 +40,7 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& other)
         this->index = other.index;
         this->routes = other.routes;
         this->error_pages = other.error_pages;
+        this->auto_index = other.auto_index;
     }
     return *this;
 }
@@ -142,7 +144,6 @@ bool ServerBlock::is_valid_method(std::string path, std::string method)
         pos = path.find(routes[i].get_root()+ routes[i].get_uri());
         if(pos != std::string::npos)
         {
-            // std::cout << pos <<  "i find it " << std::endl;
             int j = 0;
             while(j < (int)routes[i].get_methods().size())
             {
@@ -204,4 +205,6 @@ void ServerBlock::update_server_info(RouteBlock &route)
 {
     server_root = route.get_root();
     index = route.get_index();
+    auto_index = route.get_autoindex(); 
+
 }

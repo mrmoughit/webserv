@@ -24,7 +24,12 @@ class ServerBlock{
         std::vector <std::string>      index;
         std::vector<RouteBlock>        routes;
         std::map<int, std::string>     error_pages;
+
+
+
     public:
+        
+        bool                             auto_index;
         int is_location_url;
         ServerBlock();
         ServerBlock(const ServerBlock& other);

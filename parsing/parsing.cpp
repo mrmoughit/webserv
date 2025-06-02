@@ -355,6 +355,7 @@ bool check_status(ServerBlock& server)
 		if (uri == "/")
 		{
 			server.update_server_info(routes[i]);
+			std::cout << "im here: " << server.auto_index << std::endl; 
 			break;
 		}
 		i++;

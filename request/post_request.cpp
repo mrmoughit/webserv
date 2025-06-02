@@ -35,27 +35,6 @@ std::string chunked_for_cgi(Client *client)
     }
 }
 
-// void handle_x_www_form_urlencoded(Client &client)
-// {
-//     std::string tmp = client.get_request().get_s_request();
-//     std::istringstream ss(tmp);
-//     std::string line;
-//     std::string key;
-//     std::string value;
-
-//     client.set_all_recv(true);
-//     while (std::getline(ss, line, '&'))
-//     {
-//         size_t pos = line.find("=");
-//         if (pos == std::string::npos)
-//         {
-//             std::cout << "error" << std::endl;
-//             exit(21);
-//         }
-//         key = line.substr(0, pos);
-//         value = line.substr(pos + 1);
-//     }
-// }
 
 int hex_to_int(const std::string &hexStr)
 {

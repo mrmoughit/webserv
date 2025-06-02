@@ -210,11 +210,6 @@ bool check_if_have_cgi(Client &client)
                                 }
                             }
                         }
-                        // else if (client.get_request().get_method() == "GET")
-                        // {
-                        //     client.set_all_recv(true);
-                        //     cgi_handler(client, "", path);
-                        // }
                         else
                         {
                             return (set_response_error(&client, 415), 1);
@@ -259,11 +254,6 @@ bool check_if_have_cgi(Client &client)
                         }
                     }
                 }
-                // else if (client.get_request().get_method() == "GET")
-                // {
-                //     cgi_handler(client, "", path);
-                //     client.set_all_recv(true);
-                // }
                 else
                 {
                     return (set_response_error(&client, 405), 1);

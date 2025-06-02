@@ -60,7 +60,6 @@ std::string check_auto_index(Client &client , int *index){
     *index = 2;
 
 
-
     while(i < (int)client.server_client_obj.get_routes().size()){
         if (client.get_request().get_path() == (client.server_client_obj.get_routes()[i].get_root() + client.server_client_obj.get_routes()[i].get_uri()))
         {
@@ -114,11 +113,11 @@ void response_to_get(Client &client)
         struct stat default_file;
         std::string str ;
 
-        if (!client.server_client_obj.get_index().size() && client.server_client_obj.is_location_url == -1){            // i don't have a indexes and the url is not location 
+        if (!client.server_client_obj.get_index().size() && client.server_client_obj.is_location_url == -1){
             str =  client.get_request().get_path() + "/" + "index.html";
         }
         
-        else if (client.server_client_obj.is_location_url  > -1){                          //  if i have locaion 
+        else if (client.server_client_obj.is_location_url  > -1){ 
             if (client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_index().size() == 0)
             str =  client.get_request().get_path() + "/" + "index.html";
             else {
@@ -152,11 +151,13 @@ void response_to_get(Client &client)
         }
         
 
-        if (flag == 2 && client.server_client_obj.is_location_url == -1){
+
+        if (flag == 2 && client.server_client_obj.is_location_url == -1 && !client.server_client_obj.auto_index){
             set_response_error(&client , 403);
             closedir(dir);
             return ;
         }
+
         else if (client.server_client_obj.is_location_url  > -1 && !client.server_client_obj.get_routes()[client.server_client_obj.is_location_url].get_autoindex()){
             if (flag == 2){
                 set_response_error(&client , 404);

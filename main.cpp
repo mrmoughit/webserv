@@ -83,7 +83,6 @@ int main(int ac, char **av)
             return (std::cout << "Fixe config file and try again!" << std::endl, 1);
         S1.number_of_servers = conf.number_of_server;
         std::vector <ServerBlock> servers = conf.get_server();
-       
         S1.server_block_obj = servers;
         for (size_t i = 0; i < conf.number_of_server ; i++)
         {
