@@ -319,13 +319,13 @@ int cgi_handler(Client &client , std::string body, std::string &sn)
 	std::string full_path = client.get_request().get_path();
 	std::string method = client.get_request().get_method();
 
-    std::vector<char*> env_vec = get_env(map, full_path, method, sn);
-    char** env = &env_vec[0];
- 
+    
 	int code = check_extension(full_path);
 	const char* interpreter;
 	if (code > 0)
 	{
+        std::vector<char*> env_vec = get_env(map, full_path, method, sn);
+        char** env = &env_vec[0];
 		if (code == 1)
 		{ 
 			interpreter = "/usr/bin/php-cgi";
@@ -339,7 +339,5 @@ int cgi_handler(Client &client , std::string body, std::string &sn)
         }
 		return status;
 	}
-	else
-		std::cout << "serve it as regular file" << std::endl;
 	return 0;
 }

@@ -22,7 +22,7 @@ def generate_random_key(length=50):
 
 if username == db_user and password == db_pass:
     key = generate_random_key(50)
-    with open('db_cgi.txt', 'a') as file:
+    with open('db_cgi.txt', 'w') as file:
         file.write(f"user {username} key {key}\n")
 
     html_content = f"""\

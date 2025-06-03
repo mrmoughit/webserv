@@ -19,7 +19,7 @@ SRC = request/request.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 NAME = webserv
-HEDER = request/request.hpp parsing/Confile.hpp  parsing/ServerBlock.hpp parsing/RouteBlock.hpp webserver.hpp  client/client.hpp response/response.hpp server/server.hpp
+HEDER = request/request.hpp parsing/Confile.hpp  parsing/ServerBlock.hpp parsing/RouteBlock.hpp webserver.hpp  client/client.hpp response/response.hpp server/server.hpp 
 CFLAGS =  -Wall -Wextra -Werror -std=c++98
 
 all : $(NAME)
