@@ -1,117 +1,275 @@
-Webserv - 42 Project
-🌐 Overview
-Webserv is a group project at 42 School focused on building a fully functional HTTP web server in C++ from scratch, following the HTTP/1.1 protocol (RFC 2616). The server must be able to handle multiple client requests concurrently, serve static files, manage configuration parsing, support CGI execution, and more—all without relying on high-level frameworks or external libraries.
+# WebServ — HTTP/1.1 Web Server in C++
 
-This project deepens your understanding of networking, sockets, HTTP protocols, and low-level system programming in a multi-client, real-time environment.
+## Table of Contents
 
-🧠 Key Objectives
-Implement a basic yet functional HTTP/1.1 web server
+1. [Overview](#overview)  
+2. [Features](#features)  
+3. [Project Structure](#project-structure)  
+4. [Configuration](#configuration)  
+5. [Usage & Setup](#usage--setup)  
+6. [Architecture & Components](#architecture--components)  
+7. [Error Handling](#error-handling)  
+8. [Testing & Validation](#testing--validation)  
+9. [To-Do & Future Work](#to-do--future-work)  
+10. [Acknowledgments & References](#acknowledgments--references)
 
-Parse and handle HTTP methods: GET, POST, and DELETE
+---
 
-Serve static files (HTML, CSS, images, etc.)
+## 1. Overview
 
-Execute CGI scripts (like PHP or Python)
+**WebServ** is a custom HTTP/1.1 web server implemented in C++ (ISO C++98 style), developed as a project for 42 School. It is built from scratch without external libraries or frameworks.
 
-Support multiple virtual servers (hosted on different ports or domains)
+The goal is to understand and implement:
 
-Proper error handling and status code responses
+- Socket programming  
+- HTTP protocol  
+- CGI execution  
+- Asynchronous I/O  
+- Configurable virtual servers  
 
-Manage configuration via a custom .conf file
+---
 
-Use non-blocking sockets and poll()
+## 2. Features
 
-🛠️ Technologies
-Language: C++98
+- Supported HTTP methods: `GET`, `POST`, `DELETE`  
+- Serve static files (HTML, CSS, images, etc.)  
+- Run CGI scripts (Python, PHP)  
+- Virtual hosting support  
+- Custom `.conf` configuration file  
+- Autoindex directory listing  
+- Error pages and status handling  
+- Non-blocking I/O with `poll()`  
+- Basic logging  
+- Multiple listening ports
 
-Network API: POSIX sockets
+---
 
-I/O Multiplexing: poll()
+## 3. Project Structure
 
-the project Structure
-.
-├── conf/                   # Configuration files
-│   └── default.conf
-├── src/
-│   ├── server/             # Core server logic
-│   ├── config/             # Configuration parsing
-│   ├── http/               # HTTP request/response handling
-│   ├── utils/              # Helper utilities
-│   └── main.cpp
-├── www/                    # Static site root (web files)
-│   └── index.html
-├── cgi-bin/                # CGI scripts (Python, PHP, etc.)
+webserv/
+├── main.cpp
 ├── Makefile
-└── README.md
+├── test.conf
+├── cgi.cpp
+├── webserver.hpp
+├── c_tools/
+│ └── tools.cpp
+├── client/
+│ ├── client.cpp
+│ └── client.hpp
+├── parsing/
+│ ├── Confile.*
+│ ├── ServerBlock.*
+│ ├── RouteBlock.*
+│ └── parsing.cpp
+├── request/
+│ ├── request.cpp/hpp
+│ ├── request_implementation.cpp
+│ └── tools.cpp
+├── response/
+│ ├── response.cpp
+│ └── response.hpp
+├── server/
+│ ├── server.cpp
+│ └── server.hpp
+├── upload/ # temporary uploaded files
+├── www/ # static site content
+├── my_site/ # custom CGI & HTML pages
+└── pages/, error/ # HTML pages & error templates
 
 
- Configuration
-The .conf file lets you define:
 
-Server names and listening ports
+---
 
-Root directories for serving files
+## 4. Configuration
 
-Index files
+The server is configured through a custom `.conf` file.
 
-Error pages (e.g., 404, 500)
+### Sample `test.conf` snippet:
 
-Allowed HTTP methods
-
-Client body size limits
-
-CGI script handling and routes
-
-Example snippet:
-
-nginx
-Copy
-Edit
+```nginx
 server {
-    listen 8080;
+  host 127.0.0.1;
+  listen 8080;
+  server_name mysite.com;
 
-    root ./www;
+  index index.html;
+  root ./www;
+  client_max_body_size 2G;
+
+  error_page 404 ./www/pages/404.html;
+
+  location /error {
+    root ./my_site;
+    allowed_methods DELETE GET POST;
+    autoindex on;
     index index.html;
-
-    error_page 404 /errors/404.html;
-
-    location /cgi-bin/ {
-        cgi_pass /usr/bin/python3;
-        root ./cgi-bin;
-    }
+    cgi_extension .py;
+    client_body_temp_path ./upload;
+  }
 }
 
-✅ Features
- Custom configuration parser
+You can define:
 
- HTTP/1.1 request parsing
+Listening ports and IP addresses
 
- Response generation
+Server names
 
- Chunked transfer encoding
+Root directories & index files
 
- CGI support (Python, PHP, etc.)
+Allowed methods per location
 
- Autoindex directory listing
+Error pages
 
- Multiplexed I/O using poll()
+CGI script handling
 
- Proper error handling (400, 404, 500, etc.)
 
- Logging (optional)
+5. Usage & Setup
+🧱 Build
+make
 
-🧪 Testing
-Compatible with curl, telnet, and web browsers
+🚀 Run
+./webserv test.conf
 
-CGI scripts tested with Python and Bash
+If no configuration is given, a default server is used.
 
-Stress tested with multiple clients and tools like ab or wrk
+Then open your browser or terminal and visit:
 
-How to run 
-1- clone the project 
-git clone https://github.com/yourusername/webserv.git
-cd webserv
-2-buld and run project 
-make 
-./webserv conf/default.conf
-in you browser or postman visit the http://localhost:8080
+http://localhost:8080
+
+Test Tools
+
+curl
+
+telnet
+
+Web browsers
+
+Benchmarks (ab, wrk)
+
+6. Architecture & Components
+✅ Request Handling
+
+Parses HTTP request line, headers, body
+
+Supports Transfer-Encoding: chunked
+
+Handles query strings, cookies, form data
+
+📝 Response Generation
+
+Sets status codes, content types, headers
+
+Serves files or autoindexed directory listings
+
+Matches routes via longest prefix
+
+Handles connection persistence
+
+⚙️ CGI Execution
+
+Recognizes .py, .php scripts
+
+Spawns subprocess to run script
+
+Reads CGI output and includes it in response
+
+Manages timeouts and environment variables
+
+⚡ I/O Multiplexing
+
+Uses poll() for concurrent client connections
+
+All sockets and pipes are non-blocking
+
+Graceful handling of timeouts and disconnections
+
+🌐 Routing & Virtual Servers
+
+Configurable via server and location blocks
+
+Multiple ports and domains supported
+
+Route matching is hierarchical
+
+7. Error Handling
+
+Custom error pages for:
+
+400 Bad Request
+
+403 Forbidden
+
+404 Not Found
+
+405 Method Not Allowed
+
+413 Payload Too Large
+
+415 Unsupported Media Type
+
+500 Internal Server Error
+
+502 Bad Gateway
+
+504 Gateway Timeout
+
+505 HTTP Version Not Supported
+
+Errors are logged and mapped to user-friendly HTML pages.
+
+8. Testing & Validation
+
+Manual and automated tests cover:
+
+Static file serving
+
+CGI script execution
+
+Large file uploads
+
+Chunked requests
+
+Invalid method/route handling
+
+Autoindex generation
+
+Sample Tools
+
+curl -X POST ...
+
+ab -n 1000 -c 50 ...
+
+Custom CGI test scripts (Python/PHP)
+
+9. To-Do & Future Work
+
+Improve chunked request edge case handling
+
+Properly manage Connection headers
+
+Add PUT, HEAD method support
+
+Improve CGI error handling
+
+Add logging output to file
+
+Integrate SSL (HTTPS)
+
+Add full test suite
+
+10. Acknowledgments & References
+
+Inspired by Nginx & Apache
+
+Based on RFC 2616 — HTTP/1.1 Specification
+
+42 Network Project
+
+Tools used: curl, telnet, ab, Valgrind
+
+Made with 🧠, 💻, and ☕ by students at 42.
+
+
+
+
